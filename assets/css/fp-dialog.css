@@ -1,0 +1,15 @@
+/* Shared confirm/alert dialog (assets/js/fp-dialog.js). Look matches .fp-am-modal__box. */
+.fp-dialog { position: fixed; inset: 0; z-index: 100000; display: flex; align-items: center; justify-content: center; padding: 20px; background: rgba(3, 0, 20, .45); font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+.fp-dialog__box { width: 100%; max-width: 440px; background: #fff; border-radius: 12px; box-shadow: 0 24px 60px -20px rgba(3, 0, 20, .45); padding: 20px 24px; box-sizing: border-box; }
+.fp-dialog__title { margin: 0 0 8px; padding: 0; font-family: "IBM Plex Sans", -apple-system, sans-serif; font-size: 15px; font-weight: 700; line-height: 1.3; color: #212121; }
+.fp-dialog__body { font-size: 13.5px; line-height: 1.5; color: #4a4452; }
+.fp-dialog__body p { margin: 0 0 8px; }
+.fp-dialog__body p:last-child { margin-bottom: 0; }
+.fp-dialog__input, .fp-dialog__input[type="text"] { width: 100%; height: 36px; margin: 8px 0 0; padding: 0 10px; box-sizing: border-box; border: 1px solid #D1CBD7; border-radius: 8px; font: inherit; font-size: 13.5px; color: #212121; box-shadow: none; }
+.fp-dialog__input:focus { outline: none; border-color: #6D22CD; box-shadow: 0 0 0 3px rgba(109, 34, 205, .3); }
+.fp-dialog__btns { display: flex; justify-content: flex-end; gap: 8px; margin-top: 18px; }
+.fp-dialog__btn { height: 34px; padding: 0 16px; border-radius: 8px; border: 1px solid #6D22CD; background: #6D22CD; color: #fff; font: inherit; font-size: 13px; font-weight: 700; cursor: pointer; }
+.fp-dialog__btn:focus-visible { outline: none; box-shadow: 0 0 0 3px rgba(109, 34, 205, .3); }
+.fp-dialog__cancel { background: #fff; color: #6D22CD; }
+.fp-dialog.is-danger .fp-dialog__ok { background: #b42318; border-color: #b42318; }
+.fp-dialog.is-danger .fp-dialog__ok:focus-visible { box-shadow: 0 0 0 3px rgba(180, 35, 24, .3); }

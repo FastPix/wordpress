@@ -1,0 +1,14 @@
+{
+    "name": "fastpix/wordpress-plugin",
+    "description": "WordPress plugin for FastPix video embedding",
+    "type": "wordpress-plugin",
+    "require": {
+        "php": ">=8.3",
+        "woocommerce/action-scheduler": "^4.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "Fastpix\\": "includes/"
+        }
+    }
+}

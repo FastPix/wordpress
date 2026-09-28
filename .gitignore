@@ -1,0 +1,11 @@
+.DS_Store
+node_modules/
+*.log
+.playwright-mcp/
+CLAUDE.md
+CONTEXT.md
+project-specs/
+references/
+docs/
+bin/
+*.png

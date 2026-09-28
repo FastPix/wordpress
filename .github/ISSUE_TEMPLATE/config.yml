@@ -1,0 +1,11 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Report a security vulnerability
+    url: https://github.com/FastPix/wordpress/security/policy
+    about: Do not open a public issue. Follow the security policy to report privately.
+  - name: FastPix WordPress documentation
+    url: https://fastpix.com/docs/integrations/wordpress
+    about: Setup, embedding, playback and troubleshooting guides for the plugin.
+  - name: FastPix support
+    url: https://fastpix.com/contact-us
+    about: Account, billing and FastPix platform questions.

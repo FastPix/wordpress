@@ -1,0 +1,20 @@
+# Excluded from the WordPress.org distribution zip (wp dist-archive / TEST-043).
+.distignore
+.git
+.gitignore
+CLAUDE.md
+CONTEXT.md
+README.md
+CHANGELOG.md
+project-specs
+references
+tests
+docs
+bin
+node_modules
+.playwright-mcp
+.claude
+.DS_Store
+/*.png
+Dockerfile
+docker-compose.yml
