@@ -875,6 +875,7 @@
         if (status === 'ready') {
             meta.innerHTML = p.base + chip('ok', t('stReady'));
             p.el.classList.add('done');
+            askReview();
             return true;
         }
         if (st.stale) {   // finished long ago and no video was ever linked to it: not "Processing" — the library is the truth (QA 2026-09-21)
@@ -892,6 +893,31 @@
             return true;
         }
         return false;   // created / preparing / processing — keep the Processing chip
+    }
+
+    /* An upload is ready: one dismissible review line under the queue, once per site — the server is
+       told at once that it was shown, so it never appears again. "first" when nothing had been
+       uploaded through the plugin before this page loaded. */
+    function askReview() {
+        if (!cfg.askReview) { return; }
+        var first = cfg.askReview === 'first';
+        cfg.askReview = false;
+        api('POST', '/review-asked');
+        var d = document.createElement('div');
+        d.className = 'fp-am-review'; d.setAttribute('role', 'note');
+        var stars = document.createElement('span');
+        stars.className = 'fp-am-review__stars'; stars.setAttribute('aria-hidden', 'true'); stars.textContent = '★★★★★';
+        var link = document.createElement('a');
+        link.href = cfg.reviewUrl; link.target = '_blank'; link.rel = 'noopener'; link.textContent = t('reviewLink');
+        var txt = document.createElement('span');
+        txt.className = 'fp-am-review__txt';
+        txt.appendChild(document.createTextNode(t(first ? 'reviewReady' : 'reviewReadyNext') + ' '));
+        txt.appendChild(link);
+        txt.appendChild(document.createTextNode(' ' + t('reviewTail')));
+        var x = xBtn(function () { d.remove(); });
+        x.setAttribute('aria-label', t('reviewDismiss'));
+        d.appendChild(stars); d.appendChild(txt); d.appendChild(x);
+        el.list.parentNode.insertBefore(d, $('fp-am-foot'));
     }
 
     function shortName(u) {

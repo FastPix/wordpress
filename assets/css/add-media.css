@@ -189,6 +189,14 @@
 .fastpix-wrap .fp-am .fp-am-upload{height:calc(36 * var(--u));padding:0 calc(12 * var(--u));border:0;border-radius:calc(8 * var(--u));background:#5d09c7;color:#fff;font-size:calc(13 * var(--u));font-weight:700;cursor:pointer}
 .fastpix-wrap .fp-am .fp-am-upload:hover{background:#5A1CAB}
 
+/* First-video review line — one dismissible note under the queue, shown once per site. */
+.fastpix-wrap .fp-am .fp-am-review{display:flex;align-items:center;gap:calc(12 * var(--u));margin-top:calc(12 * var(--u));padding:calc(12 * var(--u)) calc(16 * var(--u));border:1px solid var(--line-soft);border-radius:calc(12 * var(--u));background:rgba(255,255,255,.72);font-size:calc(14 * var(--u));color:var(--muted)}
+.fastpix-wrap .fp-am .fp-am-review__stars{flex:none;color:#E0A91B;letter-spacing:1px;font-size:calc(15 * var(--u))}
+.fastpix-wrap .fp-am .fp-am-review__txt{flex:1;min-width:0}
+.fastpix-wrap .fp-am .fp-am-review__txt a{color:var(--purple);font-weight:700;text-decoration:none}
+.fastpix-wrap .fp-am .fp-am-review__txt a:hover{text-decoration:underline}
+.fastpix-wrap .fp-am .fp-am-review .x{flex:none;margin-left:auto}
+
 @media (max-width:760px){
   .fastpix-wrap .fp-am .fp-am-modal__body .fp-am-selects{grid-template-columns:1fr 1fr}
 }

@@ -81,7 +81,7 @@ $fastpix_sub  = isset($settings['subtitles']) && isset($fastpix_lang[$settings['
 
     <div class="fp-am-foot" id="fp-am-foot" hidden>
       <p><?php esc_html_e('Keep this tab open until uploads finish — other pages open in a new tab meanwhile. If you leave, pick the same file again to resume.', 'fastpix'); ?></p>
-      <button type="button" class="fp-am-next" id="fp-next" disabled><?php esc_html_e('Next — name & settings', 'fastpix'); ?></button>
+      <button type="button" class="fp-am-next" id="fp-next" disabled><?php esc_html_e('Name and Settings', 'fastpix'); ?></button>
     </div>
   </section>
 

@@ -18,3 +18,10 @@ node_modules
 /*.png
 Dockerfile
 docker-compose.yml
+# CI, internal notes and the lock file never ship either
+document.md
+azure-pipelines.yml
+composer.lock
+Bugs
+bug.md
+bug1.md

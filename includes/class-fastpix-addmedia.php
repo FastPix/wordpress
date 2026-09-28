@@ -13,8 +13,13 @@ class Fastpix_Addmedia {
 
     const SLUG = 'fastpix-add-media';
 
+    /** Set once the "Your first video is ready — Leave a review" line has been shown; it never shows again. */
+    const OPT_REVIEW_ASKED = 'fastpix_review_asked';
+    const REVIEW_URL       = 'https://wordpress.org/support/plugin/fastpix-video/reviews/#new-post';
+
     public static function boot() {
         add_action('admin_menu', array(__CLASS__, 'add_menu'), 21);
+        add_action('rest_api_init', array(__CLASS__, 'register_routes'));
         add_action('admin_enqueue_scripts', array(__CLASS__, 'assets'));
         add_action('admin_enqueue_scripts', array(__CLASS__, 'register_dialog'), 5);
 
@@ -143,7 +148,14 @@ class Fastpix_Addmedia {
             'libraryUrl'    => admin_url('admin.php?page=' . Fastpix_Library_Page::SLUG),
             'siteHost'      => (string) wp_parse_url(home_url(), PHP_URL_HOST),
             'canMigrate'    => current_user_can(Fastpix_Capabilities::MANAGE_SETTINGS),
+            'askReview'     => self::ask_review(),
+            'reviewUrl'     => self::REVIEW_URL,
             'i18n'          => array(
+                'reviewReady'     => __('Your first video is ready.', 'fastpix'),
+                'reviewReadyNext' => __('Your video is ready.', 'fastpix'),
+                'reviewLink'      => __('Leave a review', 'fastpix'),
+                'reviewTail'      => __('if this saved you time.', 'fastpix'),
+                'reviewDismiss'   => __('Dismiss', 'fastpix'),
                 /* translators: %d: HTTP status code */
                 'httpNoAnswer'    => __('FastPix did not answer (HTTP %d).', 'fastpix'),
                 'sendFailed'      => __('The request could not be sent — check your connection.', 'fastpix'),
@@ -207,6 +219,38 @@ class Fastpix_Addmedia {
             wp_enqueue_script('fastpix-migration', FASTPIX_PLUGIN_URL . 'assets/js/migration.js', array('fastpix-add-media', 'fastpix-dialog', 'wp-i18n'), fastpix_asset_ver('assets/js/migration.js'), true);
             wp_set_script_translations('fastpix-migration', 'fastpix');   // QA L25
         }
+    }
+
+    /**
+     * The review line is offered once per site: on the next upload that turns Ready here, whether or
+     * not the workspace already holds videos, and never again once shown — one dismissible line on the
+     * plugin's own screen, no nagging (guideline 11). Returns false (never), 'first' (nothing was
+     * uploaded through the plugin before — "Your first video is ready") or 'next' ("Your video is ready").
+     */
+    private static function ask_review() {
+        global $wpdb;
+
+        if (get_option(self::OPT_REVIEW_ASKED) || !current_user_can(Fastpix_Capabilities::UPLOAD_VIDEO) || !Fastpix_Schema::table_exists('videos')) {
+            return false;
+        }
+
+        // phpcs:ignore WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.NotPrepared -- the plugin's own table (fixed registry name), no input
+        $uploads = (int) $wpdb->get_var('SELECT COUNT(*) FROM ' . Fastpix_Schema::table('videos') . " WHERE source IN ('Upload', 'URL')");
+
+        return $uploads === 0 ? 'first' : 'next';
+    }
+
+    public static function register_routes() {
+        // POST /review-asked — the line was shown; it is never offered again.
+        Fastpix_Rest::register('/review-asked', array(
+            'methods'    => 'POST',
+            'capability' => Fastpix_Capabilities::UPLOAD_VIDEO,
+            'callback'   => function () {
+                update_option(self::OPT_REVIEW_ASKED, time(), false);
+
+                return rest_ensure_response(array('asked' => true));
+            },
+        ));
     }
 
     public static function render() {
