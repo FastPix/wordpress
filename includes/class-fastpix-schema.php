@@ -51,6 +51,7 @@ class Fastpix_Schema {
             9 => 'migrate_009_workspace_index',
             10 => 'migrate_010_upload_session_uri',
             11 => 'migrate_011_drop_ready_count',
+            12 => 'migrate_012_platform_created_at',
         );
     }
 
@@ -884,6 +885,27 @@ class Fastpix_Schema {
         return in_array('session_uri', (array) $wpdb->get_col("DESC {$table}", 0), true)
             ? true
             : new \WP_Error('fastpix_schema_create_failed', __('The session_uri column could not be added.', 'fastpix'), array('uploads'));
+    }
+
+    /**
+     * videos.platform_created_at: when the video was created ON FASTPIX. The library sorted by the
+     * local row id, but a sync files the platform's newest-first list in that order, so a library
+     * imported by sync read oldest-first. Filled by every sync from then on. (QA: pagination order)
+     */
+    private static function migrate_012_platform_created_at() {
+        global $wpdb;
+
+        if (!self::table_exists('videos')) {
+            return true;
+        }
+        $table = self::table('videos');
+        if (!in_array('platform_created_at', (array) $wpdb->get_col("DESC {$table}", 0), true)) {
+            $wpdb->query("ALTER TABLE {$table} ADD COLUMN platform_created_at datetime NULL AFTER platform_updated_at");
+        }
+
+        return in_array('platform_created_at', (array) $wpdb->get_col("DESC {$table}", 0), true)
+            ? true
+            : new \WP_Error('fastpix_schema_create_failed', __('The platform_created_at column could not be added.', 'fastpix'), array('videos'));
     }
 
     /**

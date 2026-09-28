@@ -124,12 +124,14 @@ $page = $response->get_data();
 assert(count($page['videos']) === 25, '25 rows per page, server-paged [REQ-039]');
 assert($page['next'] !== null, 'a keyset cursor is returned');
 $first_page_last = end($page['videos'])['id'];
-assert($page['next'] === $first_page_last, 'the cursor is the last id — keyset, not offset');
+$cursor_row = json_decode(base64_decode($page['next']), true);
+assert(is_array($cursor_row) && $cursor_row['i'] === $first_page_last, 'the cursor is the last row (date + id) — keyset, not offset');
 
-$response = vreq('GET', '/videos?after=' . $page['next']);
+$response = vreq('GET', '/videos?after=' . urlencode($page['next']));
 $page2 = $response->get_data();
 assert(count($page2['videos']) >= 1, 'the cursor fetches the next page');
-assert($page2['videos'][0]['id'] < $first_page_last, 'strictly past the cursor');
+$sort_at = function ($id) use ($wpdb) { return $wpdb->get_var($wpdb->prepare('SELECT COALESCE(platform_created_at, created_at) FROM ' . Schema::table('videos') . ' WHERE id = %d', $id)); };
+assert(!array_intersect(array_column($page['videos'], 'id'), array_column($page2['videos'], 'id')) && $sort_at($page2['videos'][0]['id']) <= $sort_at($first_page_last), 'strictly past the cursor: no repeats, never newer than page 1');
 
 // ------------------------------------------------------------------- filters
 
@@ -378,6 +380,19 @@ assert($response->is_error() && $response->get_status() === 409, 'a live video c
 $response = vreq('DELETE', REST_VIDEOS_SLASH . $fixture_ids[2] . '?purge=true');
 assert(!$response->is_error() && $response->get_data()['purged'] === true, 'an Unavailable record can be removed from the library');
 assert($wpdb->get_var($wpdb->prepare('SELECT COUNT(*) FROM ' . Schema::table('videos') . SQL_WHERE_ID, $fixture_ids[2])) === '0', 'and the row is gone');
+
+// ---------------------------------------- newest first by FastPix creation date (QA: pagination order)
+// A sync files the platform's newest-first list in that order, so the NEWER video can get the LOWER id.
+$wpdb->insert(Schema::table('videos'), array('media_id' => 'vr-order-new', 'workspace_id' => 'ws-vr', 'status' => 'Ready', 'source' => 'Dashboard', 'access_policy' => 'public',
+    'title' => 'Order newest', 'author_id' => $admins[0], 'platform_created_at' => '2099-01-02 00:00:00', 'created_at' => $now, 'updated_at' => $now));
+$order_new = (int) $wpdb->insert_id;
+$wpdb->insert(Schema::table('videos'), array('media_id' => 'vr-order-old', 'workspace_id' => 'ws-vr', 'status' => 'Ready', 'source' => 'Dashboard', 'access_policy' => 'public',
+    'title' => 'Order older', 'author_id' => $admins[0], 'platform_created_at' => '2099-01-01 00:00:00', 'created_at' => $now, 'updated_at' => $now));
+$page1 = vreq('GET', '/videos?per_page=1')->get_data();
+assert($page1['videos'][0]['id'] === $order_new, 'the library lists the newest FastPix video first, whatever order it was synced in');
+$page2 = vreq('GET', '/videos?per_page=1&after=' . urlencode($page1['next']))->get_data();
+assert($page2['videos'][0]['title'] === 'Order older', 'and the next page continues in date order from the cursor');
+$wpdb->query("DELETE FROM " . Schema::table('videos') . " WHERE media_id IN ('vr-order-new', 'vr-order-old')");
 
 // ------------------------------------------------------------ usage [REQ-037]
 

@@ -30,6 +30,7 @@ class Fastpix_Sync_Apply {
             'max_resolution'       => Fastpix_Sync::field($media, array('maxResolution', 'max_resolution')),
             'mp4_support'          => self::mp4_support(Fastpix_Sync::field($media, array('mp4Support', 'mp4_support'))),
             'platform_updated_at'  => self::datetime(Fastpix_Sync::field($media, array('updatedAt', 'updated_at'))),
+            'platform_created_at'  => self::datetime(Fastpix_Sync::field($media, array('createdAt', 'created_at'))),   // the library's newest-first order
         ), function ($value) { return $value !== null && $value !== ''; });
     }
 

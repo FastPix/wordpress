@@ -125,8 +125,9 @@ assert(Schema::current_version() === $before, 'migrations never re-run [REQ-103]
 $has_ready = function () use ($wpdb) { return in_array('ready_count', (array) $wpdb->get_col('DESC ' . Schema::table('migrations'), 0), true); };
 $wpdb->query('ALTER TABLE ' . Schema::table('migrations') . ' ADD COLUMN ready_count int(10) unsigned NOT NULL DEFAULT 0');
 update_option(Schema::OPT_VERSION, 10, false);
-assert(Schema::update() === true && !$has_ready() && Schema::current_version() === 11, 'QA M29: v11 drops the dead column and the version advances');
-assert(Schema::update() === true && !$has_ready() && Schema::current_version() === 11, 'QA M29: running it again is a no-op');
+assert(Schema::update() === true && !$has_ready() && Schema::current_version() === Schema::target_version(), 'QA M29: v11 drops the dead column and the version advances');
+assert(Schema::update() === true && !$has_ready() && Schema::current_version() === Schema::target_version(), 'QA M29: running it again is a no-op');
+assert(in_array('platform_created_at', (array) $wpdb->get_col('DESC ' . Schema::table('videos'), 0), true), 'v12 adds videos.platform_created_at — the library\'s newest-first order');
 
 // ---------------------------------------------------------------- the lock
 

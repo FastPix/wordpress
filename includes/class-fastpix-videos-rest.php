@@ -21,6 +21,10 @@ if (!defined('WPINC')) {
 
 class Fastpix_Videos_Rest {
 
+    /** Newest first by when the video was created on FastPix; a row not yet synced since that was recorded falls back to when it arrived here. */
+    const SORT_AT = 'COALESCE(v.platform_created_at, v.created_at)';
+
+
     const PER_PAGE = 25;   // admin lists server-paged at 25 rows [REQ-039]
 
     /** The platform's VOD path prefix (media id appended, rawurlencoded). */
@@ -154,21 +158,21 @@ class Fastpix_Videos_Rest {
         $timestamps  = $found !== null ? $found['timestamps'] : array();
 
         $per_page = min(100, max(1, (int) $request->get_param('per_page') ?: self::PER_PAGE));
-        $order_sql = $orderby === 'title' ? "v.title {$order}, v.id {$order}" : "v.id {$order}";
+        $order_sql = $orderby === 'title' ? "v.title {$order}, v.id {$order}" : self::SORT_AT . " {$order}, v.id {$order}";
         $count_sql = "SELECT COUNT(*) FROM {$table} v WHERE (" . implode(') AND (', $where) . ')';
         $total     = (int) ($params ? $wpdb->get_var($wpdb->prepare($count_sql, $params)) : $wpdb->get_var($count_sql));
         $all_where = array_merge($where, $cursor_where);
         $all_params = array_merge($params, $cursor_params);
-        $sql      = "SELECT v.* FROM {$table} v WHERE (" . implode(') AND (', $all_where) . ") ORDER BY {$order_sql} LIMIT " . ((int) $per_page + 1);
+        $sql      = "SELECT v.*, " . self::SORT_AT . " AS fp_sort_at FROM {$table} v WHERE (" . implode(') AND (', $all_where) . ") ORDER BY {$order_sql} LIMIT " . ((int) $per_page + 1);
         $rows     = $all_params ? $wpdb->get_results($wpdb->prepare($sql, $all_params), ARRAY_A) : $wpdb->get_results($sql, ARRAY_A);
 
         $next = null;
         if (count($rows) > $per_page) {
             array_pop($rows);
             $last = end($rows);
-            $next = $orderby === 'title'
-                ? base64_encode(wp_json_encode(array('t' => $last['title'], 'i' => (int) $last['id'])))
-                : (int) $last['id'];
+            $next = base64_encode(wp_json_encode($orderby === 'title'
+                ? array('t' => $last['title'], 'i' => (int) $last['id'])
+                : array('d' => $last['fp_sort_at'], 'i' => (int) $last['id'])));
         }
 
         return rest_ensure_response(array(
@@ -250,9 +254,17 @@ class Fastpix_Videos_Rest {
                     $cursor_params[] = (string) $cursor['t'];
                     $cursor_params[] = (int) $cursor['i'];
                 }
-            } elseif ((int) $after > 0) {
-                $cursor_where[]  = "v.id {$cmp} %d";
-                $cursor_params[] = (int) $after;
+            } else {
+                $cursor = json_decode((string) base64_decode($after, true), true);
+                if (is_array($cursor) && isset($cursor['d'], $cursor['i'])) {
+                    $cursor_where[]  = '(' . self::SORT_AT . " {$cmp} %s OR (" . self::SORT_AT . " = %s AND v.id {$cmp} %d))";
+                    $cursor_params[] = (string) $cursor['d'];
+                    $cursor_params[] = (string) $cursor['d'];
+                    $cursor_params[] = (int) $cursor['i'];
+                } elseif (ctype_digit($after)) {   // a cursor from before the date order (an open tab)
+                    $cursor_where[]  = "v.id {$cmp} %d";
+                    $cursor_params[] = (int) $after;
+                }
             }
         }
 
