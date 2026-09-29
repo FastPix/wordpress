@@ -1,0 +1,3 @@
+@fastpix/resumable-uploads 1.0.6 — https://www.npmjs.com/package/@fastpix/resumable-uploads
+Vendored dist/uploads.js (IIFE build, exposes window.Uploader). MIT.
+Publisher: fastpix-dev <devs@fastpix.com>. Bundled per REQ-112 — no runtime CDN loads.
