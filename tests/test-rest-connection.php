@@ -81,7 +81,7 @@ function jresp($code, $body) {
 }
 
 $server = rest_get_server();
-$pair   = array('4f27c4c4-9a1e-4c2f-9d33-2b8f0a7c1e55', 'test_secret_9RtP2xW7qL4mZ0vC8bN6yH3jK1sD5gF');
+$pair   = array('4f27c4c4-9a1e-4c2f-9d33-2b8f0a7c1e55', 'test-secret-not-a-real-key');
 $admins = get_users(array('role' => 'administrator', 'number' => 1, 'fields' => 'ID'));
 assert(!empty($admins), 'the test site has an administrator');
 

@@ -92,7 +92,7 @@ assert($halted, 'a disconnected site cannot sweep');
 
 // ---------------------------------------------------- connected: work queues
 
-Creds::store('4f27c4c4-9a1e-4c2f-9d33-2b8f0a7c1e55', 'sk_live_selfcheck');
+Creds::store('4f27c4c4-9a1e-4c2f-9d33-2b8f0a7c1e55', 'test-secret-not-a-real-key');
 WP_CLI::reset();
 
 Cli::sync(array(), array());

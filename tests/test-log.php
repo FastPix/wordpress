@@ -31,7 +31,7 @@ Log::set_correlation_id($correlation);
 
 // ---------------------------------------------------------------- redaction
 
-$secret = 'test_secret_9RtP2xW7qL4mZ0vC8bN6yH3jK1sD5gF';
+$secret = 'test-secret-not-a-real-key';
 $jwt    = 'eyJhbGciOiJIUzI1NiIsImtpZCI6ImFiYyJ9.eyJhdWQiOiJ2IiwiZXhwIjo5OTk5fQ.c2lnbmF0dXJl';
 
 $clean = Log::redact(array(

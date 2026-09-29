@@ -90,7 +90,7 @@ function reset_state(&$mock) {
     delete_option(Client::OPT_HEALTH);
 }
 
-$pair = array('4f27c4c4-9a1e-4c2f-9d33-2b8f0a7c1e55', 'test_secret_9RtP2xW7qL4mZ0vC8bN6yH3jK1sD5gF');
+$pair = array('4f27c4c4-9a1e-4c2f-9d33-2b8f0a7c1e55', 'test-secret-not-a-real-key');
 $media_body = array('success' => true, 'data' => array(array(
     'id' => 'm-1', 'workspaceId' => 'ws-4f27c4c4', 'status' => 'Ready',
 )));

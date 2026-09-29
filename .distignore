@@ -2,6 +2,7 @@
 .distignore
 .git
 .gitignore
+.github
 CLAUDE.md
 CONTEXT.md
 README.md
@@ -25,3 +26,5 @@ composer.lock
 Bugs
 bug.md
 bug1.md
+# Upstream AI-agent notes shipped inside vendor packages
+AGENTS.md

@@ -15,7 +15,7 @@ class Fastpix_Addmedia {
 
     /** Set once the "Your first video is ready — Leave a review" line has been shown; it never shows again. */
     const OPT_REVIEW_ASKED = 'fastpix_review_asked';
-    const REVIEW_URL       = 'https://wordpress.org/support/plugin/fastpix-video/reviews/#new-post';
+    const REVIEW_URL       = 'https://wordpress.org/support/plugin/fastpix-io/reviews/#new-post';
 
     public static function boot() {
         add_action('admin_menu', array(__CLASS__, 'add_menu'), 21);

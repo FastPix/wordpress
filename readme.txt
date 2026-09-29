@@ -1,5 +1,5 @@
 === FastPix Video ===
-Contributors: fastpixdev
+Contributors: fastpix
 Tags: video, video hosting, streaming, lms, analytics
 Requires at least: 6.8
 Tested up to: 7.1

@@ -108,10 +108,10 @@ assert(strpos($html, 'migration') === false, 'the done screen promises no auto-m
 // Owner ruling 2026-09-23 (as on the Settings screen): a fastpix_manage_settings user sees the
 // stored pair and can edit it — a value you cannot see is one you cannot check. The secret sits
 // behind the field's own Show/Hide. Connection::state() stays masked: it is a REST shape too.
-Creds::store(FIXTURE_TOKEN_ID, 'sk_live_onboarding_check');
+Creds::store(FIXTURE_TOKEN_ID, 'test-secret-not-a-real-key_check');
 $html = render_page();
 
-assert(strpos($html, 'sk_live_onboarding_check') !== false, 'the stored secret is shown to the owner');
+assert(strpos($html, 'test-secret-not-a-real-key_check') !== false, 'the stored secret is shown to the owner');
 assert(strpos($html, 'id="fp-secret"') !== false && strpos($html, 'type="password"') !== false, 'dotted until Show is pressed');
 assert(strpos($html, FIXTURE_TOKEN_ID) !== false, 'the access token id is shown in full — an identifier, not a secret');
 $state = Fastpix\Fastpix_Connection::state();
@@ -156,7 +156,7 @@ $html = render_page();
 
 assert(strpos($html, 'Credentials are limited to one capability') !== false, 'the restricted notice renders [UI-001 restricted]');
 assert(strpos($html, '<input') === false, 'no fields rendered at all — not merely disabled [REQ-004]');
-assert(strpos($html, 'sk_live_onboarding_check') === false, 'no secret for restricted roles either');
+assert(strpos($html, 'test-secret-not-a-real-key_check') === false, 'no secret for restricted roles either');
 assert(strpos($html, Creds::SECRET_MASK) === false, 'not even the mask');
 assert(strpos($html, 'Connected') !== false, 'connection state is visible');
 assert(strpos($html, 'Go to Videos') !== false, 'with the CTA [UI-001 restricted]');
