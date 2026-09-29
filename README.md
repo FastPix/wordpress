@@ -14,7 +14,7 @@ Ideal for publishers, membership and course sites, and media teams that need pri
 
 **Requires:** WordPress 6.8+, PHP 8.3+, MySQL 8.0+ or MariaDB 10.11+ (InnoDB). HTTPS is recommended and required for DRM playback. Tested up to WordPress 7.1. Licensed GPLv2 or later.
 
-[User docs](https://fastpix.com/docs/integrations/wordpress) · [Create a FastPix account](https://dashboard.fastpix.com) · [Pricing](https://fastpix.com/pricing)
+[User docs](https://fastpix.com/docs/integrations/wordpress) · [Create a FastPix account](https://dashboard.fastpix.com/signup?utm_source=wordpress&utm_medium=plugin&utm_campaign=wp-plugin) · [Pricing](https://fastpix.com/pricing)
 
 ---
 
@@ -116,7 +116,7 @@ Each file prints `<name>: all checks passed` (or `OK`), or throws an `AssertionE
 
 ## Building the distribution zip
 
-`.distignore` lists what must not ship (tests, docs, specs, tooling, CI files). Copy the tree minus those entries into a folder named `fastpix-video/` (the WordPress.org slug) and zip that folder, so the zip unpacks to a single `fastpix-video/` directory. Then run Plugin Check on the result:
+`.distignore` lists what must not ship (tests, docs, specs, tooling, CI files). Copy the tree minus those entries into a folder named `fastpix-io/` (the WordPress.org slug) and zip that folder, so the zip unpacks to a single `fastpix-io/` directory. Then run Plugin Check on the result:
 
 ```bash
 wp plugin check /path/to/fastpix-video
@@ -149,7 +149,7 @@ Yes - LearnDash, Tutor LMS, LifterLMS and LearnPress are supported, with skip-pr
 Views, watch time, quality of experience and errors, shown in your WordPress admin from a local daily rollup. The FastPix player reports playback quality to FastPix, and the plugin pulls the figures from there - there is no separate analytics tag to install. Where a consent platform is in use, reporting runs only with the visitor's consent.
 
 **Is a FastPix account required?**
-Yes. The plugin connects to your FastPix workspace for hosting, encoding and delivery. [Create an account](https://dashboard.fastpix.com).
+Yes. The plugin connects to your FastPix workspace for hosting, encoding and delivery. [Create an account](https://dashboard.fastpix.com/signup?utm_source=wordpress&utm_medium=plugin&utm_campaign=wp-plugin).
 
 **How is it priced?**
 FastPix is usage-based, billed per minute of video. See [pricing](https://fastpix.com/pricing).

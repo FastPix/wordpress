@@ -177,7 +177,7 @@ $fastpix_hidden = ' hidden';
                 <aside class="fp-con2-side" aria-label="<?php esc_attr_e('Get your API credentials', 'fastpix'); ?>">
                     <p class="fp-eyebrow"><?php esc_html_e('Get your API credentials', 'fastpix'); ?></p>
                     <ol class="fp-con2-steps">
-                        <li><span class="n">1</span><span><?php esc_html_e('Sign in to', 'fastpix'); ?> <a class="fp-go" href="https://dashboard.fastpix.com" target="_blank" rel="noopener">dashboard.fastpix.com<img src="<?php echo esc_url($fastpix_link_arrow); ?>" alt="" width="16" height="16"></a></span></li>
+                        <li><span class="n">1</span><span><?php esc_html_e('Sign in to', 'fastpix'); ?> <a class="fp-go" href="https://dashboard.fastpix.com/signup?utm_source=wordpress&utm_medium=plugin&utm_campaign=wp-plugin" target="_blank" rel="noopener">dashboard.fastpix.com<img src="<?php echo esc_url($fastpix_link_arrow); ?>" alt="" width="16" height="16"></a></span></li>
                         <li><span class="n">2</span><span><?php esc_html_e('In FastPix dashboard go to', 'fastpix'); ?> <a class="fp-go" href="https://fastpix.com/docs/getting-started/activate-your-account#create-an-access-token" target="_blank" rel="noopener"><?php esc_html_e('Manage → Access Tokens', 'fastpix'); ?><img src="<?php echo esc_url($fastpix_link_arrow); ?>" alt="" width="16" height="16"></a></span></li>
                         <li><span class="n">3</span><span><?php esc_html_e('Copy access token and secret keys then paste them into the fields.', 'fastpix'); ?></span></li>
                     </ol>
@@ -280,7 +280,7 @@ $fastpix_hidden = ' hidden';
                 <aside class="fp-con2-side" aria-label="<?php esc_attr_e('Find the workspace key', 'fastpix'); ?>">
                     <p class="fp-eyebrow"><?php esc_html_e('Find the workspace key', 'fastpix'); ?></p>
                     <ol class="fp-con2-steps">
-                        <li><span class="n">1</span><span><?php esc_html_e('In FastPix, open', 'fastpix'); ?> <a class="fp-go" href="https://dashboard.fastpix.com" target="_blank" rel="noopener"><?php esc_html_e('Workspaces', 'fastpix'); ?><img src="<?php echo esc_url($fastpix_link_arrow); ?>" alt="" width="16" height="16"></a></span></li>
+                        <li><span class="n">1</span><span><?php esc_html_e('In FastPix, open', 'fastpix'); ?> <a class="fp-go" href="https://dashboard.fastpix.com/signup?utm_source=wordpress&utm_medium=plugin&utm_campaign=wp-plugin" target="_blank" rel="noopener"><?php esc_html_e('Workspaces', 'fastpix'); ?><img src="<?php echo esc_url($fastpix_link_arrow); ?>" alt="" width="16" height="16"></a></span></li>
                         <li><span class="n">2</span><span><?php esc_html_e('Copy the key on the workspace card', 'fastpix'); ?></span></li>
                     </ol>
                     <p class="fp-con2-cap"><?php esc_html_e("You'll see this card — copy from it:", 'fastpix'); ?></p>
@@ -296,7 +296,7 @@ $fastpix_hidden = ' hidden';
                     <p class="fp-eyebrow"><?php esc_html_e('Turn on instant updates', 'fastpix'); ?></p>
                     <ol class="fp-con2-steps">
                         <li><span class="n">1</span><span><?php esc_html_e("Copy your site's webhook address", 'fastpix'); ?></span></li>
-                        <li><span class="n">2</span><span><?php esc_html_e('In FastPix, open', 'fastpix'); ?> <a class="fp-go" href="https://dashboard.fastpix.com" target="_blank" rel="noopener"><?php esc_html_e('Settings → Webhooks', 'fastpix'); ?><img src="<?php echo esc_url($fastpix_link_arrow); ?>" alt="" width="16" height="16"></a> <?php esc_html_e('and paste it', 'fastpix'); ?></span></li>
+                        <li><span class="n">2</span><span><?php esc_html_e('In FastPix, open', 'fastpix'); ?> <a class="fp-go" href="https://dashboard.fastpix.com/signup?utm_source=wordpress&utm_medium=plugin&utm_campaign=wp-plugin" target="_blank" rel="noopener"><?php esc_html_e('Settings → Webhooks', 'fastpix'); ?><img src="<?php echo esc_url($fastpix_link_arrow); ?>" alt="" width="16" height="16"></a> <?php esc_html_e('and paste it', 'fastpix'); ?></span></li>
                         <li><span class="n">3</span><span><?php esc_html_e('Copy the signing secret FastPix shows, paste it back here', 'fastpix'); ?></span></li>
                     </ol>
                     <p class="fp-con2-cap"><?php esc_html_e("You'll see this popup — copy from it:", 'fastpix'); ?></p>
