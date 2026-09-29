@@ -68,13 +68,13 @@ class Fastpix_Lms_Courses {
     public static function course_detail($request) {
         $course_id = (int) $request->get_param('id');
         if (!$course_id || !get_post($course_id)) {
-            return new \WP_Error('fastpix_course_missing', __('No such course.', 'fastpix'), array('status' => 404));
+            return new \WP_Error('fastpix_course_missing', __('No such course.', 'fastpix-io'), array('status' => 404));
         }
 
         $lessons  = self::course_lessons($course_id);
         if (!$lessons && self::usage_scope_sql() !== '') {
             // Author-scoped and none of this course's lessons are theirs: no roster, no enrolled count. (QA X20)
-            return new \WP_Error('fastpix_course_missing', __('No such course.', 'fastpix'), array('status' => 404));
+            return new \WP_Error('fastpix_course_missing', __('No such course.', 'fastpix-io'), array('status' => 404));
         }
         $enrolled = self::enrolled_map($course_id);
 

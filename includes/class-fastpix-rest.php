@@ -86,7 +86,7 @@ class Fastpix_Rest {
 
                 return new \WP_Error(
                     'fastpix_forbidden',
-                    __('Your role cannot do that.', 'fastpix'),
+                    __('Your role cannot do that.', 'fastpix-io'),
                     array('status' => rest_authorization_required_code())
                 );
             }

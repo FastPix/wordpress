@@ -8,7 +8,7 @@
   "icon": "video-alt3",
   "description": "Pick a video from your FastPix library, or upload one now. Your site defaults are already applied.",
   "keywords": ["video", "fastpix", "player", "stream"],
-  "textdomain": "fastpix",
+  "textdomain": "fastpix-io",
   "attributes": {
     "videoId":         { "type": "string",  "default": "" },
     "autoplay":        { "type": "boolean", "default": false },

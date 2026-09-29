@@ -41,11 +41,11 @@ class Fastpix_Deactivate { // NOSONAR php:S101 — WordPress class naming
 
         wp_enqueue_style('fastpix-deactivate', FASTPIX_PLUGIN_URL . 'assets/css/deactivate.css', array(), fastpix_asset_ver('assets/css/deactivate.css'));
         wp_enqueue_script('fastpix-deactivate', FASTPIX_PLUGIN_URL . 'assets/js/deactivate.js', array('wp-i18n'), fastpix_asset_ver('assets/js/deactivate.js'), true);
-        wp_set_script_translations('fastpix-deactivate', 'fastpix');
+        wp_set_script_translations('fastpix-deactivate', 'fastpix-io');
         wp_localize_script('fastpix-deactivate', 'fastpixDeactivate', array(
             'restUrl' => rest_url(Fastpix_Rest::NS),
             'nonce'   => wp_create_nonce('wp_rest'),
-            'slug'    => plugin_basename(FASTPIX_PLUGIN_DIR . 'fastpix-video-embed.php'),
+            'slug'    => plugin_basename(FASTPIX_PLUGIN_DIR . 'fastpix-io.php'),
         ));
     }
 
@@ -55,13 +55,13 @@ class Fastpix_Deactivate { // NOSONAR php:S101 — WordPress class naming
      */
     private static function reasons() {
         return array(
-            'temporary'   => __('Just turning it off for a moment', 'fastpix'),
-            'not_needed'  => __('I do not need it any more', 'fastpix'),
-            'connect'     => __('I could not connect my FastPix workspace', 'fastpix'),
-            'playback'    => __('Uploads or playback did not work', 'fastpix'),
-            'confusing'   => __('I could not work out how to use it', 'fastpix'),
-            'other_tool'  => __('I am using something else', 'fastpix'),
-            'other'       => __('Another reason', 'fastpix'),
+            'temporary'   => __('Just turning it off for a moment', 'fastpix-io'),
+            'not_needed'  => __('I do not need it any more', 'fastpix-io'),
+            'connect'     => __('I could not connect my FastPix workspace', 'fastpix-io'),
+            'playback'    => __('Uploads or playback did not work', 'fastpix-io'),
+            'confusing'   => __('I could not work out how to use it', 'fastpix-io'),
+            'other_tool'  => __('I am using something else', 'fastpix-io'),
+            'other'       => __('Another reason', 'fastpix-io'),
         );
     }
 
@@ -73,11 +73,11 @@ class Fastpix_Deactivate { // NOSONAR php:S101 — WordPress class naming
         <div class="fp-de" id="fp-de" hidden>
             <dialog class="fp-de__box" open aria-modal="true" aria-labelledby="fp-de-title">
                 <div class="fp-de__head">
-                    <h2 id="fp-de-title"><?php esc_html_e('Before you go', 'fastpix'); ?></h2>
-                    <button type="button" class="fp-de__x" id="fp-de-x" aria-label="<?php esc_attr_e('Close', 'fastpix'); ?>">&times;</button>
+                    <h2 id="fp-de-title"><?php esc_html_e('Before you go', 'fastpix-io'); ?></h2>
+                    <button type="button" class="fp-de__x" id="fp-de-x" aria-label="<?php esc_attr_e('Close', 'fastpix-io'); ?>">&times;</button>
                 </div>
                 <div class="fp-de__body">
-                    <p class="fp-de__ask"><?php esc_html_e('What made you turn FastPix off? It stays on this site — we only see it if you send us a support report.', 'fastpix'); ?></p>
+                    <p class="fp-de__ask"><?php esc_html_e('What made you turn FastPix off? It stays on this site — we only see it if you send us a support report.', 'fastpix-io'); ?></p>
                     <ul class="fp-de__list">
                         <?php foreach (self::reasons() as $key => $label) : ?>
                             <li>
@@ -88,13 +88,13 @@ class Fastpix_Deactivate { // NOSONAR php:S101 — WordPress class naming
                             </li>
                         <?php endforeach; ?>
                     </ul>
-                    <label class="fp-de__more" for="fp-de-detail"><?php esc_html_e('Anything else worth telling us?', 'fastpix'); ?>
-                        <textarea id="fp-de-detail" rows="3" maxlength="1000" placeholder="<?php esc_attr_e('Optional', 'fastpix'); ?>"></textarea>
+                    <label class="fp-de__more" for="fp-de-detail"><?php esc_html_e('Anything else worth telling us?', 'fastpix-io'); ?>
+                        <textarea id="fp-de-detail" rows="3" maxlength="1000" placeholder="<?php esc_attr_e('Optional', 'fastpix-io'); ?>"></textarea>
                     </label>
                 </div>
                 <div class="fp-de__foot">
-                    <button type="button" class="fp-de__btn primary" id="fp-de-send"><?php esc_html_e('Send &amp; deactivate', 'fastpix'); ?></button>
-                    <button type="button" class="fp-de__btn ghost" id="fp-de-skip"><?php esc_html_e('Skip &amp; deactivate', 'fastpix'); ?></button>
+                    <button type="button" class="fp-de__btn primary" id="fp-de-send"><?php esc_html_e('Send &amp; deactivate', 'fastpix-io'); ?></button>
+                    <button type="button" class="fp-de__btn ghost" id="fp-de-skip"><?php esc_html_e('Skip &amp; deactivate', 'fastpix-io'); ?></button>
                 </div>
             </dialog>
         </div>

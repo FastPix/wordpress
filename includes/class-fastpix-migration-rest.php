@@ -24,7 +24,7 @@ class Fastpix_Migration_Rest {
     /** M7: every route that queues background work says so when the queue is not there, instead of reporting success. */
     private static function jobs_unavailable() {
         return Fastpix_Jobs::available() ? null
-            : new \WP_Error('fastpix_jobs_unavailable', __('Background jobs are unavailable on this site (Action Scheduler is not loaded), so the migration cannot run.', 'fastpix'), array('status' => 503));
+            : new \WP_Error('fastpix_jobs_unavailable', __('Background jobs are unavailable on this site (Action Scheduler is not loaded), so the migration cannot run.', 'fastpix-io'), array('status' => 503));
     }
 
     /** (QA M7) Cancelling queued jobs is a no-op — never a fatal — where Action Scheduler is not loaded. */
@@ -48,10 +48,10 @@ class Fastpix_Migration_Rest {
     public static function start_scan() {
         global $wpdb;
 
-        $err  = Fastpix_Credentials::has_pair() ? self::jobs_unavailable() : new \WP_Error('fastpix_not_connected', __('Connect this site to FastPix first.', 'fastpix'), array('status' => 409));
+        $err  = Fastpix_Credentials::has_pair() ? self::jobs_unavailable() : new \WP_Error('fastpix_not_connected', __('Connect this site to FastPix first.', 'fastpix-io'), array('status' => 409));
         $open = Fastpix_Migration::latest_batch(array('scanning', 'scanned', 'running', 'paused'));
         if (!$err && $open && in_array($open['state'], array('running', 'paused'), true)) {
-            $err = new \WP_Error('fastpix_migration_busy', __('A migration is already running. Finish or cancel it before scanning again.', 'fastpix'), array('status' => 409));
+            $err = new \WP_Error('fastpix_migration_busy', __('A migration is already running. Finish or cancel it before scanning again.', 'fastpix-io'), array('status' => 409));
         }
         if ($err) {
             return $err;
@@ -77,11 +77,11 @@ class Fastpix_Migration_Rest {
     private static function run_refusal($batch, $policy) {
         $err = null;
         if (!$batch) {
-            $err = new \WP_Error('fastpix_batch_missing', __('Unknown batch.', 'fastpix'), array('status' => 404));
+            $err = new \WP_Error('fastpix_batch_missing', __('Unknown batch.', 'fastpix-io'), array('status' => 404));
         } elseif ($batch['state'] !== 'scanned') {
-            $err = new \WP_Error('fastpix_batch_state', __('This batch is not ready to run — scan first, or it already ran.', 'fastpix'), array('status' => 409));
+            $err = new \WP_Error('fastpix_batch_state', __('This batch is not ready to run — scan first, or it already ran.', 'fastpix-io'), array('status' => 409));
         } elseif ($policy === 'drm' && Fastpix_Settings_Page::drm_configuration_id() === '') {
-            $err = new \WP_Error('fastpix_drm_unconfigured', __('DRM needs a DRM configuration ID — add it under FastPix → Settings first.', 'fastpix'), array('status' => 409));
+            $err = new \WP_Error('fastpix_drm_unconfigured', __('DRM needs a DRM configuration ID — add it under FastPix → Settings first.', 'fastpix-io'), array('status' => 409));
         }
 
         return $err;
@@ -97,7 +97,7 @@ class Fastpix_Migration_Rest {
         $scope  = $request->get_param('scope') === 'selection' ? 'selection' : 'all';
         $ids    = array_filter(array_map('intval', (array) $request->get_param('ids')));
         if (!$err && $scope === 'selection' && !$ids) {
-            $err = new \WP_Error('fastpix_nothing_selected', __('Choose at least one video.', 'fastpix'), array('status' => 400));
+            $err = new \WP_Error('fastpix_nothing_selected', __('Choose at least one video.', 'fastpix-io'), array('status' => 400));
         }
         if ($err) {
             return $err;
@@ -112,7 +112,7 @@ class Fastpix_Migration_Rest {
         ), array('batch_id' => $batch['batch_id'], 'state' => 'scanned'));
         $items = array();
         if (!$claimed) {
-            $err = new \WP_Error('fastpix_batch_state', __('This batch is not ready to run — scan first, or it already ran.', 'fastpix'), array('status' => 409));
+            $err = new \WP_Error('fastpix_batch_state', __('This batch is not ready to run — scan first, or it already ran.', 'fastpix-io'), array('status' => 409));
         } else {
             if ($scope === 'selection') {
                 $wpdb->query($wpdb->prepare(
@@ -123,7 +123,7 @@ class Fastpix_Migration_Rest {
             $items = $wpdb->get_results($wpdb->prepare("SELECT id, attachment_id FROM {$t} WHERE batch_id = %s AND state = 'pending' ORDER BY id", $batch['batch_id']), ARRAY_A);
             if (!$items) {
                 $wpdb->update(Fastpix_Schema::table('migrations'), array('state' => 'scanned', 'updated_at' => $now), array('batch_id' => $batch['batch_id'], 'state' => 'running'));
-                $err = new \WP_Error('fastpix_nothing_to_move', __('Nothing in this scan can be moved.', 'fastpix'), array('status' => 400));
+                $err = new \WP_Error('fastpix_nothing_to_move', __('Nothing in this scan can be moved.', 'fastpix-io'), array('status' => 400));
             }
         }
         if ($err) {
@@ -146,11 +146,11 @@ class Fastpix_Migration_Rest {
         $op    = (string) $request['op'];
         $err   = null;
         if (!$batch) {
-            $err = new \WP_Error('fastpix_batch_missing', __('Unknown batch.', 'fastpix'), array('status' => 404));
+            $err = new \WP_Error('fastpix_batch_missing', __('Unknown batch.', 'fastpix-io'), array('status' => 404));
         } elseif ($op === 'pause' && $batch['state'] !== 'running') {
-            $err = new \WP_Error('fastpix_batch_state', __('Only a running batch can be paused.', 'fastpix'), array('status' => 409));
+            $err = new \WP_Error('fastpix_batch_state', __('Only a running batch can be paused.', 'fastpix-io'), array('status' => 409));
         } elseif ($op === 'resume' && $batch['state'] !== 'paused') {
-            $err = new \WP_Error('fastpix_batch_state', __('This batch is not paused.', 'fastpix'), array('status' => 409));
+            $err = new \WP_Error('fastpix_batch_state', __('This batch is not paused.', 'fastpix-io'), array('status' => 409));
         }
         if ($err) {
             return $err;
@@ -177,9 +177,9 @@ class Fastpix_Migration_Rest {
         $batch = Fastpix_Migration::batch((string) $request['id']);
         $err   = null;
         if (!$batch) {
-            $err = new \WP_Error('fastpix_batch_missing', __('Unknown batch.', 'fastpix'), array('status' => 404));
+            $err = new \WP_Error('fastpix_batch_missing', __('Unknown batch.', 'fastpix-io'), array('status' => 404));
         } elseif (!in_array($batch['state'], array('scanning', 'scanned', 'running', 'paused'), true)) {
-            $err = new \WP_Error('fastpix_batch_state', __('This batch has already finished.', 'fastpix'), array('status' => 409));
+            $err = new \WP_Error('fastpix_batch_state', __('This batch has already finished.', 'fastpix-io'), array('status' => 409));
         }
         if ($err) {
             return $err;
@@ -204,10 +204,10 @@ class Fastpix_Migration_Rest {
         $batch = Fastpix_Migration::batch((string) $request['id']);
         $err   = null;
         if (!$batch) {
-            $err = new \WP_Error('fastpix_batch_missing', __('Unknown batch.', 'fastpix'), array('status' => 404));
+            $err = new \WP_Error('fastpix_batch_missing', __('Unknown batch.', 'fastpix-io'), array('status' => 404));
         } elseif (!in_array($batch['state'], array('running', 'paused', 'done'), true)) {
             // M5: only a batch that ran and is still open to items can retry — never a cancelled or cleaned one.
-            $err = new \WP_Error('fastpix_batch_state', __('This batch is finished — cancelled or cleaned up — and cannot retry items.', 'fastpix'), array('status' => 409));
+            $err = new \WP_Error('fastpix_batch_state', __('This batch is finished — cancelled or cleaned up — and cannot retry items.', 'fastpix-io'), array('status' => 409));
         }
         $err = $err ?: self::jobs_unavailable();
         if ($err) {
@@ -259,17 +259,17 @@ class Fastpix_Migration_Rest {
     public static function cleanup($request) {
         $batch = Fastpix_Migration::batch((string) $request['id']);
         if (!$batch) {
-            return new \WP_Error('fastpix_batch_missing', __('Unknown batch.', 'fastpix'), array('status' => 404));
+            return new \WP_Error('fastpix_batch_missing', __('Unknown batch.', 'fastpix-io'), array('status' => 404));
         }
         $verify   = Fastpix_Migration::verification($batch['batch_id']);
         $expected = sprintf('delete %d file%s', $verify['cleanable'], $verify['cleanable'] === 1 ? '' : 's');
         $typed    = preg_replace('/\s+/', ' ', trim(strtolower((string) $request->get_param('confirm'))));
         $err      = null;
         if (!$verify['verified'] || $verify['cleanable'] === 0) {
-            $err = new \WP_Error('fastpix_not_verified', __('Cleanup is only offered for a batch whose items passed verification.', 'fastpix'), array('status' => 409));
+            $err = new \WP_Error('fastpix_not_verified', __('Cleanup is only offered for a batch whose items passed verification.', 'fastpix-io'), array('status' => 409));
         } elseif (!in_array($typed, array(sprintf('delete %d file', $verify['cleanable']), sprintf('delete %d files', $verify['cleanable'])), true)) {   // M26: "1 file" / "1 files" both pass; "filess" does not
             /* translators: %s: the exact confirmation phrase to type */
-            $err = new \WP_Error('fastpix_confirm_mismatch', sprintf(__('Type "%s" to confirm.', 'fastpix'), $expected), array('status' => 400, 'expected' => $expected));
+            $err = new \WP_Error('fastpix_confirm_mismatch', sprintf(__('Type "%s" to confirm.', 'fastpix-io'), $expected), array('status' => 400, 'expected' => $expected));
         }
         if ($err) {
             return $err;
@@ -291,11 +291,11 @@ class Fastpix_Migration_Rest {
         $item = $wpdb->get_row($wpdb->prepare("SELECT * FROM {$t} WHERE id = %d", (int) $request['id']), ARRAY_A);
         $err  = null;
         if (!$item) {
-            $err = new \WP_Error('fastpix_item_missing', __('Unknown item.', 'fastpix'), array('status' => 404));
+            $err = new \WP_Error('fastpix_item_missing', __('Unknown item.', 'fastpix-io'), array('status' => 404));
         } elseif ($item['state'] === 'cleaned') {
-            $err = new \WP_Error('fastpix_revert_impossible', __('The local file was removed at cleanup — there is nothing to revert to.', 'fastpix'), array('status' => 409));
+            $err = new \WP_Error('fastpix_revert_impossible', __('The local file was removed at cleanup — there is nothing to revert to.', 'fastpix-io'), array('status' => 409));
         } elseif ($item['state'] !== 'submitted') {
-            $err = new \WP_Error('fastpix_revert_state', __('Only a migrated video can be reverted.', 'fastpix'), array('status' => 409));
+            $err = new \WP_Error('fastpix_revert_state', __('Only a migrated video can be reverted.', 'fastpix-io'), array('status' => 409));
         }
         if ($err) {
             return $err;
@@ -328,7 +328,7 @@ class Fastpix_Migration_Rest {
     public static function get_batch($request) {
         $batch = Fastpix_Migration::batch((string) $request['id']);
         if (!$batch) {
-            return new \WP_Error('fastpix_batch_missing', __('Unknown batch.', 'fastpix'), array('status' => 404));
+            return new \WP_Error('fastpix_batch_missing', __('Unknown batch.', 'fastpix-io'), array('status' => 404));
         }
         // (QA reaper) The UI polls this while a batch is open — the one path sure to run when the last items wedge in 'submitting'.
         // (QA M10 stall) Nothing parks as a keep-alive any more: when every worker died at once (restart, queue cleared) no item action is

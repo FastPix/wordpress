@@ -188,7 +188,7 @@ class Fastpix_Uploads {
         ));
         $row_id  = (int) $wpdb->insert_id;
         $session = (!$inserted || $row_id === 0)
-            ? new \WP_Error('fastpix_upload_row', __('The upload could not be recorded on this site — try again.', 'fastpix'), array('status' => 500))
+            ? new \WP_Error('fastpix_upload_row', __('The upload could not be recorded on this site — try again.', 'fastpix-io'), array('status' => 500))
             : self::platform_session($row_id, $settings);
         if (is_wp_error($session)) {
             $wpdb->delete($table, array('id' => $row_id));   // nothing queued on refusal [RULE-005]; a no-op when the INSERT itself failed (id 0)
@@ -223,11 +223,11 @@ class Fastpix_Uploads {
 
         $refusal = self::refuse_if_unavailable();   // RULE-005
         if (!$refusal && $filesize > self::MAX_FILE_BYTES) {
-            $refusal = new \WP_Error('fastpix_too_large', __('This file is over the 20 GB per-file limit.', 'fastpix'), array('status' => 400, 'limit' => '20 GB'));
+            $refusal = new \WP_Error('fastpix_too_large', __('This file is over the 20 GB per-file limit.', 'fastpix-io'), array('status' => 400, 'limit' => '20 GB'));
         }
         if (!$refusal && $filetype !== '' && !Fastpix_Uploads_Settings::accepted_type($filetype)) {
             /* translators: %s: file extension or MIME type */
-            $refusal = new \WP_Error('fastpix_bad_format', sprintf(__('%s is not an accepted video format.', 'fastpix'), $filetype), array('status' => 400, 'limit' => 'format'));
+            $refusal = new \WP_Error('fastpix_bad_format', sprintf(__('%s is not an accepted video format.', 'fastpix-io'), $filetype), array('status' => 400, 'limit' => 'format'));
         }
         if (!$refusal) {
             $table = Fastpix_Schema::table('uploads');
@@ -236,7 +236,7 @@ class Fastpix_Uploads {
                 // The cap is per site [REQ-012] but a user only sees their own sessions: say whose they are and how the rest clear. (QA U10)
                 $mine = (int) $wpdb->get_var($wpdb->prepare("SELECT COUNT(*) FROM {$table} WHERE state IN ('created', 'uploading', 'paused') AND user_id = %d", get_current_user_id()));
                 /* translators: 1: number of open sessions site-wide, 2: how many of them belong to this user */
-                $refusal = new \WP_Error('fastpix_session_cap', sprintf(__('This site already has %1$d open upload sessions across all users (%2$d of them yours). Finish or discard yours from Add media; other users\' sessions clear when they finish, or after 7 days untouched.', 'fastpix'), $open, $mine), array('status' => 429, 'limit' => '20 sessions'));
+                $refusal = new \WP_Error('fastpix_session_cap', sprintf(__('This site already has %1$d open upload sessions across all users (%2$d of them yours). Finish or discard yours from Add media; other users\' sessions clear when they finish, or after 7 days untouched.', 'fastpix-io'), $open, $mine), array('status' => 429, 'limit' => '20 sessions'));
             }
         }
 
@@ -408,7 +408,7 @@ class Fastpix_Uploads {
         $update  = array('updated_at' => current_time('mysql', true));
         $refusal = null;
         if ($row['state'] === 'cancelled') {   // terminal: the tab learns it and stops (QA U21)
-            $refusal = new \WP_Error('fastpix_upload_cancelled', __('This upload was cancelled.', 'fastpix'), array('status' => 409));
+            $refusal = new \WP_Error('fastpix_upload_cancelled', __('This upload was cancelled.', 'fastpix-io'), array('status' => 409));
         } elseif ($request->get_param('resume')) {
             $refusal = self::apply_resume($request, $row, $update);
         }
@@ -451,7 +451,7 @@ class Fastpix_Uploads {
             $uri = (string) $request->get_param('session_uri');
             // Verified live 2026-09-20: the bucket session lives on the signed URL's host (storage.googleapis.com); any other origin is not ours to resume against. (QA U17)
             if (strtolower((string) wp_parse_url($uri, PHP_URL_HOST)) !== strtolower((string) wp_parse_url((string) $row['signed_url'], PHP_URL_HOST))) {
-                return new \WP_Error('fastpix_session_uri_host', __('The session address must be on the same host as the signed upload URL.', 'fastpix'), array('status' => 400));
+                return new \WP_Error('fastpix_session_uri_host', __('The session address must be on the same host as the signed upload URL.', 'fastpix-io'), array('status' => 400));
             }
             $update['session_uri'] = $uri;
         }
@@ -479,18 +479,18 @@ class Fastpix_Uploads {
 
         $session = null;
         if ((string) get_option(Fastpix_Connection::OPT_PENDING_LEAVE, '') !== '') {   // the signed URL may belong to the workspace just left [ASSUME-092]
-            $session = new \WP_Error('fastpix_workspace_pending', __('Uploads resume once the newly connected workspace is confirmed.', 'fastpix'), array('status' => 409));
+            $session = new \WP_Error('fastpix_workspace_pending', __('Uploads resume once the newly connected workspace is confirmed.', 'fastpix-io'), array('status' => 409));
         } elseif ($name !== $row['filename'] || $size !== (int) $row['filesize']) {
             $session = new \WP_Error(
                 'fastpix_wrong_file',
                 /* translators: 1: file name, 2: file size */
-                sprintf(__('That is a different file. Resume needs %1$s (%2$s) — the upload continues from where it stopped only with the same file.', 'fastpix'),
+                sprintf(__('That is a different file. Resume needs %1$s (%2$s) — the upload continues from where it stopped only with the same file.', 'fastpix-io'),
                     $row['filename'], size_format((int) $row['filesize'])),
                 array('status' => 409)
             );
         } elseif ($row['state'] === 'uploading' && strtotime($row['updated_at'] . ' UTC') > time() - self::INTERRUPT_SECONDS) {
             // Still reporting progress: another tab owns this transfer; two senders on one session corrupt it. (QA U20)
-            $session = new \WP_Error('fastpix_upload_live', __('This upload is still running in another tab or window.', 'fastpix'), array('status' => 409));
+            $session = new \WP_Error('fastpix_upload_live', __('This upload is still running in another tab or window.', 'fastpix-io'), array('status' => 409));
         } elseif (self::url_expired($row)) {
             // Signed URL past its window: re-create the platform session under
             // the SAME idempotency key so no second object appears.
@@ -593,13 +593,13 @@ class Fastpix_Uploads {
         $refusal = null;
         if (!Fastpix_Credentials::has_pair()) {
             // 409: the route exists, the site's state conflicts with it.
-            $refusal = new \WP_Error('fastpix_not_connected', __('This site is not connected to FastPix. Connect a workspace from the FastPix menu first.', 'fastpix'), array('status' => 409));
+            $refusal = new \WP_Error('fastpix_not_connected', __('This site is not connected to FastPix. Connect a workspace from the FastPix menu first.', 'fastpix-io'), array('status' => 409));
         } elseif (!Fastpix_Api_Client::is_healthy()) {
-            $refusal = new \WP_Error('fastpix_unhealthy', __('FastPix rejected the stored credentials, so new uploads are paused. Re-check the connection.', 'fastpix'), array('status' => 503));
+            $refusal = new \WP_Error('fastpix_unhealthy', __('FastPix rejected the stored credentials, so new uploads are paused. Re-check the connection.', 'fastpix-io'), array('status' => 503));
         } else {
             $breaker = get_transient(Fastpix_Api_Client::TRANSIENT_BREAKER);
             if (is_array($breaker) && isset($breaker['open_until']) && $breaker['open_until'] > time()) {
-                $refusal = new \WP_Error('fastpix_offline', __('FastPix is not responding right now, so nothing was queued. Try again shortly.', 'fastpix'), array('status' => 503, 'retry' => true));
+                $refusal = new \WP_Error('fastpix_offline', __('FastPix is not responding right now, so nothing was queued. Try again shortly.', 'fastpix-io'), array('status' => 503, 'retry' => true));
             }
         }
 
@@ -623,7 +623,7 @@ class Fastpix_Uploads {
         ), ARRAY_A);
 
         if (!$row) {
-            return new \WP_Error('fastpix_upload_missing', __('No such upload session.', 'fastpix'), array('status' => 404));
+            return new \WP_Error('fastpix_upload_missing', __('No such upload session.', 'fastpix-io'), array('status' => 404));
         }
 
         return $row;
@@ -658,7 +658,7 @@ class Fastpix_Uploads {
         $url  = (string) Fastpix_Sync::field($data, array('url', 'uploadUrl', 'signedUrl'));
 
         if ($url === '') {
-            $session = new \WP_Error('fastpix_no_signed_url', __('FastPix did not return an upload URL.', 'fastpix'), array('status' => 502));
+            $session = new \WP_Error('fastpix_no_signed_url', __('FastPix did not return an upload URL.', 'fastpix-io'), array('status' => 502));
         } else {
             $session = array(
                 'upload_id'  => (string) Fastpix_Sync::field($data, array('uploadId', 'id', 'upload_id')),
@@ -699,7 +699,7 @@ class Fastpix_Uploads {
         if ($body['accessPolicy'] === 'drm') {
             $drm_id = Fastpix_Settings_Page::drm_configuration_id();
             if ($drm_id === '') {
-                return new \WP_Error('fastpix_drm_unconfigured', __('DRM needs a DRM configuration ID — add it under FastPix → Settings → DRM, then try again.', 'fastpix'), array('status' => 409));
+                return new \WP_Error('fastpix_drm_unconfigured', __('DRM needs a DRM configuration ID — add it under FastPix → Settings → DRM, then try again.', 'fastpix-io'), array('status' => 409));
             }
             $body['drmConfigurationId'] = $drm_id;
         }

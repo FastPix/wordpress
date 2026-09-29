@@ -64,14 +64,14 @@
                 cancelBtn = document.createElement('button');
                 cancelBtn.type = 'button';
                 cancelBtn.className = 'fp-dialog__btn fp-dialog__cancel';
-                cancelBtn.textContent = opts.cancel || (i18n() ? wp.i18n.__('Cancel', 'fastpix') : 'Cancel');
+                cancelBtn.textContent = opts.cancel || (i18n() ? wp.i18n.__('Cancel', 'fastpix-io') : 'Cancel');
                 cancelBtn.addEventListener('click', function () { close(input ? null : false); });
                 row.appendChild(cancelBtn);
             }
             var okBtn = document.createElement('button');
             okBtn.type = 'button';
             okBtn.className = 'fp-dialog__btn fp-dialog__ok';
-            okBtn.textContent = opts.ok || (i18n() ? wp.i18n.__('OK', 'fastpix') : 'OK');
+            okBtn.textContent = opts.ok || (i18n() ? wp.i18n.__('OK', 'fastpix-io') : 'OK');
             okBtn.addEventListener('click', function () { close(input ? input.value : true); });
             row.appendChild(okBtn);
             box.appendChild(row);

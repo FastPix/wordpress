@@ -192,7 +192,7 @@ class Fastpix_Search {
             // Disabled and said so — never a LIKE scan. [RULE-044]
             return new \WP_Error(
                 'fastpix_search_disabled',
-                __('Transcript search is unavailable: this database has no FULLTEXT support. Title search still works.', 'fastpix')
+                __('Transcript search is unavailable: this database has no FULLTEXT support. Title search still works.', 'fastpix-io')
             );
         }
 

@@ -106,7 +106,7 @@ class Fastpix_Render {
         $path = WPMU_PLUGIN_DIR . '/' . self::FALLBACK_FILE;
         $code = "<?php\n/**\n * Plugin Name: FastPix shortcode fallback\n * Description: While the FastPix plugin is deactivated, shows \"This video is not available right now.\" in place of [fastpix] shortcodes instead of the raw shortcode text. Removed when FastPix is deleted.\n */\n"
             . "add_action('init', function () {\n    if (!shortcode_exists('fastpix')) {\n        add_shortcode('fastpix', function () {\n"
-            . "            return '<figure class=\"fastpix-embed fastpix-embed--fallback\"><figcaption>' . esc_html__('This video is not available right now.', 'fastpix') . '</figcaption></figure>';\n"
+            . "            return '<figure class=\"fastpix-embed fastpix-embed--fallback\"><figcaption>' . esc_html__('This video is not available right now.', 'fastpix-io') . '</figcaption></figure>';\n"
             . "        });\n    }\n}, 99);\n";
         if ((file_exists($path) && (string) file_get_contents($path) === $code) || !wp_mkdir_p(WPMU_PLUGIN_DIR) || !wp_is_writable(WPMU_PLUGIN_DIR)) {
             return;
@@ -275,16 +275,16 @@ class Fastpix_Render {
     private static function render_gate($identifier, $video, $fallback) {
         $result = null;
         if ($identifier === '') {
-            $result = Fastpix_Render_Player::message(__('No video selected.', 'fastpix'), $fallback);
+            $result = Fastpix_Render_Player::message(__('No video selected.', 'fastpix-io'), $fallback);
         } elseif (!$video) {
             // ERR-041: removed / unknown — the saved poster + link, never a blank frame.
-            $result = $fallback !== '' ? $fallback : Fastpix_Render_Player::message(__('This video is not available right now.', 'fastpix'), '');
+            $result = $fallback !== '' ? $fallback : Fastpix_Render_Player::message(__('This video is not available right now.', 'fastpix-io'), '');
         } elseif (Fastpix_Sync::is_unavailable($video)) {   // deleted, or orphaned (404 on FastPix) — the library's "Unavailable" [QA L12]
-            $result = $fallback !== '' ? $fallback : Fastpix_Render_Player::message(__('This video no longer exists on FastPix.', 'fastpix'), '');
+            $result = $fallback !== '' ? $fallback : Fastpix_Render_Player::message(__('This video no longer exists on FastPix.', 'fastpix-io'), '');
         } elseif ($video['status'] === 'Failed') {   // never "still being processed" [QA L11]
-            $result = $fallback !== '' ? $fallback : Fastpix_Render_Player::message(__('This video could not be processed.', 'fastpix'), '');
+            $result = $fallback !== '' ? $fallback : Fastpix_Render_Player::message(__('This video could not be processed.', 'fastpix-io'), '');
         } elseif ($video['status'] === 'Ready' && self::playback_id($video) === '') {   // its playback id was removed on the platform [QA L10]
-            $result = $fallback !== '' ? $fallback : Fastpix_Render_Player::message(__('This video is not available right now.', 'fastpix'), '');
+            $result = $fallback !== '' ? $fallback : Fastpix_Render_Player::message(__('This video is not available right now.', 'fastpix-io'), '');
         }
 
         return $result;
@@ -339,7 +339,7 @@ class Fastpix_Render {
         // A previously connected workspace's media: the connected pair's signing key
         // cannot sign it, so say so instead of minting a token the platform rejects. [ASSUME-092]
         if ($reason === '' && Fastpix_Videos_Rest::is_other_workspace($video)) {
-            $reason = __('This video is not available right now.', 'fastpix');
+            $reason = __('This video is not available right now.', 'fastpix-io');
         }
         if ($reason !== '') {
             return Fastpix_Render_Player::poster_message($video, $playback, $reason, $settings, false);
@@ -351,7 +351,7 @@ class Fastpix_Render {
             do_action('fastpix_log', 'render_unsigned', array('scope' => 'render', 'severity' => 'warning',
                 'message' => 'Could not sign playback for ' . $video['media_id'] . ': ' . $tokens->get_error_message()));
 
-            return Fastpix_Render_Player::poster_message($video, $playback, __('This video is not available right now.', 'fastpix'), $settings, false);
+            return Fastpix_Render_Player::poster_message($video, $playback, __('This video is not available right now.', 'fastpix-io'), $settings, false);
         }
 
         Fastpix_Render_Player::enqueue();

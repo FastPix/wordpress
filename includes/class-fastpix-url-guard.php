@@ -40,7 +40,7 @@ class Fastpix_Url_Guard {   // NOSONAR php:S101 — WordPress class naming
     /** @param string $kind video|image — all that differs is the content type demanded at the end. */
     private static function validate_public_url($url, $hops, $kind) { // NOSONAR php:S100 — WordPress snake_case naming
         if ($hops > Fastpix_Uploads::MAX_REDIRECTS) {
-            return new \WP_Error('fastpix_url_redirects', __('Too many redirects (more than 3).', 'fastpix'));
+            return new \WP_Error('fastpix_url_redirects', __('Too many redirects (more than 3).', 'fastpix-io'));
         }
 
         $response = self::probe_url($url);
@@ -60,9 +60,9 @@ class Fastpix_Url_Guard {   // NOSONAR php:S101 — WordPress class naming
         $parts  = wp_parse_url($url);
         $result = null;
         if (!$parts || empty($parts['host'])) {
-            $result = new \WP_Error('fastpix_url_invalid', __('Not a valid URL.', 'fastpix'));
+            $result = new \WP_Error('fastpix_url_invalid', __('Not a valid URL.', 'fastpix-io'));
         } elseif (!isset($parts['scheme']) || !in_array(strtolower($parts['scheme']), array('http', 'https'), true)) {
-            $result = new \WP_Error('fastpix_url_scheme', __('Only http and https URLs are accepted.', 'fastpix'));
+            $result = new \WP_Error('fastpix_url_scheme', __('Only http and https URLs are accepted.', 'fastpix-io'));
         } else {
             // Resolve and check the ADDRESS, not the name — every A and AAAA record,
             // so a dual-stack host cannot hide a loopback behind a clean IPv4. [SEC-010]
@@ -98,7 +98,7 @@ class Fastpix_Url_Guard {   // NOSONAR php:S101 — WordPress class naming
             }
         }
 
-        return new \WP_Error('fastpix_url_unreachable', __('The URL did not respond.', 'fastpix'));
+        return new \WP_Error('fastpix_url_unreachable', __('The URL did not respond.', 'fastpix-io'));
     }
 
     /** One probe, pinned to one already-validated address. */
@@ -138,7 +138,7 @@ class Fastpix_Url_Guard {   // NOSONAR php:S101 — WordPress class naming
         if (in_array($status, array(301, 302, 303, 307, 308), true)) {
             $location = wp_remote_retrieve_header($response, 'location');
             if (!$location) {
-                $verdict = new \WP_Error('fastpix_url_redirect_blind', __('The URL redirects without a destination.', 'fastpix'));
+                $verdict = new \WP_Error('fastpix_url_redirect_blind', __('The URL redirects without a destination.', 'fastpix-io'));
             } else {
                 // A relative Location is legal (RFC 7231) and resolved against the URL that sent it. (QA U16)
                 $verdict = self::validate_public_url(\WP_Http::make_absolute_url((string) $location, $url), $hops + 1, $kind);
@@ -147,10 +147,10 @@ class Fastpix_Url_Guard {   // NOSONAR php:S101 — WordPress class naming
             // 403 is usually hotlink or bot protection rather than a login, and both refuse FastPix
             // the same way they refused this probe. Naming only the login sent people hunting for a
             // password that does not exist. (owner 2026-09-23)
-            $verdict = new \WP_Error('fastpix_url_login', __('The URL is behind a login, or the host blocks other servers from fetching it — FastPix cannot fetch it either.', 'fastpix'));   // REQ-015
+            $verdict = new \WP_Error('fastpix_url_login', __('The URL is behind a login, or the host blocks other servers from fetching it — FastPix cannot fetch it either.', 'fastpix-io'));   // REQ-015
         } elseif ($status < 200 || $status >= 400) {
             /* translators: %d: HTTP status code */
-            $verdict = new \WP_Error('fastpix_url_status', sprintf(__('The URL answered HTTP %d.', 'fastpix'), $status));
+            $verdict = new \WP_Error('fastpix_url_status', sprintf(__('The URL answered HTTP %d.', 'fastpix-io'), $status));
         } else {
             $verdict = self::type_verdict(strtolower((string) wp_remote_retrieve_header($response, 'content-type')), $kind);
         }
@@ -164,13 +164,13 @@ class Fastpix_Url_Guard {   // NOSONAR php:S101 — WordPress class naming
         if ($kind === 'image') {
             if ($type !== '' && strpos($type, 'image/') !== 0 && strpos($type, 'application/octet-stream') !== 0) {
                 /* translators: %s: content type served by the URL */
-                $verdict = new \WP_Error('fastpix_url_not_image', sprintf(__('the URL serves %s, not an image.', 'fastpix'), explode(';', $type)[0]));
+                $verdict = new \WP_Error('fastpix_url_not_image', sprintf(__('the URL serves %s, not an image.', 'fastpix-io'), explode(';', $type)[0]));
             }
         } elseif ($type !== '' && strpos($type, 'video/') !== 0
             && strpos($type, 'application/octet-stream') !== 0
             && strpos($type, 'application/x-mpegurl') !== 0) {
             /* translators: %s: content type served by the URL */
-            $verdict = new \WP_Error('fastpix_url_not_video', sprintf(__('The URL serves %s, not video.', 'fastpix'), explode(';', $type)[0]));
+            $verdict = new \WP_Error('fastpix_url_not_video', sprintf(__('The URL serves %s, not video.', 'fastpix-io'), explode(';', $type)[0]));
         }
 
         return $verdict;
@@ -190,11 +190,11 @@ class Fastpix_Url_Guard {   // NOSONAR php:S101 — WordPress class naming
 
         $ips = array_values(array_unique(array_filter($ips)));
         if (!$ips) {
-            return new \WP_Error('fastpix_url_unresolvable', __('The host could not be resolved.', 'fastpix'));
+            return new \WP_Error('fastpix_url_unresolvable', __('The host could not be resolved.', 'fastpix-io'));
         }
         foreach ($ips as $ip) {
             if (!self::ip_is_public($ip)) {
-                return new \WP_Error('fastpix_url_private', __('The URL points at a local or private address — FastPix cannot fetch it.', 'fastpix'));
+                return new \WP_Error('fastpix_url_private', __('The URL points at a local or private address — FastPix cannot fetch it.', 'fastpix-io'));
             }
         }
 

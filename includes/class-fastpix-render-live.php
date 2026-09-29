@@ -47,7 +47,7 @@ class Fastpix_Render_Live {
             ), ARRAY_A);
         }
         if (!$stream) {
-            return Fastpix_Render_Player::message(__('This live stream is not available.', 'fastpix'), '');
+            return Fastpix_Render_Player::message(__('This live stream is not available.', 'fastpix-io'), '');
         }
         if (!empty($stream['deleted_at'])) {
             // A deleted stream keeps its recording renderable — the delete dialog
@@ -55,7 +55,7 @@ class Fastpix_Render_Live {
             // the /stream-state route tombstones it, and nothing can change.
             $recording = self::live_recording($stream, 'ended', $over);
 
-            return $recording !== null ? $recording : Fastpix_Render_Player::message(__('This live stream is not available.', 'fastpix'), '');
+            return $recording !== null ? $recording : Fastpix_Render_Player::message(__('This live stream is not available.', 'fastpix-io'), '');
         }
 
         // Every state carries the poll attributes so player.js can reload the
@@ -104,12 +104,12 @@ class Fastpix_Render_Live {
     /** The waiting card's line: not started yet, ended with a recording to come, or just ended. */
     private static function waiting_note($status, $stream) { // NOSONAR php:S100 — WordPress snake_case naming
         if ($status !== 'ended') {
-            return __('The stream has not started yet — this page will play it once it goes live.', 'fastpix');
+            return __('The stream has not started yet — this page will play it once it goes live.', 'fastpix-io');
         }
 
         return !empty($stream['recording_enabled'])
-            ? __('This stream has ended. The recording will appear here when it is ready.', 'fastpix')
-            : __('This stream has ended.', 'fastpix');   // recording off: promise nothing
+            ? __('This stream has ended. The recording will appear here when it is ready.', 'fastpix-io')
+            : __('This stream has ended.', 'fastpix-io');   // recording off: promise nothing
     }
 
     /** The live player for an active stream — or the warming-up card while the playback id resolves. */
@@ -152,7 +152,7 @@ class Fastpix_Render_Live {
         Fastpix_Render_Player::enqueue();
         if (!$player_attrs) {
             return '<figure class="wp-block-fastpix-video fastpix-embed fastpix-embed--message fastpix-embed--waiting"' . $live_attrs
-                . '><figcaption class="fastpix-embed__note">' . esc_html__('The stream is live — the player is warming up.', 'fastpix') . '</figcaption></figure>';
+                . '><figcaption class="fastpix-embed__note">' . esc_html__('The stream is live — the player is warming up.', 'fastpix-io') . '</figcaption></figure>';
         }
 
         // Live must start muted+autoplay (browsers block unmuted autoplay);
@@ -233,7 +233,7 @@ class Fastpix_Render_Live {
         }
         $refusal = self::config_refusal($video, $playback, $policy);
         if (!$refusal && Fastpix_Videos_Rest::is_other_workspace($video)) {   // the connected key cannot sign it [ASSUME-092]
-            $refusal = new \WP_Error('fastpix_video_missing', __('No such video.', 'fastpix'), array('status' => 404));
+            $refusal = new \WP_Error('fastpix_video_missing', __('No such video.', 'fastpix-io'), array('status' => 404));
         }
         if ($refusal) {
             return $refusal;
@@ -287,7 +287,7 @@ class Fastpix_Render_Live {
         // The local row is checked BEFORE the platform is asked, so a made-up id costs no API call.
         $live = ($stream && strtolower((string) $stream['status']) === 'active') ? self::live_playback($stream_id) : null;
         if (!$live || $live['id'] === '' || !hash_equals($live['id'], $playback) || in_array($live['policy'], array('', 'public'), true)) {
-            return new \WP_Error('fastpix_video_missing', __('Unknown video.', 'fastpix'), array('status' => 404));
+            return new \WP_Error('fastpix_video_missing', __('Unknown video.', 'fastpix-io'), array('status' => 404));
         }
 
         $post_ids = get_posts(array(
@@ -297,7 +297,7 @@ class Fastpix_Render_Live {
         if (!self::posts_allow($post_ids, $stream)) {
             do_action('fastpix_audit_event', 'player_config_refused', array('playback_id' => $playback));
 
-            return new \WP_Error('fastpix_not_allowed', __('This video is protected. Open the page it is embedded on.', 'fastpix'), array('status' => 403));
+            return new \WP_Error('fastpix_not_allowed', __('This video is protected. Open the page it is embedded on.', 'fastpix-io'), array('status' => 403));
         }
         $tokens = Fastpix_Signing::tokens($playback);   // the same media-audience token live_active() mints
 
@@ -339,14 +339,14 @@ class Fastpix_Render_Live {
     private static function config_refusal($video, $playback, $policy) {
         $refusal = null;
         if (!$video) {
-            $refusal = new \WP_Error('fastpix_video_missing', __('Unknown video.', 'fastpix'), array('status' => 404));
+            $refusal = new \WP_Error('fastpix_video_missing', __('Unknown video.', 'fastpix-io'), array('status' => 404));
         } elseif ($policy !== 'public' && !self::viewer_may_stream($video)) {
             // SEC-014: this route must not out-mint the page's own gate. The
             // playback id is visible in page source, so possession of it proves
             // nothing — tokens only for viewers who could open an embedding page.
             do_action('fastpix_audit_event', 'player_config_refused', array('playback_id' => $playback));
 
-            $refusal = new \WP_Error('fastpix_not_allowed', __('This video is protected. Open the page it is embedded on.', 'fastpix'), array('status' => 403));
+            $refusal = new \WP_Error('fastpix_not_allowed', __('This video is protected. Open the page it is embedded on.', 'fastpix-io'), array('status' => 403));
         }
 
         return $refusal;

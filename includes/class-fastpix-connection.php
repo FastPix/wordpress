@@ -85,7 +85,7 @@ class Fastpix_Connection {
             && !preg_match('/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/', $workspace_id)) {
             return new \WP_Error(
                 'fastpix_bad_workspace_id',
-                __('That does not look like a workspace key — copy it from the Workspaces page of the FastPix dashboard (a long number).', 'fastpix'),
+                __('That does not look like a workspace key — copy it from the Workspaces page of the FastPix dashboard (a long number).', 'fastpix-io'),
                 array('status' => 400)
             );
         }
@@ -143,7 +143,7 @@ class Fastpix_Connection {
         if (!Fastpix_Credentials::store($token_id, $secret)) {
             return new \WP_Error(
                 'fastpix_store_failed',
-                __('The connection could not be saved on this site.', 'fastpix')
+                __('The connection could not be saved on this site.', 'fastpix-io')
             );
         }
 
@@ -309,7 +309,7 @@ class Fastpix_Connection {
     /** POST /connection/test — re-runs the validation read with the stored pair. [WF-001] */
     public static function test() {
         if (!Fastpix_Credentials::has_pair()) {
-            return new \WP_Error('fastpix_not_connected', __('This site is not connected to FastPix.', 'fastpix'));
+            return new \WP_Error('fastpix_not_connected', __('This site is not connected to FastPix.', 'fastpix-io'));
         }
 
         $validated = self::validate(Fastpix_Credentials::token_id(), Fastpix_Credentials::secret());
@@ -367,7 +367,7 @@ class Fastpix_Connection {
                 // field is singled out (owner ruling 2026-09-08, ASSUME-071).
                 return new \WP_Error(
                     'fastpix_bad_credentials',
-                    __('Invalid credentials', 'fastpix')
+                    __('Invalid credentials', 'fastpix-io')
                 );
 
             case 'fastpix_unreachable':
@@ -377,7 +377,7 @@ class Fastpix_Connection {
                 // ERR-002. Firewall/outbound guidance and a system report live in the UI.
                 return new \WP_Error(
                     'fastpix_unreachable',
-                    __('FastPix did not respond. A firewall or outbound rule may be blocking this site; your hosting provider can confirm.', 'fastpix'),
+                    __('FastPix did not respond. A firewall or outbound rule may be blocking this site; your hosting provider can confirm.', 'fastpix-io'),
                     array('action' => 'copy_system_report')
                 );
 

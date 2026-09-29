@@ -14,7 +14,7 @@
 
     var cfg = window.fastpixDeactivate || {};
     var i18n = window.wp && window.wp.i18n;
-    function __(s) { return i18n ? i18n.__(s, 'fastpix') : s; }
+    function __(s) { return i18n ? i18n.__(s, 'fastpix-io') : s; }
     function el(id) { return document.getElementById(id); }
 
     if (!cfg.slug) { return; }

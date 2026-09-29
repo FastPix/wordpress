@@ -36,28 +36,28 @@ class Fastpix_Uploads_Settings {
     /** The picker's labels, in WATERMARK_PLACEMENT order. */
     public static function watermark_positions() { // NOSONAR php:S100 — WordPress snake_case naming
         return array(
-            'top-left'     => __('Top left', 'fastpix'),
-            'top-center'   => __('Top center', 'fastpix'),
-            'top-right'    => __('Top right', 'fastpix'),
-            'middle-left'  => __('Middle left', 'fastpix'),
-            'middle-right' => __('Middle right', 'fastpix'),
-            'bottom-left'  => __('Bottom left', 'fastpix'),
-            'bottom-right' => __('Bottom right', 'fastpix'),
+            'top-left'     => __('Top left', 'fastpix-io'),
+            'top-center'   => __('Top center', 'fastpix-io'),
+            'top-right'    => __('Top right', 'fastpix-io'),
+            'middle-left'  => __('Middle left', 'fastpix-io'),
+            'middle-right' => __('Middle right', 'fastpix-io'),
+            'bottom-left'  => __('Bottom left', 'fastpix-io'),
+            'bottom-right' => __('Bottom right', 'fastpix-io'),
         );
     }
 
     /** Gap from the video's edge, as a share of its size. */
     public static function watermark_margins() { // NOSONAR php:S100 — WordPress snake_case naming
-        return array('3%' => __('Tight · 3%', 'fastpix'), '6%' => __('Normal · 6%', 'fastpix'), '10%' => __('Wide · 10%', 'fastpix'));
+        return array('3%' => __('Tight · 3%', 'fastpix-io'), '6%' => __('Normal · 6%', 'fastpix-io'), '10%' => __('Wide · 10%', 'fastpix-io'));
     }
 
     /** Watermark width as a share of the video's width; the height follows the image's own shape. */
     public static function watermark_sizes() { // NOSONAR php:S100 — WordPress snake_case naming
         return array(
-            '6%'  => __('Small · 6%', 'fastpix'),
-            '10%' => __('Medium · 10%', 'fastpix'),
-            '15%' => __('Large · 15%', 'fastpix'),
-            '20%' => __('Extra large · 20%', 'fastpix'),
+            '6%'  => __('Small · 6%', 'fastpix-io'),
+            '10%' => __('Medium · 10%', 'fastpix-io'),
+            '15%' => __('Large · 15%', 'fastpix-io'),
+            '20%' => __('Extra large · 20%', 'fastpix-io'),
         );
     }
 
@@ -219,7 +219,7 @@ class Fastpix_Uploads_Settings {
             $seen[$url] = is_wp_error($verdict)
                 ? new \WP_Error('fastpix_watermark_url', sprintf(
                     /* translators: %s: why the image URL was refused */
-                    __('The watermark image cannot be used: %s', 'fastpix'),
+                    __('The watermark image cannot be used: %s', 'fastpix-io'),
                     $verdict->get_error_message()
                 ), array('status' => 400))
                 : true;
@@ -232,7 +232,7 @@ class Fastpix_Uploads_Settings {
     public static function watermark_check($request) { // NOSONAR php:S100 — WordPress snake_case naming
         $url = self::settings_snapshot(array('watermark_url' => (string) $request->get_param('url')))['watermark_url'];
         $ok  = $url === ''
-            ? new \WP_Error('fastpix_watermark_url', __('Enter a full http:// or https:// image URL.', 'fastpix'), array('status' => 400))
+            ? new \WP_Error('fastpix_watermark_url', __('Enter a full http:// or https:// image URL.', 'fastpix-io'), array('status' => 400))
             : self::watermark_reachable($url);
 
         return is_wp_error($ok) ? $ok : rest_ensure_response(array('ok' => true));

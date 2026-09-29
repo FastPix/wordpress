@@ -106,7 +106,7 @@ class Fastpix_Api_Client {
         // A success read with a pair that was replaced while the retries ran
         // is the previous workspace's data — never hand it back. [ASSUME-092]
         if (!is_wp_error($result) && $this->stored && $this->token_id !== Fastpix_Credentials::token_id_fresh()) {
-            $result = new \WP_Error('fastpix_pair_changed', __('The connection changed while this job was running.', 'fastpix'));
+            $result = new \WP_Error('fastpix_pair_changed', __('The connection changed while this job was running.', 'fastpix-io'));
         }
 
         return $result;
@@ -118,11 +118,11 @@ class Fastpix_Api_Client {
         // A job that started under the previous pair must not keep paging the old
         // workspace (and teach it as the new one) after a connect. [ASSUME-092]
         if ($this->stored && $this->token_id !== Fastpix_Credentials::token_id_fresh()) {
-            $error = new \WP_Error('fastpix_pair_changed', __('The connection changed while this job was running.', 'fastpix'));
+            $error = new \WP_Error('fastpix_pair_changed', __('The connection changed while this job was running.', 'fastpix-io'));
         } elseif ($this->token_id === '' || $this->secret === '') {
             $error = new \WP_Error(
                 'fastpix_not_connected',
-                __('This site is not connected to FastPix.', 'fastpix')
+                __('This site is not connected to FastPix.', 'fastpix-io')
             );
         } elseif (!$this->stored) {
             // A candidate pair is one deliberate click (Connect / Verify): it goes
@@ -134,14 +134,14 @@ class Fastpix_Api_Client {
             // [ERR-037] Breaker open: fail immediately, do not spend a request.
             $error = new \WP_Error(
                 'fastpix_breaker_open',
-                __('FastPix is not responding. Requests are paused briefly.', 'fastpix'),
+                __('FastPix is not responding. Requests are paused briefly.', 'fastpix-io'),
                 array('retry_after' => $open_until - time())
             );
         } elseif (($pause_until = (int) get_transient(self::TRANSIENT_PAUSE)) > time()) {
             // [ERR-038] A 429 pauses the queue group; nothing new goes out until it lapses.
             $error = new \WP_Error(
                 'fastpix_rate_limited',
-                __('FastPix is rate limiting this site. Requests resume shortly.', 'fastpix'),
+                __('FastPix is rate limiting this site. Requests resume shortly.', 'fastpix-io'),
                 array('retry_after' => $pause_until - time())
             );
         }
@@ -272,7 +272,7 @@ class Fastpix_Api_Client {
 
             return new \WP_Error(
                 'fastpix_unreachable',
-                __('FastPix did not respond.', 'fastpix'),
+                __('FastPix did not respond.', 'fastpix-io'),
                 array('description' => $response->get_error_message())
             );
         }
@@ -334,32 +334,32 @@ class Fastpix_Api_Client {
         // A 403 whose description says the token lacks a *permission* is a valid
         // token that cannot do this one thing — not a dead connection. [ERR-005]
         if ($status === 403 && stripos((string) $description, 'permission') !== false) {
-            $out = $error('fastpix_forbidden', __('The access token does not have permission for this request.', 'fastpix'));
+            $out = $error('fastpix_forbidden', __('The access token does not have permission for this request.', 'fastpix-io'));
         } elseif ($status === 401 || $status === 403) {
             // Only the STORED pair can be unhealthy: a rejected candidate (Verify /
             // Update with a typo) says nothing about the pair the site runs on.
             if ($this->stored) {
                 $this->mark_unhealthy($status);
             }
-            $out = $error('fastpix_bad_credentials', __('FastPix rejected these credentials.', 'fastpix'));
+            $out = $error('fastpix_bad_credentials', __('FastPix rejected these credentials.', 'fastpix-io'));
         } elseif ($status === 429) {
             // 429: honour Retry-After and pause; the caller does not retry inline. [ERR-038]
             $retry_after = (int) wp_remote_retrieve_header($response, 'retry-after');
             $retry_after = $retry_after > 0 ? $retry_after : 60;
             set_transient(self::TRANSIENT_PAUSE, time() + $retry_after, $retry_after);
-            $out = $error('fastpix_rate_limited', __('FastPix is rate limiting this site.', 'fastpix'), array('retry_after' => $retry_after));
+            $out = $error('fastpix_rate_limited', __('FastPix is rate limiting this site.', 'fastpix-io'), array('retry_after' => $retry_after));
         } elseif ($status === 404) {
             // 404: the caller marks its row orphaned; sync decides, never this class. [ERR-040, RULE-021]
-            $out = $error('fastpix_not_found', __('FastPix has no such object.', 'fastpix'));
+            $out = $error('fastpix_not_found', __('FastPix has no such object.', 'fastpix-io'));
         } elseif ($status === 409) {
             // 409: the caller refetches and re-applies under §17 ownership rules. [ERR-039]
-            $out = $error('fastpix_conflict', __('This object changed on FastPix.', 'fastpix'));
+            $out = $error('fastpix_conflict', __('This object changed on FastPix.', 'fastpix-io'));
         } elseif ($status < 500) {
             // 400/422 and any other 4xx: no retry, the request itself is wrong.
-            $out = $error('fastpix_bad_request', __('FastPix refused the request.', 'fastpix'));
+            $out = $error('fastpix_bad_request', __('FastPix refused the request.', 'fastpix-io'));
         } else {
             $this->record_failure();
-            $out = $error('fastpix_server_error', __('FastPix is not responding.', 'fastpix'));
+            $out = $error('fastpix_server_error', __('FastPix is not responding.', 'fastpix-io'));
         }
 
         return $out;

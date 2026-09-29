@@ -41,8 +41,8 @@ class Fastpix_Menu_Gate {
      */
     public static function register() {
         add_menu_page(
-            __('FastPix', 'fastpix'),
-            __('FastPix', 'fastpix'),
+            __('FastPix', 'fastpix-io'),
+            __('FastPix', 'fastpix-io'),
             Fastpix_Capabilities::VIEW_VIDEOS,
             'fastpix-settings',
             array('\Fastpix\Fastpix_Library_Page', 'render'),
@@ -74,8 +74,8 @@ class Fastpix_Menu_Gate {
         remove_menu_page('fastpix-settings');
 
         add_menu_page(
-            __('FastPix', 'fastpix'),
-            __('FastPix', 'fastpix'),
+            __('FastPix', 'fastpix-io'),
+            __('FastPix', 'fastpix-io'),
             Fastpix_Capabilities::VIEW_VIDEOS,
             Fastpix_Onboarding::SLUG,
             array('\Fastpix\Fastpix_Onboarding', 'render'),

@@ -64,7 +64,7 @@ class Fastpix_Webhooks_Apply {
             Fastpix_Rate_Limiter::block('webhook_failures', $address);
         }
 
-        return new \WP_Error('fastpix_webhook_invalid', __('Invalid signature.', 'fastpix'), array('status' => 401));
+        return new \WP_Error('fastpix_webhook_invalid', __('Invalid signature.', 'fastpix-io'), array('status' => 401));
     }
 
     /**
@@ -309,7 +309,7 @@ class Fastpix_Webhooks_Apply {
      */
     public static function send_test_event() {   // NOSONAR php:S100 — WordPress snake_case naming
         if (!Fastpix_Webhooks::configured()) {
-            return new \WP_Error('fastpix_webhook_unconfigured', __('Save the signing secret first.', 'fastpix'), array('status' => 409));
+            return new \WP_Error('fastpix_webhook_unconfigured', __('Save the signing secret first.', 'fastpix-io'), array('status' => 409));
         }
         $payload = wp_json_encode(array('id' => 'test-' . wp_generate_password(8, false, false), 'type' => 'fastpix.plugin.test', 'workspaceId' => (string) get_option(Fastpix_Connection::OPT_WORKSPACE_ID, ''), 'data' => array('sentAt' => gmdate('c'))));
         $key = base64_decode(Fastpix_Webhooks::secret(), true) ?: Fastpix_Webhooks::secret();
@@ -319,7 +319,7 @@ class Fastpix_Webhooks_Apply {
         ));
         if (is_wp_error($res)) {
             /* translators: %s: transport error message */
-            return new \WP_Error('fastpix_test_unreachable', sprintf(__('This site could not reach its own webhook URL: %s', 'fastpix'), $res->get_error_message()), array('status' => 502));
+            return new \WP_Error('fastpix_test_unreachable', sprintf(__('This site could not reach its own webhook URL: %s', 'fastpix-io'), $res->get_error_message()), array('status' => 502));
         }
         $code = (int) wp_remote_retrieve_response_code($res);
 
@@ -344,7 +344,7 @@ class Fastpix_Webhooks_Apply {
             return array('sent' => false, 'reason' => $list->get_error_message());
         }
         if (empty($list['body']['data'][0]['id'])) {
-            return array('sent' => false, 'reason' => __('the workspace has no video yet', 'fastpix'));
+            return array('sent' => false, 'reason' => __('the workspace has no video yet', 'fastpix-io'));
         }
         $media = $list['body']['data'][0];
         $res   = $client->request('PATCH', '/on-demand/' . rawurlencode((string) $media['id']), array('body' => array('title' => (string) (isset($media['title']) ? $media['title'] : ''))));

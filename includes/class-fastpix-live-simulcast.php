@@ -37,7 +37,7 @@ class Fastpix_Live_Simulcast {
     public static function add($request) {
         $url = trim((string) $request->get_param('url'));
         if (!preg_match('#^rtmps?://.#i', $url)) {
-            return new \WP_Error('fastpix_simulcast_url', __('The target URL must start with rtmp:// or rtmps://.', 'fastpix'), array('status' => 400));
+            return new \WP_Error('fastpix_simulcast_url', __('The target URL must start with rtmp:// or rtmps://.', 'fastpix-io'), array('status' => 400));
         }
 
         $stream_id = (string) $request->get_param('id');

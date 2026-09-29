@@ -34,7 +34,7 @@ register_shutdown_function(function () use (&$saved, &$fixture_attachment) {
 // shipped default, and this run happens against the live site's tables.
 update_option('fastpix_delete_on_uninstall', false, false);
 if (!defined('WP_UNINSTALL_PLUGIN')) {
-    define('WP_UNINSTALL_PLUGIN', 'fastpix/fastpix-video-embed.php');
+    define('WP_UNINSTALL_PLUGIN', 'fastpix-io/fastpix-io.php');
 }
 define('FASTPIX_UNINSTALL_INSPECT', true);   // loading the file must not run it against this live site
 $tables_before = count($wpdb->get_col($wpdb->prepare('SHOW TABLES LIKE %s', $wpdb->esc_like($wpdb->prefix . 'fastpix_') . '%')));
@@ -83,7 +83,7 @@ assert(strpos($uninstall_src, 'actionscheduler_logs') !== false && strpos($unins
 
 // Deactivation registers exactly one job: unschedule everything. Nothing that
 // deletes data or edits posts hooks deactivation.
-$deactivate_hook = 'deactivate_' . plugin_basename(FASTPIX_PLUGIN_DIR . 'fastpix-video-embed.php');
+$deactivate_hook = 'deactivate_' . plugin_basename(FASTPIX_PLUGIN_DIR . 'fastpix-io.php');
 assert((bool) has_action($deactivate_hook, array(\Fastpix\Fastpix_Jobs::class, 'unschedule_all')));
 
 // Reactivation sweep: nothing without credentials; one deep sweep with them.
@@ -112,7 +112,7 @@ assert(strpos($readme, 'Action Scheduler') !== false);               // bundled 
 assert(strpos($readme, 'privacy-policy') !== false);
 assert(stripos($readme, 'delete-on-uninstall') !== false || stripos($readme, 'Delete plugin data on uninstall') !== false);
 
-$header = (string) file_get_contents(dirname(__DIR__) . '/fastpix-video-embed.php');
+$header = (string) file_get_contents(dirname(__DIR__) . '/fastpix-io.php');
 assert(strpos($header, 'Version: 2.0.0') !== false);
 assert(strpos($header, 'Requires at least: 6.8') !== false);
 assert(strpos($header, 'Requires PHP: 8.3') !== false);

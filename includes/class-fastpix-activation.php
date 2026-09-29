@@ -36,7 +36,7 @@ class Fastpix_Activation {
         $checks[] = self::check(
             'wordpress_version',
             /* translators: %s: minimum WordPress version */
-            sprintf(__('WordPress %s or newer', 'fastpix'), self::MIN_WP),
+            sprintf(__('WordPress %s or newer', 'fastpix-io'), self::MIN_WP),
             $wp_version,
             version_compare($wp_version, self::MIN_WP, '>=')
         );
@@ -44,7 +44,7 @@ class Fastpix_Activation {
         $checks[] = self::check(
             'php_version',
             /* translators: %s: minimum PHP version */
-            sprintf(__('PHP %s or newer', 'fastpix'), self::MIN_PHP),
+            sprintf(__('PHP %s or newer', 'fastpix-io'), self::MIN_PHP),
             PHP_VERSION,
             version_compare(PHP_VERSION, self::MIN_PHP, '>=')
         );
@@ -57,9 +57,9 @@ class Fastpix_Activation {
 
         $https = self::check(
             'https',
-            __('A secure connection (HTTPS)', 'fastpix'),
+            __('A secure connection (HTTPS)', 'fastpix-io'),
             /* translators: 1: URL scheme found, 2: environment type */
-            $exempt ? sprintf(__('%1$s (exempt: %2$s environment)', 'fastpix'), $scheme, $environment) : $scheme,
+            $exempt ? sprintf(__('%1$s (exempt: %2$s environment)', 'fastpix-io'), $scheme, $environment) : $scheme,
             $exempt || 'https' === $scheme
         );
         // Advisory, never a blocker (owner ruling 2026-09-01): playback works on
@@ -101,10 +101,10 @@ class Fastpix_Activation {
         // would leave subsites without capabilities (broken cap-gated menus/REST).
         // Refuse it with guidance rather than half-installing.
         if (is_multisite() && $network_wide) {
-            deactivate_plugins(plugin_basename(FASTPIX_PLUGIN_DIR . 'fastpix-video-embed.php'), false, true);
+            deactivate_plugins(plugin_basename(FASTPIX_PLUGIN_DIR . 'fastpix-io.php'), false, true);
             wp_die(
-                esc_html__('FastPix does not support network activation. Please activate it on each site individually.', 'fastpix'),
-                esc_html__('Network activation is not supported', 'fastpix'),
+                esc_html__('FastPix does not support network activation. Please activate it on each site individually.', 'fastpix-io'),
+                esc_html__('Network activation is not supported', 'fastpix-io'),
                 array('back_link' => true)
             );
         }
@@ -112,21 +112,21 @@ class Fastpix_Activation {
         $failures = self::failures();
 
         if ($failures) {
-            deactivate_plugins(plugin_basename(FASTPIX_PLUGIN_DIR . 'fastpix-video-embed.php'));
+            deactivate_plugins(plugin_basename(FASTPIX_PLUGIN_DIR . 'fastpix-io.php'));
 
             $lines = array_map(function ($check) {
                 return sprintf(
                     /* translators: 1: requirement, 2: value found */
-                    esc_html__('%1$s — found: %2$s', 'fastpix'),
+                    esc_html__('%1$s — found: %2$s', 'fastpix-io'),
                     $check['requirement'],
                     $check['found']
                 );
             }, $failures);
 
             wp_die(
-                '<h1>' . esc_html__('FastPix cannot be activated yet', 'fastpix') . '</h1><ul><li>'
+                '<h1>' . esc_html__('FastPix cannot be activated yet', 'fastpix-io') . '</h1><ul><li>'
                     . implode('</li><li>', array_map('esc_html', $lines)) . '</li></ul>',
-                esc_html__('Plugin activation refused', 'fastpix'),
+                esc_html__('Plugin activation refused', 'fastpix-io'),
                 array('back_link' => true)
             );
         }
@@ -178,11 +178,11 @@ class Fastpix_Activation {
             'database',
             sprintf(
                 /* translators: 1: database engine name, 2: minimum version */
-                __('%1$s %2$s or newer, with InnoDB and FULLTEXT', 'fastpix'),
+                __('%1$s %2$s or newer, with InnoDB and FULLTEXT', 'fastpix-io'),
                 $is_mariadb ? 'MariaDB' : 'MySQL',
                 $minimum
             ),
-            $server . ($has_innodb ? '' : __(' (no InnoDB)', 'fastpix')),
+            $server . ($has_innodb ? '' : __(' (no InnoDB)', 'fastpix-io')),
             $ok
         );
     }
@@ -212,11 +212,11 @@ class Fastpix_Activation {
         $ok    = !is_wp_error($response);
         $found = $ok
             /* translators: 1: HTTP status code, 2: URL */
-            ? sprintf(__('HTTP %1$d from %2$s', 'fastpix'), wp_remote_retrieve_response_code($response), $url)
+            ? sprintf(__('HTTP %1$d from %2$s', 'fastpix-io'), wp_remote_retrieve_response_code($response), $url)
             : $response->get_error_message();
 
         /* translators: %s: URL */
-        $check = self::check('outbound', sprintf(__('Outbound connectivity to %s', 'fastpix'), $url), $found, $ok);
+        $check = self::check('outbound', sprintf(__('Outbound connectivity to %s', 'fastpix-io'), $url), $found, $ok);
         set_transient('fastpix_check_outbound', $check, self::CHECK_CACHE_TTL);
         return $check;
     }
@@ -243,9 +243,9 @@ class Fastpix_Activation {
 
         $check = self::check(
             'rest_api',
-            __('A reachable WordPress REST API', 'fastpix'),
+            __('A reachable WordPress REST API', 'fastpix-io'),
             /* translators: 1: HTTP status code, 2: URL */
-            is_wp_error($response) ? $response->get_error_message() : sprintf(__('HTTP %1$d from %2$s', 'fastpix'), $status, $url),
+            is_wp_error($response) ? $response->get_error_message() : sprintf(__('HTTP %1$d from %2$s', 'fastpix-io'), $status, $url),
             $ok
         );
         $check['fatal'] = false;
@@ -276,8 +276,8 @@ class Fastpix_Activation {
 
         $check = self::check(
             'plugin_conflict',
-            __('No conflicting video plugin claiming the same content', 'fastpix'),
-            $found ? implode(', ', $found) : __('none detected', 'fastpix'),
+            __('No conflicting video plugin claiming the same content', 'fastpix-io'),
+            $found ? implode(', ', $found) : __('none detected', 'fastpix-io'),
             empty($found)
         );
         $check['fatal'] = false;   // AMBIG-001 — advisory until the list exists.

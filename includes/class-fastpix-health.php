@@ -63,69 +63,69 @@ class Fastpix_Health {
 
         // 3. Webhook delivery. Unconfigured is polling mode, stated plainly. [ERR-035]
         if (!get_option(self::OPT_WEBHOOK_SECRET)) {
-            $checks['webhook_delivery'] = self::c(__('FastPix webhooks', 'fastpix'), 'recommended',
-                __('Webhooks are not configured yet, so video state can be up to 15 minutes behind. Configure the receiver URL and signing secret in the FastPix dashboard.', 'fastpix'));
+            $checks['webhook_delivery'] = self::c(__('FastPix webhooks', 'fastpix-io'), 'recommended',
+                __('Webhooks are not configured yet, so video state can be up to 15 minutes behind. Configure the receiver URL and signing secret in the FastPix dashboard.', 'fastpix-io'));
         } else {
-            $checks['webhook_delivery'] = self::c(__('FastPix webhooks', 'fastpix'), 'good',
-                __('The webhook receiver is configured.', 'fastpix'));
+            $checks['webhook_delivery'] = self::c(__('FastPix webhooks', 'fastpix-io'), 'good',
+                __('The webhook receiver is configured.', 'fastpix-io'));
         }
 
         // 4. Signing (needed the moment a video is private).
         if (!get_option(self::OPT_SIGNING_KEY)) {
-            $checks['signing'] = self::c(__('FastPix playback signing', 'fastpix'), 'recommended',
-                __('No playback signing key is configured. Public video plays; private video will need one.', 'fastpix'));
+            $checks['signing'] = self::c(__('FastPix playback signing', 'fastpix-io'), 'recommended',
+                __('No playback signing key is configured. Public video plays; private video will need one.', 'fastpix-io'));
         } else {
-            $checks['signing'] = self::c(__('FastPix playback signing', 'fastpix'), 'good',
-                __('A playback signing key is configured.', 'fastpix'));
+            $checks['signing'] = self::c(__('FastPix playback signing', 'fastpix-io'), 'good',
+                __('A playback signing key is configured.', 'fastpix-io'));
         }
 
         // 4b. DRM configuration — ERR-061: a render found it no longer resolves.
         $drm_bad = get_option(Fastpix_Render::OPT_DRM_BAD);
         if (is_array($drm_bad)) {
-            $checks['drm'] = self::c(__('FastPix DRM configuration', 'fastpix'), 'critical',
+            $checks['drm'] = self::c(__('FastPix DRM configuration', 'fastpix-io'), 'critical',
                 /* translators: %s: media id */
-                sprintf(__('A DRM video (%s) could not play: its DRM configuration no longer resolves. Set the DRM configuration ID under FastPix → Settings, or change the video\'s policy.', 'fastpix'), (string) $drm_bad['media_id']));
+                sprintf(__('A DRM video (%s) could not play: its DRM configuration no longer resolves. Set the DRM configuration ID under FastPix → Settings, or change the video\'s policy.', 'fastpix-io'), (string) $drm_bad['media_id']));
         }
 
         // 5. Schema version.
         if (Fastpix_Schema::needs_update()) {
-            $checks['schema_version'] = self::c(__('FastPix database schema', 'fastpix'), 'critical',
+            $checks['schema_version'] = self::c(__('FastPix database schema', 'fastpix-io'), 'critical',
                 /* translators: 1: current schema version, 2: expected schema version */
-                sprintf(__('The schema is at v%1$d but v%2$d is expected. A migration has not run or has failed.', 'fastpix'),
+                sprintf(__('The schema is at v%1$d but v%2$d is expected. A migration has not run or has failed.', 'fastpix-io'),
                     Fastpix_Schema::current_version(), Fastpix_Schema::target_version()));
         } elseif (get_option(Fastpix_Schema::OPT_FAILED)) {
             $failed = get_option(Fastpix_Schema::OPT_FAILED);
-            $checks['schema_version'] = self::c(__('FastPix database schema', 'fastpix'), 'critical',
+            $checks['schema_version'] = self::c(__('FastPix database schema', 'fastpix-io'), 'critical',
                 /* translators: %s: comma-separated table names */
-                sprintf(__('A schema migration failed; these tables are read-only: %s', 'fastpix'), implode(', ', (array) $failed['tables'])));
+                sprintf(__('A schema migration failed; these tables are read-only: %s', 'fastpix-io'), implode(', ', (array) $failed['tables'])));
         } else {
-            $checks['schema_version'] = self::c(__('FastPix database schema', 'fastpix'), 'good',
+            $checks['schema_version'] = self::c(__('FastPix database schema', 'fastpix-io'), 'good',
                 /* translators: %d: schema version */
-                sprintf(__('Schema v%d, current.', 'fastpix'), Fastpix_Schema::current_version()));
+                sprintf(__('Schema v%d, current.', 'fastpix-io'), Fastpix_Schema::current_version()));
         }
 
         // 6. Object cache.
         $checks['object_cache'] = Fastpix_Cache::using_object_cache()
-            ? self::c(__('FastPix object cache', 'fastpix'), 'good', __('A persistent object cache is in use.', 'fastpix'))
-            : self::c(__('FastPix object cache', 'fastpix'), 'recommended',
-                __('No persistent object cache; the plugin falls back to transients. Fine for small sites, slower for large libraries.', 'fastpix'));
+            ? self::c(__('FastPix object cache', 'fastpix-io'), 'good', __('A persistent object cache is in use.', 'fastpix-io'))
+            : self::c(__('FastPix object cache', 'fastpix-io'), 'recommended',
+                __('No persistent object cache; the plugin falls back to transients. Fine for small sites, slower for large libraries.', 'fastpix-io'));
 
         // 7. Detected page cache — signed output must never be cached. [ARCH-09]
         $page_cache = self::detected_page_cache();
         $checks['page_cache'] = $page_cache
-            ? self::c(__('FastPix page cache compatibility', 'fastpix'), 'recommended',
+            ? self::c(__('FastPix page cache compatibility', 'fastpix-io'), 'recommended',
                 /* translators: %s: page cache plugin name */
-                sprintf(__('A page cache is detected (%s). Pages with private video must be excluded from it; the plugin sends DONOTCACHEPAGE, but full-page caches configured at the edge cannot see that header.', 'fastpix'), $page_cache))
-            : self::c(__('FastPix page cache compatibility', 'fastpix'), 'good', __('No page cache detected.', 'fastpix'));
+                sprintf(__('A page cache is detected (%s). Pages with private video must be excluded from it; the plugin sends DONOTCACHEPAGE, but full-page caches configured at the edge cannot see that header.', 'fastpix-io'), $page_cache))
+            : self::c(__('FastPix page cache compatibility', 'fastpix-io'), 'good', __('No page cache detected.', 'fastpix-io'));
 
         // 7b. Proxy/CDN in front of the site that the rate limiter does not know
         // about: every viewer then shares one address bucket. Only while detected.
         $dominant = Fastpix_Rate_Limiter::dominant_address();
         if ($dominant && $dominant['share'] > 0.9) {
-            $checks['proxy'] = self::c(__('FastPix rate limiting behind a proxy', 'fastpix'), 'recommended',
+            $checks['proxy'] = self::c(__('FastPix rate limiting behind a proxy', 'fastpix-io'), 'recommended',
                 sprintf(
                     /* translators: 1: percentage, 2: IP address */
-                    __('%1$d%% of recent player and webhook requests arrived from one address (%2$s), which looks like a reverse proxy or CDN. Add define(\'FASTPIX_TRUSTED_PROXIES\', \'%2$s\') to wp-config.php so rate limits apply per visitor instead of to everyone at once.', 'fastpix'),
+                    __('%1$d%% of recent player and webhook requests arrived from one address (%2$s), which looks like a reverse proxy or CDN. Add define(\'FASTPIX_TRUSTED_PROXIES\', \'%2$s\') to wp-config.php so rate limits apply per visitor instead of to everyone at once.', 'fastpix-io'),
                     (int) round($dominant['share'] * 100), $dominant['address']
                 ));
         }
@@ -139,11 +139,11 @@ class Fastpix_Health {
         // 8. Environment.
         $unmet = array_filter(Fastpix_Activation::checks(), function ($check) { return !$check['ok']; });
         $checks['environment'] = $unmet
-            ? self::c(__('FastPix environment', 'fastpix'), 'recommended',
+            ? self::c(__('FastPix environment', 'fastpix-io'), 'recommended',
                 implode(' · ', array_map(function ($check) {
                     return sprintf('%s — found: %s', $check['requirement'], $check['found']);
                 }, $unmet)))
-            : self::c(__('FastPix environment', 'fastpix'), 'good', __('Every environment requirement is met.', 'fastpix'));
+            : self::c(__('FastPix environment', 'fastpix-io'), 'good', __('Every environment requirement is met.', 'fastpix-io'));
 
         return $checks;
     }
@@ -237,18 +237,18 @@ class Fastpix_Health {
     /** Check 1 — the credential pair and whether the platform accepts it. */
     private static function connection_check() {
         if (!Fastpix_Credentials::has_pair()) {
-            return self::c(__('FastPix connection', 'fastpix'), 'recommended',
-                __('This site is not connected to FastPix. Run the setup wizard from the Connection screen.', 'fastpix'));
+            return self::c(__('FastPix connection', 'fastpix-io'), 'recommended',
+                __('This site is not connected to FastPix. Run the setup wizard from the Connection screen.', 'fastpix-io'));
         }
         if (Fastpix_Credentials::is_unreadable()) {
-            return self::c(__('FastPix connection', 'fastpix'), 'critical',
-                __('The stored Secret Key can no longer be read — the site security keys may have been rotated. Re-enter the credential pair.', 'fastpix'));
+            return self::c(__('FastPix connection', 'fastpix-io'), 'critical',
+                __('The stored Secret Key can no longer be read — the site security keys may have been rotated. Re-enter the credential pair.', 'fastpix-io'));
         }
 
         return Fastpix_Api_Client::is_healthy()
-            ? self::c(__('FastPix connection', 'fastpix'), 'good', __('Connected and healthy.', 'fastpix'))
-            : self::c(__('FastPix connection', 'fastpix'), 'critical',
-                __('FastPix rejected the stored credentials. Playback of existing pages continues; new work is paused until the pair is re-entered or rotated.', 'fastpix'));
+            ? self::c(__('FastPix connection', 'fastpix-io'), 'good', __('Connected and healthy.', 'fastpix-io'))
+            : self::c(__('FastPix connection', 'fastpix-io'), 'critical',
+                __('FastPix rejected the stored credentials. Playback of existing pages continues; new work is paused until the pair is re-entered or rotated.', 'fastpix-io'));
     }
 
     /**
@@ -283,28 +283,28 @@ class Fastpix_Health {
         }
 
         return $views > 0
-            ? self::c(__('FastPix analytics collection', 'fastpix'), 'good', __('Videos are being watched and FastPix is reporting views.', 'fastpix'))
-            : self::c(__('FastPix analytics collection', 'fastpix'), 'recommended',
+            ? self::c(__('FastPix analytics collection', 'fastpix-io'), 'good', __('Videos are being watched and FastPix is reporting views.', 'fastpix-io'))
+            : self::c(__('FastPix analytics collection', 'fastpix-io'), 'recommended',
                 /* translators: %d: number of watch-progress records */
-                sprintf(__('Players were watched on this site in the last 7 days (%d watch-progress records), but FastPix reported no views for the same days. The player\'s analytics beacons are probably being rejected: check that the Workspace key under FastPix → Settings is the one the FastPix dashboard shows for this workspace, and that the workspace has FastPix Data enabled.', 'fastpix'), $plays));
+                sprintf(__('Players were watched on this site in the last 7 days (%d watch-progress records), but FastPix reported no views for the same days. The player\'s analytics beacons are probably being rejected: check that the Workspace key under FastPix → Settings is the one the FastPix dashboard shows for this workspace, and that the workspace has FastPix Data enabled.', 'fastpix-io'), $plays));
     }
 
     /** Check 2 — the queue exists, is moving, and the deep sweep completes. */
     private static function scheduler_check() {
         $stalled = get_option(Fastpix_Jobs::OPT_STALLED);
         if (!Fastpix_Jobs::available()) {
-            return self::c(__('FastPix background work', 'fastpix'), 'critical',
-                __('Action Scheduler is not loaded, so no background work can run.', 'fastpix'));
+            return self::c(__('FastPix background work', 'fastpix-io'), 'critical',
+                __('Action Scheduler is not loaded, so no background work can run.', 'fastpix-io'));
         }
         if ($stalled) {
-            return self::c(__('FastPix background work', 'fastpix'), 'critical', $stalled['message']);
+            return self::c(__('FastPix background work', 'fastpix-io'), 'critical', $stalled['message']);
         }
 
         // FR-101: no completed deep sweep for 7 days is a health failure.
         return self::deep_sweep_overdue()
-            ? self::c(__('FastPix background work', 'fastpix'), 'critical',
-                __('The nightly deep sweep has not completed in over 7 days, so local video records may be drifting from the platform.', 'fastpix'))
-            : self::c(__('FastPix background work', 'fastpix'), 'good', __('The job queue is running.', 'fastpix'));
+            ? self::c(__('FastPix background work', 'fastpix-io'), 'critical',
+                __('The nightly deep sweep has not completed in over 7 days, so local video records may be drifting from the platform.', 'fastpix-io'))
+            : self::c(__('FastPix background work', 'fastpix-io'), 'good', __('The job queue is running.', 'fastpix-io'));
     }
 
     private static function c($label, $status, $description) {

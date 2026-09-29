@@ -47,8 +47,8 @@ class Fastpix_Onboarding {
         if (Fastpix_Connection::workspace_ready()) {
             $hook = add_submenu_page(
                 '',   // no parent: reachable at admin.php?page=fastpix-connection, listed nowhere
-                __('Connection', 'fastpix'),
-                __('Connection', 'fastpix'),
+                __('Connection', 'fastpix-io'),
+                __('Connection', 'fastpix-io'),
                 Fastpix_Capabilities::VIEW_VIDEOS,
                 self::SLUG,
                 array(__CLASS__, 'render')
@@ -56,7 +56,7 @@ class Fastpix_Onboarding {
             // A parentless page has no menu row for get_admin_page_title() to read,
             // so the tab title came out empty ("‹ Site"); name it before the header.
             if ($hook) {
-                add_action('load-' . $hook, function () { $GLOBALS['title'] = __('Connection', 'fastpix'); });
+                add_action('load-' . $hook, function () { $GLOBALS['title'] = __('Connection', 'fastpix-io'); });
             }
 
             return;
@@ -64,8 +64,8 @@ class Fastpix_Onboarding {
 
         add_submenu_page(
             'fastpix-settings',
-            __('Connection', 'fastpix'),
-            __('Connection', 'fastpix'),
+            __('Connection', 'fastpix-io'),
+            __('Connection', 'fastpix-io'),
             // Menu visibility is never authorisation [SEC-011]: the page itself
             // branches on fastpix_manage_settings; view-capability holders reach
             // the restricted view by URL.
@@ -103,55 +103,55 @@ class Fastpix_Onboarding {
             'nonce'      => wp_create_nonce('wp_rest'),
             'libraryUrl' => admin_url('admin.php?page=fastpix-video-library'),
             'i18n'       => array(
-                'bothRequired'  => __('Both values required', 'fastpix'),
-                'oneToGo'       => __('One value to go', 'fastpix'),
-                'pairComplete'  => __('Pair complete', 'fastpix'),
-                'enterSecret'   => __('Enter your secret key again to update', 'fastpix'),
-                'checking'      => __('Checking…', 'fastpix'),
-                'notSaved'      => __('Nothing is saved yet', 'fastpix'),
-                'savedWorking'  => __('Saved and working', 'fastpix'),
-                'show'          => __('Show', 'fastpix'),
-                'hide'          => __('Hide', 'fastpix'),
-                'copyReport'    => __('Copy system report', 'fastpix'),
-                'reportCopied'  => __('System report copied.', 'fastpix'),
-                'unknownError'  => __('Something went wrong. The connection was not changed.', 'fastpix'),
+                'bothRequired'  => __('Both values required', 'fastpix-io'),
+                'oneToGo'       => __('One value to go', 'fastpix-io'),
+                'pairComplete'  => __('Pair complete', 'fastpix-io'),
+                'enterSecret'   => __('Enter your secret key again to update', 'fastpix-io'),
+                'checking'      => __('Checking…', 'fastpix-io'),
+                'notSaved'      => __('Nothing is saved yet', 'fastpix-io'),
+                'savedWorking'  => __('Saved and working', 'fastpix-io'),
+                'show'          => __('Show', 'fastpix-io'),
+                'hide'          => __('Hide', 'fastpix-io'),
+                'copyReport'    => __('Copy system report', 'fastpix-io'),
+                'reportCopied'  => __('System report copied.', 'fastpix-io'),
+                'unknownError'  => __('Something went wrong. The connection was not changed.', 'fastpix-io'),
                 // FR-002 unreachable state: a server-side reachability problem,
                 // distinct from wrong credentials.
-                'unreachableTitle' => __('FastPix could not be reached', 'fastpix'),
-                'unreachableBody'  => __('Your keys were not checked because this server could not reach FastPix. A firewall or proxy may be blocking outbound HTTPS to api.fastpix.com — confirm outbound access and try again. If it persists, copy the system report for support.', 'fastpix'),
-                'invalidCredentials' => __('Invalid credentials', 'fastpix'),
-                'unreachableShort' => __('FastPix did not respond — check again in a moment', 'fastpix'),
-                'notAccepted'      => __('Not accepted', 'fastpix'),
-                'connected'        => __('Connected', 'fastpix'),
-                'update'           => __('Update', 'fastpix'),
-                'connect'          => __('Connect', 'fastpix'),
-                'saveWsFirst'      => __('Save the workspace ID first', 'fastpix'),
-                'wsHint'           => __('Copy the workspace key exactly from the Workspaces page of the FastPix dashboard.', 'fastpix'),
-                'wsRejected'       => __('That workspace ID was not accepted.', 'fastpix'),
-                'saved'            => __('Saved', 'fastpix'),
-                'copied'           => __('Copied', 'fastpix'),
-                'copy'             => __('Copy', 'fastpix'),
-                'configured'       => __('Configured', 'fastpix'),
-                'whVerified'       => __('Receiver reachable. Not verified — waiting for FastPix’s next event to confirm this secret…', 'fastpix'),
+                'unreachableTitle' => __('FastPix could not be reached', 'fastpix-io'),
+                'unreachableBody'  => __('Your keys were not checked because this server could not reach FastPix. A firewall or proxy may be blocking outbound HTTPS to api.fastpix.com — confirm outbound access and try again. If it persists, copy the system report for support.', 'fastpix-io'),
+                'invalidCredentials' => __('Invalid credentials', 'fastpix-io'),
+                'unreachableShort' => __('FastPix did not respond — check again in a moment', 'fastpix-io'),
+                'notAccepted'      => __('Not accepted', 'fastpix-io'),
+                'connected'        => __('Connected', 'fastpix-io'),
+                'update'           => __('Update', 'fastpix-io'),
+                'connect'          => __('Connect', 'fastpix-io'),
+                'saveWsFirst'      => __('Save the workspace ID first', 'fastpix-io'),
+                'wsHint'           => __('Copy the workspace key exactly from the Workspaces page of the FastPix dashboard.', 'fastpix-io'),
+                'wsRejected'       => __('That workspace ID was not accepted.', 'fastpix-io'),
+                'saved'            => __('Saved', 'fastpix-io'),
+                'copied'           => __('Copied', 'fastpix-io'),
+                'copy'             => __('Copy', 'fastpix-io'),
+                'configured'       => __('Configured', 'fastpix-io'),
+                'whVerified'       => __('Receiver reachable. Not verified — waiting for FastPix’s next event to confirm this secret…', 'fastpix-io'),
                 /* translators: %s: why FastPix could not be asked for a delivery */
-                'whNoNudge'        => __('FastPix could not be asked for a delivery (%s) — its next event will confirm it.', 'fastpix'),
-                'whRejected'       => __('Not verified — this secret does not match the one on the endpoint in the FastPix dashboard. Paste it again.', 'fastpix'),
+                'whNoNudge'        => __('FastPix could not be asked for a delivery (%s) — its next event will confirm it.', 'fastpix-io'),
+                'whRejected'       => __('Not verified — this secret does not match the one on the endpoint in the FastPix dashboard. Paste it again.', 'fastpix-io'),
                 /* translators: %d: HTTP status code */
-                'whNotVerified'    => __('Not verified — the receiver answered HTTP %d', 'fastpix'),
-                'couldNotSave'     => __('Could not save.', 'fastpix'),
-                'whSavedVerifying' => __('Saved — verifying…', 'fastpix'),
+                'whNotVerified'    => __('Not verified — the receiver answered HTTP %d', 'fastpix-io'),
+                'couldNotSave'     => __('Could not save.', 'fastpix-io'),
+                'whSavedVerifying' => __('Saved — verifying…', 'fastpix-io'),
                 /* translators: %s: the delivered event type */
-                'whVerifiedDelivered' => __('Verified — FastPix delivered %s', 'fastpix'),
+                'whVerifiedDelivered' => __('Verified — FastPix delivered %s', 'fastpix-io'),
                 /* translators: %s: workspace name */
-                'whForWorkspace'   => __(' for workspace “%s”', 'fastpix'),
-                'whSkipped'        => __('Skipped — save the workspace ID to finish', 'fastpix'),
+                'whForWorkspace'   => __(' for workspace “%s”', 'fastpix-io'),
+                'whSkipped'        => __('Skipped — save the workspace ID to finish', 'fastpix-io'),
             ),
         ));
     }
 
     public static function render() {
         if (!current_user_can(Fastpix_Capabilities::VIEW_VIDEOS) && !current_user_can(Fastpix_Capabilities::MANAGE_SETTINGS)) {
-            wp_die(esc_html__('Your role cannot view this screen.', 'fastpix'));
+            wp_die(esc_html__('Your role cannot view this screen.', 'fastpix-io'));
         }
 
         // Owner ruling 2026-09-23 (as on Settings): the person who entered these may read and edit

@@ -217,12 +217,12 @@ class Fastpix_Progress {
     private static function write_guards($request) {
         // Guard: body size. Refused before anything is parsed further.
         if (strlen((string) $request->get_body()) > self::MAX_BODY_BYTES) {
-            return new \WP_Error('fastpix_payload_too_large', __('Request too large.', 'fastpix'), array('status' => 413));
+            return new \WP_Error('fastpix_payload_too_large', __('Request too large.', 'fastpix-io'), array('status' => 413));
         }
 
         $viewer = self::viewer_key($request);
         if ($viewer === null) {
-            return new \WP_Error('fastpix_no_viewer', __('No viewer reference.', 'fastpix'), array('status' => 400));
+            return new \WP_Error('fastpix_no_viewer', __('No viewer reference.', 'fastpix-io'), array('status' => 400));
         }
 
         $video_id = (int) $request->get_param('video');
@@ -269,7 +269,7 @@ class Fastpix_Progress {
         $duration = (float) $video['duration_seconds'];
         $position = (float) $request->get_param('position');
         if ($duration <= 0 || $position > $duration + 2) {
-            return new \WP_Error('fastpix_bad_position', __('Position is outside this video.', 'fastpix'), array('status' => 400));
+            return new \WP_Error('fastpix_bad_position', __('Position is outside this video.', 'fastpix-io'), array('status' => 400));
         }
 
         return array(
@@ -318,7 +318,7 @@ class Fastpix_Progress {
         ), ARRAY_A);
 
         if (!$video) {
-            return new \WP_Error('fastpix_video_missing', __('No such video.', 'fastpix'), array('status' => 404));
+            return new \WP_Error('fastpix_video_missing', __('No such video.', 'fastpix-io'), array('status' => 404));
         }
 
         if (current_user_can(Fastpix_Capabilities::VIEW_VIDEOS)) {
@@ -333,7 +333,7 @@ class Fastpix_Progress {
         ));
 
         return $published === 0
-            ? new \WP_Error('fastpix_not_published', __('This video is not published here.', 'fastpix'), array('status' => 403))
+            ? new \WP_Error('fastpix_not_published', __('This video is not published here.', 'fastpix-io'), array('status' => 403))
             : $video;
     }
 
@@ -365,14 +365,14 @@ class Fastpix_Progress {
             return;
         }
 
-        wp_add_privacy_policy_content(__('FastPix Video', 'fastpix'), wp_kses_post(wpautop(
-            __('When a visitor watches a video and has given analytics consent, this site stores a watch-progress record: how far they got and which parts they watched, so playback can resume and completion can be recognised. Visitors are identified by a pseudonymous random reference kept in their own browser (not a cookie); logged-in viewers are identified by their account. Records are kept for 12 months after the last activity, then deleted. Aggregate viewing figures are provided by FastPix; the per-viewer progress records never leave this site. Watch-progress records are included in personal data exports and erased on request.', 'fastpix')
+        wp_add_privacy_policy_content(__('FastPix Video', 'fastpix-io'), wp_kses_post(wpautop(
+            __('When a visitor watches a video and has given analytics consent, this site stores a watch-progress record: how far they got and which parts they watched, so playback can resume and completion can be recognised. Visitors are identified by a pseudonymous random reference kept in their own browser (not a cookie); logged-in viewers are identified by their account. Records are kept for 12 months after the last activity, then deleted. Aggregate viewing figures are provided by FastPix; the per-viewer progress records never leave this site. Watch-progress records are included in personal data exports and erased on request.', 'fastpix-io')
         )));
     }
 
     public static function register_exporter($exporters) {
         $exporters['fastpix-watch-progress'] = array(
-            'exporter_friendly_name' => __('FastPix watch progress', 'fastpix'),
+            'exporter_friendly_name' => __('FastPix watch progress', 'fastpix-io'),
             'callback'               => array(__CLASS__, 'export_personal_data'),
         );
 
@@ -381,7 +381,7 @@ class Fastpix_Progress {
 
     public static function register_eraser($erasers) {
         $erasers['fastpix-watch-progress'] = array(
-            'eraser_friendly_name' => __('FastPix watch progress', 'fastpix'),
+            'eraser_friendly_name' => __('FastPix watch progress', 'fastpix-io'),
             'callback'             => array(__CLASS__, 'erase_personal_data'),
         );
 
@@ -411,14 +411,14 @@ class Fastpix_Progress {
         foreach (self::user_rows($email) as $row) {
             $items[] = array(
                 'group_id'    => 'fastpix-watch-progress',
-                'group_label' => __('FastPix watch progress', 'fastpix'),
+                'group_label' => __('FastPix watch progress', 'fastpix-io'),
                 'item_id'     => 'fastpix-watch-progress-' . $row['id'],
                 'data'        => array(
-                    array('name' => __('Video', 'fastpix'), 'value' => (string) $row['title']),
-                    array('name' => __('Furthest point reached', 'fastpix'), 'value' => $row['furthest_seconds'] . ' s'),
-                    array('name' => __('Seconds watched', 'fastpix'), 'value' => (string) $row['covered_seconds']),
-                    array('name' => __('Completed', 'fastpix'), 'value' => $row['completed_at'] ? $row['completed_at'] : __('No', 'fastpix')),
-                    array('name' => __('Last activity', 'fastpix'), 'value' => (string) $row['last_seen_at']),
+                    array('name' => __('Video', 'fastpix-io'), 'value' => (string) $row['title']),
+                    array('name' => __('Furthest point reached', 'fastpix-io'), 'value' => $row['furthest_seconds'] . ' s'),
+                    array('name' => __('Seconds watched', 'fastpix-io'), 'value' => (string) $row['covered_seconds']),
+                    array('name' => __('Completed', 'fastpix-io'), 'value' => $row['completed_at'] ? $row['completed_at'] : __('No', 'fastpix-io')),
+                    array('name' => __('Last activity', 'fastpix-io'), 'value' => (string) $row['last_seen_at']),
                 ),
             );
         }

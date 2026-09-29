@@ -35,8 +35,8 @@ class Fastpix_Library_Page {
 
         add_submenu_page(
             'fastpix-settings',
-            __('Videos', 'fastpix'),
-            __('Videos', 'fastpix'),
+            __('Videos', 'fastpix-io'),
+            __('Videos', 'fastpix-io'),
             Fastpix_Capabilities::VIEW_VIDEOS,
             self::SLUG,
             array(__CLASS__, 'render'),
@@ -59,7 +59,7 @@ class Fastpix_Library_Page {
             trim((string) @file_get_contents(FASTPIX_PLUGIN_DIR . 'assets/vendor/fastpix-player.VERSION.txt')) ?: '1', true);
         wp_enqueue_style('fastpix-dialog');
         wp_enqueue_script('fastpix-library-page', FASTPIX_PLUGIN_URL . 'assets/js/library-page.js', array('fastpix-player', 'fastpix-dialog', 'wp-i18n'), fastpix_asset_ver('assets/js/library-page.js'), true);
-        wp_set_script_translations('fastpix-library-page', 'fastpix');   // the screen's strings go through wp.i18n [QA L25]
+        wp_set_script_translations('fastpix-library-page', 'fastpix-io');   // the screen's strings go through wp.i18n [QA L25]
 
         wp_localize_script('fastpix-library-page', 'fastpixLibrary', array(
             'restUrl'  => esc_url_raw(rest_url(Fastpix_Rest::NS)),

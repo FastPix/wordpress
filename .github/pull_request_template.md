@@ -11,7 +11,7 @@
 
 ## Area(s) Affected
 
-- [ ] Plugin bootstrap / activation / deactivation (`fastpix-video-embed.php`, `class-fastpix-activation.php`, `class-fastpix-deactivate.php`)
+- [ ] Plugin bootstrap / activation / deactivation (`fastpix-io.php`, `class-fastpix-activation.php`, `class-fastpix-deactivate.php`)
 - [ ] API client (`class-fastpix-api-client.php`)
 - [ ] Connection / credentials (`class-fastpix-connection.php`, `class-fastpix-credentials.php`)
 - [ ] REST routes (`class-fastpix-rest*.php`, `class-fastpix-videos-rest.php`)

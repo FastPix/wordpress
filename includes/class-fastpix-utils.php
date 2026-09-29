@@ -125,13 +125,13 @@ class Fastpix_Utils {
         
         // Fallback if file doesn't exist
         return array(
-            'title' => __('Instructions', 'fastpix'),
+            'title' => __('Instructions', 'fastpix-io'),
             'items' => array(
-                __('The FastPix Video API uses a token key pair that consists of an Access Token ID and Secret Key for authentication.', 'fastpix'),
-                __('Enable automatic subtitles in multiple languages or upload your own custom subtitle files (VTT, SRT).', 'fastpix'),
-                __('MP4 generation can be enabled for offline viewing or downloads. Choose highest resolution or audio-only options based on your needs.', 'fastpix'),
-                __('Once uploaded, copy the generated shortcode to embed videos anywhere in your WordPress site.', 'fastpix'),
-                __('Monitor your video status and manage all uploaded videos from the Video List page. Videos may take a few moments to process after upload.', 'fastpix')
+                __('The FastPix Video API uses a token key pair that consists of an Access Token ID and Secret Key for authentication.', 'fastpix-io'),
+                __('Enable automatic subtitles in multiple languages or upload your own custom subtitle files (VTT, SRT).', 'fastpix-io'),
+                __('MP4 generation can be enabled for offline viewing or downloads. Choose highest resolution or audio-only options based on your needs.', 'fastpix-io'),
+                __('Once uploaded, copy the generated shortcode to embed videos anywhere in your WordPress site.', 'fastpix-io'),
+                __('Monitor your video status and manage all uploaded videos from the Video List page. Videos may take a few moments to process after upload.', 'fastpix-io')
             )
         );
     }
@@ -149,7 +149,7 @@ class Fastpix_Utils {
         $map = self::get_language_map();
         $name = isset($map[$code]) ? $map[$code] : strtoupper((string) $code);
 
-        return in_array($code, self::get_beta_languages(), true) ? $name . ' · ' . __('Beta', 'fastpix') : $name;
+        return in_array($code, self::get_beta_languages(), true) ? $name . ' · ' . __('Beta', 'fastpix-io') : $name;
     }
 
     public static function get_language_map() {

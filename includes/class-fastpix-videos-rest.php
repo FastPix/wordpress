@@ -331,7 +331,7 @@ class Fastpix_Videos_Rest {
             (string) $request['media_id']
         ), ARRAY_A);
         if (!$row) {
-            return new \WP_Error('fastpix_video_missing', __('No such video.', 'fastpix'), array('status' => 404));
+            return new \WP_Error('fastpix_video_missing', __('No such video.', 'fastpix-io'), array('status' => 404));
         }
         // Someone else's video embedded in a post the caller edits: only what the block
         // inspector reads and the front end already shows — this route only. (QA L9, ASSUME-106)
@@ -495,7 +495,7 @@ class Fastpix_Videos_Rest {
             return null;
         }
         if ($row['access_policy'] === 'drm' && $downloadable !== 'off') {
-            return new \WP_Error('fastpix_drm_no_download', __('Downloadable files are unavailable with DRM.', 'fastpix'), array('status' => 400));   // REQ-017
+            return new \WP_Error('fastpix_drm_no_download', __('Downloadable files are unavailable with DRM.', 'fastpix-io'), array('status' => 400));   // REQ-017
         }
 
         $client = new Fastpix_Api_Client();
@@ -539,12 +539,12 @@ class Fastpix_Videos_Rest {
     /** [REQ-054] The embed constraint line for an access policy. */
     private static function access_constraints($policy) {
         if ($policy === 'public') {
-            return __('Public — the reference is visible in page source and embeddable anywhere.', 'fastpix');
+            return __('Public — the reference is visible in page source and embeddable anywhere.', 'fastpix-io');
         }
         if ($policy === 'drm') {
-            return __('DRM — authorised at render and expires; needs an HTTPS page and a supported browser; downloads unavailable.', 'fastpix');
+            return __('DRM — authorised at render and expires; needs an HTTPS page and a supported browser; downloads unavailable.', 'fastpix-io');
         }
-        return __('Private — authorised at render and expires; an embed code copied elsewhere will not work.', 'fastpix');
+        return __('Private — authorised at render and expires; an embed code copied elsewhere will not work.', 'fastpix-io');
     }
 
     /** Local downloadable choice → FastPix mp4Support (docs: Update the mp4Support of a media). */
@@ -576,7 +576,7 @@ class Fastpix_Videos_Rest {
                 // languageName"; names are validated, so the old one cannot be parked under a temporary
                 // name) — a new file for an existing language can only be remove + add. [QA F12]
                 if (empty($op['track_id'])) {
-                    $result = new \WP_Error('fastpix_bad_track_op', __('A replace needs the track to replace.', 'fastpix'), array('status' => 400));
+                    $result = new \WP_Error('fastpix_bad_track_op', __('A replace needs the track to replace.', 'fastpix-io'), array('status' => 400));
                     break;
                 }
                 $result = self::track_operation($row, array('action' => 'remove', 'track_id' => (string) $op['track_id']));
@@ -590,7 +590,7 @@ class Fastpix_Videos_Rest {
                         // No rollback exists on the platform — say exactly where things stand instead of a bare error.
                         $result = new \WP_Error('fastpix_track_replace_half', sprintf(
                             /* translators: %s: the platform's reason */
-                            __('The old subtitle track was removed, but FastPix refused the new file (%s). This language has no subtitles now — upload the file again.', 'fastpix'),
+                            __('The old subtitle track was removed, but FastPix refused the new file (%s). This language has no subtitles now — upload the file again.', 'fastpix-io'),
                             $result->get_error_message()
                         ), array('status' => 502));
                     }
@@ -607,7 +607,7 @@ class Fastpix_Videos_Rest {
                 break;
 
             default:
-                $result = new \WP_Error('fastpix_bad_track_op', __('Unknown subtitle operation.', 'fastpix'), array('status' => 400));
+                $result = new \WP_Error('fastpix_bad_track_op', __('Unknown subtitle operation.', 'fastpix-io'), array('status' => 400));
         }
 
         return $result;
@@ -650,7 +650,7 @@ class Fastpix_Videos_Rest {
         if (is_wp_error($generated) && stripos($generated->get_error_message(), 'duplicate language') !== false) {
             $retired = $old_id === ''
                 /* translators: %s: subtitle language name */
-                ? new \WP_Error('fastpix_track_exists', sprintf(__('%s subtitles already exist on FastPix — remove that track first, then generate again.', 'fastpix'), $label), array('status' => 409))
+                ? new \WP_Error('fastpix_track_exists', sprintf(__('%s subtitles already exist on FastPix — remove that track first, then generate again.', 'fastpix-io'), $label), array('status' => 409))
                 : $retire();
             if (is_wp_error($retired)) {
                 return $retired;
@@ -691,7 +691,7 @@ class Fastpix_Videos_Rest {
             }
         }
 
-        return new \WP_Error('fastpix_no_audio', __('This video has no audio track to generate subtitles from.', 'fastpix'), array('status' => 409));
+        return new \WP_Error('fastpix_no_audio', __('This video has no audio track to generate subtitles from.', 'fastpix-io'), array('status' => 409));
     }
 
     /* ------------------------------------------------------------ deletion */
@@ -716,7 +716,7 @@ class Fastpix_Videos_Rest {
 
         if ($request->get_param('purge')) {
             if (!Fastpix_Sync::is_unavailable($row)) {
-                $verdict = new \WP_Error('fastpix_not_unavailable', __('Only an Unavailable video can be removed from the library. Delete it first.', 'fastpix'), array('status' => 409));
+                $verdict = new \WP_Error('fastpix_not_unavailable', __('Only an Unavailable video can be removed from the library. Delete it first.', 'fastpix-io'), array('status' => 409));
             } else {
                 Fastpix_Sync::purge_video((int) $row['id']);
                 do_action('fastpix_audit_event', 'video_purged', array('media_id' => $row['media_id'], 'usage' => $usage));
@@ -756,9 +756,9 @@ class Fastpix_Videos_Rest {
     public static function bulk($request) {
         $error = null;
         if ($request->get_param('action') === null || !is_array($request->get_param('ids'))) {
-            $error = new \WP_Error('rest_missing_callback_param', __('Missing parameter(s): action, ids', 'fastpix'), array('status' => 400));
+            $error = new \WP_Error('rest_missing_callback_param', __('Missing parameter(s): action, ids', 'fastpix-io'), array('status' => 400));
         } elseif (!in_array($request->get_param('action'), array('rerun_ai', 'regenerate_posters', 'delete'), true)) {
-            $error = new \WP_Error('rest_invalid_param', __('Unknown bulk action.', 'fastpix'), array('status' => 400));
+            $error = new \WP_Error('rest_invalid_param', __('Unknown bulk action.', 'fastpix-io'), array('status' => 400));
         }
         if ($error) {
             return $error;
@@ -774,7 +774,7 @@ class Fastpix_Videos_Rest {
         if ($action === 'delete') {
             if (!current_user_can(Fastpix_Capabilities::DELETE_VIDEO)
                 && !current_user_can(Fastpix_Capabilities::DELETE_VIDEO_OWN)) {
-                return new \WP_Error('fastpix_forbidden', __('Your role cannot delete videos.', 'fastpix'), array('status' => 403));
+                return new \WP_Error('fastpix_forbidden', __('Your role cannot delete videos.', 'fastpix-io'), array('status' => 403));
             }
             // Scope by the DELETE capability, not EDIT: a delete-own user may
             // only reach their own videos, even if they can edit every video.
@@ -865,7 +865,7 @@ class Fastpix_Videos_Rest {
         // refuse now with the reason, as the migration path does. [QA F12, ASSUME-032 (c)]
         if (!is_wp_error($upload) && !self::subtitle_url_reachable($upload['url'])) {
             wp_delete_file($upload['file']);
-            $upload = new \WP_Error('fastpix_subtitle_unreachable', __('FastPix downloads the subtitle file from this site, and this site is not reachable from the internet. Publish it on a public address, or use Generate instead.', 'fastpix'), array('status' => 409));
+            $upload = new \WP_Error('fastpix_subtitle_unreachable', __('FastPix downloads the subtitle file from this site, and this site is not reachable from the internet. Publish it on a public address, or use Generate instead.', 'fastpix-io'), array('status' => 409));
         }
         if (is_wp_error($upload)) {
             return $upload;
@@ -934,15 +934,15 @@ class Fastpix_Videos_Rest {
 
     private static function sideload_subtitle($files) {
         if (empty($files['file']['name']) || empty($files['file']['tmp_name'])) {
-            return new \WP_Error('fastpix_no_file', __('No subtitle file was sent.', 'fastpix'), array('status' => 400));
+            return new \WP_Error('fastpix_no_file', __('No subtitle file was sent.', 'fastpix-io'), array('status' => 400));
         }
 
         $ext   = strtolower(pathinfo($files['file']['name'], PATHINFO_EXTENSION));
         $error = null;
         if (!in_array($ext, array('vtt', 'srt'), true)) {
-            $error = array('fastpix_bad_subtitle', __('Only .vtt and .srt files are accepted.', 'fastpix'));
+            $error = array('fastpix_bad_subtitle', __('Only .vtt and .srt files are accepted.', 'fastpix-io'));
         } elseif (!empty($files['file']['size']) && (int) $files['file']['size'] > self::SUBTITLE_MAX_BYTES) {
-            $error = array('fastpix_subtitle_too_large', __('That file is over 2 MB.', 'fastpix'));
+            $error = array('fastpix_subtitle_too_large', __('That file is over 2 MB.', 'fastpix-io'));
         }
         $text = $error ? '' : (string) file_get_contents($files['file']['tmp_name']);
         if (substr($text, 0, 3) === "\xEF\xBB\xBF") {
@@ -950,11 +950,11 @@ class Fastpix_Videos_Rest {
         }
         $text = str_replace(array("\r\n", "\r"), "\n", $text);
         if (!$error && strpos($text, '-->') === false) {
-            $error = array('fastpix_bad_subtitle', __('That file does not contain subtitle cues.', 'fastpix'));
+            $error = array('fastpix_bad_subtitle', __('That file does not contain subtitle cues.', 'fastpix-io'));
         } elseif ($ext === 'srt') {
             $text = "WEBVTT\n\n" . preg_replace('/(\d{1,3}:\d{2}:\d{2}),(\d{3})/', '$1.$2', $text);
         } elseif (!$error && strpos($text, 'WEBVTT') !== 0) {
-            $error = array('fastpix_bad_subtitle', __('That .vtt file does not start with WEBVTT.', 'fastpix'));
+            $error = array('fastpix_bad_subtitle', __('That .vtt file does not start with WEBVTT.', 'fastpix-io'));
         }
         if ($error) {
             return new \WP_Error($error[0], $error[1], array('status' => 400));
@@ -978,7 +978,7 @@ class Fastpix_Videos_Rest {
         // One kind → only that item is re-run (RULE-011); none → the full set per the batch settings.
         $kind = (string) $request->get_param('kind');
         if ($kind !== '' && !isset(Fastpix_Ai::KINDS[$kind]) && $kind !== 'subtitles') {
-            return new \WP_Error('fastpix_bad_kind', __('Unknown AI output.', 'fastpix'), array('status' => 400));
+            return new \WP_Error('fastpix_bad_kind', __('Unknown AI output.', 'fastpix-io'), array('status' => 400));
         }
         Fastpix_Ai::request($row['media_id'], $kind !== '' ? array($kind) : null);
 
@@ -1055,12 +1055,12 @@ class Fastpix_Videos_Rest {
         $row = $wpdb->get_row($wpdb->prepare($sql, $params), ARRAY_A);
 
         if (!$row) {
-            return new \WP_Error('fastpix_video_missing', __('No such video.', 'fastpix'), array('status' => 404));
+            return new \WP_Error('fastpix_video_missing', __('No such video.', 'fastpix-io'), array('status' => 404));
         }
         // A previous workspace's row is readable (posts keep their embeds) but the
         // connected pair cannot change it on the platform — refuse every write. [ASSUME-092]
         if ($request->get_method() !== 'GET' && self::is_other_workspace($row)) {
-            return new \WP_Error('fastpix_other_workspace', __('This video belongs to a previously connected workspace — the current credentials cannot change it.', 'fastpix'), array('status' => 409));
+            return new \WP_Error('fastpix_other_workspace', __('This video belongs to a previously connected workspace — the current credentials cannot change it.', 'fastpix-io'), array('status' => 409));
         }
 
         return $row;

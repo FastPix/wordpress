@@ -37,7 +37,7 @@ class Fastpix_Addmedia {
     /** Shared in-page confirm/alert (QA U3). Registered once; screens list 'fastpix-dialog' as a dependency. */
     public static function register_dialog() {
         wp_register_script('fastpix-dialog', FASTPIX_PLUGIN_URL . 'assets/js/fp-dialog.js', array('wp-i18n'), fastpix_asset_ver('assets/js/fp-dialog.js'), true);
-        wp_set_script_translations('fastpix-dialog', 'fastpix');   // default OK / Cancel (QA L25)
+        wp_set_script_translations('fastpix-dialog', 'fastpix-io');   // default OK / Cancel (QA L25)
         wp_register_style('fastpix-dialog', FASTPIX_PLUGIN_URL . 'assets/css/fp-dialog.css', array(), fastpix_asset_ver('assets/css/fp-dialog.css'));
     }
 
@@ -59,10 +59,10 @@ class Fastpix_Addmedia {
         ?>
         <?php /* QA U2: core puts this block in an absolutely positioned .uploader-inline-content — keep it compact and on its own layer so it never paints over the attachments below. */ ?>
         <div class="fastpix-media-panel" id="fastpix-media-panel" style="position:relative; z-index:2; background:#fff; margin:12px auto 0; max-width:560px; padding:10px 14px; border:1px solid #dcdcde; border-radius:8px; text-align:left;">
-            <p><strong><?php esc_html_e('Video? Send it to FastPix instead', 'fastpix'); ?></strong> —
-               <?php esc_html_e('streamed from the FastPix network, captions and chapters generated, and it still shows up here in the Media Library.', 'fastpix'); ?></p>
-            <p><button type="button" class="button" id="fastpix-media-pick"><?php esc_html_e('Upload video to FastPix', 'fastpix'); ?></button>
-               <input type="file" id="fastpix-media-file" accept="video/*,audio/*,.mkv,.mts,.m2ts,.mxf,.rm,.wtv,.vob,.ts" multiple aria-label="<?php esc_attr_e('Video files to upload to FastPix', 'fastpix'); ?>" hidden>
+            <p><strong><?php esc_html_e('Video? Send it to FastPix instead', 'fastpix-io'); ?></strong> —
+               <?php esc_html_e('streamed from the FastPix network, captions and chapters generated, and it still shows up here in the Media Library.', 'fastpix-io'); ?></p>
+            <p><button type="button" class="button" id="fastpix-media-pick"><?php esc_html_e('Upload video to FastPix', 'fastpix-io'); ?></button>
+               <input type="file" id="fastpix-media-file" accept="video/*,audio/*,.mkv,.mts,.m2ts,.mxf,.rm,.wtv,.vob,.ts" multiple aria-label="<?php esc_attr_e('Video files to upload to FastPix', 'fastpix-io'); ?>" hidden>
                <span id="fastpix-media-status"></span></p>
             <ul id="fastpix-media-queue" aria-live="polite" style="margin:4px 0 0; font-size:12px; max-height:120px; overflow-y:auto;"></ul>
         </div>
@@ -90,18 +90,18 @@ class Fastpix_Addmedia {
             'chunkKb'       => (int) (Fastpix_Uploads::CHUNK_BYTES / 1024),
             'concurrency'   => min(6, max(1, (int) apply_filters('fastpix_upload_concurrency', 3))),   // same queue rule as Add media [REQ-012] (QA U12)
             'i18n'          => array(
-                'tooBig'          => __('Over the 20 GB per-file limit — refused before anything left this browser.', 'fastpix'),
+                'tooBig'          => __('Over the 20 GB per-file limit — refused before anything left this browser.', 'fastpix-io'),
                 /* translators: %s: file MIME type */
-                'badType'         => __('%s is not an accepted video or audio format — refused before anything left this browser.', 'fastpix'),
-                'queued'          => __('Queued', 'fastpix'),
-                'creatingSession' => __('Creating session…', 'fastpix'),
-                'refused'         => __('Refused.', 'fastpix'),
-                'uploaderRefused' => __('The uploader refused this file.', 'fastpix'),
-                'transferred'     => __('Transferred. It appears here as a FastPix video once processing starts.', 'fastpix'),
-                'transferFailed'  => __('The transfer failed', 'fastpix'),
+                'badType'         => __('%s is not an accepted video or audio format — refused before anything left this browser.', 'fastpix-io'),
+                'queued'          => __('Queued', 'fastpix-io'),
+                'creatingSession' => __('Creating session…', 'fastpix-io'),
+                'refused'         => __('Refused.', 'fastpix-io'),
+                'uploaderRefused' => __('The uploader refused this file.', 'fastpix-io'),
+                'transferred'     => __('Transferred. It appears here as a FastPix video once processing starts.', 'fastpix-io'),
+                'transferFailed'  => __('The transfer failed', 'fastpix-io'),
                 /* translators: %s: the transfer error message */
-                'pausedMsg'       => __('Paused (%s). Resume it on the FastPix Add media screen.', 'fastpix'),
-                'confirming'      => __('sent — confirming with FastPix…', 'fastpix'),
+                'pausedMsg'       => __('Paused (%s). Resume it on the FastPix Add media screen.', 'fastpix-io'),
+                'confirming'      => __('sent — confirming with FastPix…', 'fastpix-io'),
             ),
         ));
     }
@@ -109,8 +109,8 @@ class Fastpix_Addmedia {
     public static function add_menu() {
         add_submenu_page(
             'fastpix-settings',
-            __('Add media', 'fastpix'),
-            __('Add media', 'fastpix'),
+            __('Add media', 'fastpix-io'),
+            __('Add media', 'fastpix-io'),
             Fastpix_Capabilities::VIEW_VIDEOS,   // page branches on UPLOAD_VIDEO [SEC-011]
             self::SLUG,
             array(__CLASS__, 'render'),
@@ -151,73 +151,73 @@ class Fastpix_Addmedia {
             'askReview'     => self::ask_review(),
             'reviewUrl'     => self::REVIEW_URL,
             'i18n'          => array(
-                'reviewReady'     => __('Your first video is ready.', 'fastpix'),
-                'reviewReadyNext' => __('Your video is ready.', 'fastpix'),
-                'reviewLink'      => __('Leave a review', 'fastpix'),
-                'reviewTail'      => __('if this saved you time.', 'fastpix'),
-                'reviewDismiss'   => __('Dismiss', 'fastpix'),
+                'reviewReady'     => __('Your first video is ready.', 'fastpix-io'),
+                'reviewReadyNext' => __('Your video is ready.', 'fastpix-io'),
+                'reviewLink'      => __('Leave a review', 'fastpix-io'),
+                'reviewTail'      => __('if this saved you time.', 'fastpix-io'),
+                'reviewDismiss'   => __('Dismiss', 'fastpix-io'),
                 /* translators: %d: HTTP status code */
-                'httpNoAnswer'    => __('FastPix did not answer (HTTP %d).', 'fastpix'),
-                'sendFailed'      => __('The request could not be sent — check your connection.', 'fastpix'),
-                'tooBig'          => __('Over the 20 GB per-file limit — refused before anything left this browser.', 'fastpix'),
+                'httpNoAnswer'    => __('FastPix did not answer (HTTP %d).', 'fastpix-io'),
+                'sendFailed'      => __('The request could not be sent — check your connection.', 'fastpix-io'),
+                'tooBig'          => __('Over the 20 GB per-file limit — refused before anything left this browser.', 'fastpix-io'),
                 /* translators: %s: file MIME type */
-                'badType'         => __('%s is not an accepted video or audio format — refused before anything left this browser.', 'fastpix'),
-                'stLink'          => __('Link — checked when you upload', 'fastpix'),
+                'badType'         => __('%s is not an accepted video or audio format — refused before anything left this browser.', 'fastpix-io'),
+                'stLink'          => __('Link — checked when you upload', 'fastpix-io'),
                 /* translators: %d: files per submission */
-                'tooMany'         => __('Over the %d files per submission — add it to the next batch.', 'fastpix'),
-                'cancelledElsewhere' => __('This upload was cancelled elsewhere — nothing more will be sent.', 'fastpix'),
-                'windowClosed'    => __('The upload window closed while this was paused — Resume sends the file again from the start.', 'fastpix'),
+                'tooMany'         => __('Over the %d files per submission — add it to the next batch.', 'fastpix-io'),
+                'cancelledElsewhere' => __('This upload was cancelled elsewhere — nothing more will be sent.', 'fastpix-io'),
+                'windowClosed'    => __('The upload window closed while this was paused — Resume sends the file again from the start.', 'fastpix-io'),
                 /* translators: %d: number of files and links in the batch */
-                'appliesTo'       => __('Applies to the %d files in this batch. Who can watch, quality, top resolution, even out volume, lock to this site and the watermark are fixed once the upload starts. The title, downloads, subtitles, chapters and summary can be changed later, per video.', 'fastpix'),
-                'wmBad'           => __('Enter a full http:// or https:// image URL, or turn Watermark off.', 'fastpix'),
-                'badHost'         => __('Enter a domain like videos.example.com or *.example.com.', 'fastpix'),
+                'appliesTo'       => __('Applies to the %d files in this batch. Who can watch, quality, top resolution, even out volume, lock to this site and the watermark are fixed once the upload starts. The title, downloads, subtitles, chapters and summary can be changed later, per video.', 'fastpix-io'),
+                'wmBad'           => __('Enter a full http:// or https:// image URL, or turn Watermark off.', 'fastpix-io'),
+                'badHost'         => __('Enter a domain like videos.example.com or *.example.com.', 'fastpix-io'),
                 /* translators: %d: number of sites */
-                'lockDenySum'     => __('Plays on %d site(s) and nowhere else.', 'fastpix'),
-                'lockAllowSum'    => __('Plays everywhere. Add the sites to block.', 'fastpix'),
+                'lockDenySum'     => __('Plays on %d site(s) and nowhere else.', 'fastpix-io'),
+                'lockAllowSum'    => __('Plays everywhere. Add the sites to block.', 'fastpix-io'),
                 /* translators: %d: number of blocked sites */
-                'lockAllowSumN'   => __('Plays everywhere except %d blocked site(s).', 'fastpix'),
+                'lockAllowSumN'   => __('Plays everywhere except %d blocked site(s).', 'fastpix-io'),
                 /* translators: %s: domain */
-                'removeHost'      => __('Remove %s', 'fastpix'),
-                'appliesToOne'    => __('Applies to this file. Who can watch, quality, top resolution, even out volume, lock to this site and the watermark are fixed once the upload starts. The title, downloads, subtitles, chapters and summary can be changed later.', 'fastpix'),
+                'removeHost'      => __('Remove %s', 'fastpix-io'),
+                'appliesToOne'    => __('Applies to this file. Who can watch, quality, top resolution, even out volume, lock to this site and the watermark are fixed once the upload starts. The title, downloads, subtitles, chapters and summary can be changed later.', 'fastpix-io'),
                 /* translators: %d: number of files and links in the batch */
-                'uploadN'         => __('Upload %d videos', 'fastpix'),
-                'uploadOne'       => __('Upload 1 video', 'fastpix'),
-                'stQueued'        => __('Queued', 'fastpix'),
-                'stProcessing'    => __('Processing', 'fastpix'),
-                'stPaused'        => __('Paused', 'fastpix'),
-                'stUploading'     => __('Uploading', 'fastpix'),
-                'stChecking'      => __('Checking', 'fastpix'),
-                'pause'           => __('Pause', 'fastpix'),
-                'resume'          => __('Resume', 'fastpix'),
-                'remove'          => __('Remove', 'fastpix'),
-                'stReady'         => __('Ready', 'fastpix'),
-                'drmNoDownload'   => __('Unavailable with DRM — protection applies to streaming only.', 'fastpix'),
-                'cancelled'       => __('Cancelled.', 'fastpix'),
-                'refused'         => __('Refused.', 'fastpix'),
-                'creatingSession' => __('Creating session', 'fastpix'),
-                'notResponding'   => __('FastPix is not responding — nothing was queued.', 'fastpix'),
-                'uploaderRefused' => __('The uploader refused this file.', 'fastpix'),
-                'transferFailed'  => __('The transfer failed', 'fastpix'),
+                'uploadN'         => __('Upload %d videos', 'fastpix-io'),
+                'uploadOne'       => __('Upload 1 video', 'fastpix-io'),
+                'stQueued'        => __('Queued', 'fastpix-io'),
+                'stProcessing'    => __('Processing', 'fastpix-io'),
+                'stPaused'        => __('Paused', 'fastpix-io'),
+                'stUploading'     => __('Uploading', 'fastpix-io'),
+                'stChecking'      => __('Checking', 'fastpix-io'),
+                'pause'           => __('Pause', 'fastpix-io'),
+                'resume'          => __('Resume', 'fastpix-io'),
+                'remove'          => __('Remove', 'fastpix-io'),
+                'stReady'         => __('Ready', 'fastpix-io'),
+                'drmNoDownload'   => __('Unavailable with DRM — protection applies to streaming only.', 'fastpix-io'),
+                'cancelled'       => __('Cancelled.', 'fastpix-io'),
+                'refused'         => __('Refused.', 'fastpix-io'),
+                'creatingSession' => __('Creating session', 'fastpix-io'),
+                'notResponding'   => __('FastPix is not responding — nothing was queued.', 'fastpix-io'),
+                'uploaderRefused' => __('The uploader refused this file.', 'fastpix-io'),
+                'transferFailed'  => __('The transfer failed', 'fastpix-io'),
                 /* translators: %s: the transfer error message */
-                'transferFailedMsg' => __('%s. The platform holds what was sent.', 'fastpix'),
-                'confirming'        => __('Sent — confirming with FastPix…', 'fastpix'),
-                'connLost'        => __('Connection lost — resumes when it returns', 'fastpix'),
-                'platformHoldsResume' => __('The platform holds what was sent. Resume needs this same file.', 'fastpix'),
-                'resumeRefused'   => __('Resume was refused.', 'fastpix'),
-                'resuming'        => __('Resuming', 'fastpix'),
-                'differentFile'   => __('That is a different file — refused.', 'fastpix'),
-                'nothingWasQueued'=> __('Nothing was queued.', 'fastpix'),
-                'checked'         => __('Checked', 'fastpix'),
-                'notReachable'    => __('Not a reachable video file — check the address and add it again', 'fastpix'),
-                'openInLibrary'   => __('Open in library', 'fastpix'),
+                'transferFailedMsg' => __('%s. The platform holds what was sent.', 'fastpix-io'),
+                'confirming'        => __('Sent — confirming with FastPix…', 'fastpix-io'),
+                'connLost'        => __('Connection lost — resumes when it returns', 'fastpix-io'),
+                'platformHoldsResume' => __('The platform holds what was sent. Resume needs this same file.', 'fastpix-io'),
+                'resumeRefused'   => __('Resume was refused.', 'fastpix-io'),
+                'resuming'        => __('Resuming', 'fastpix-io'),
+                'differentFile'   => __('That is a different file — refused.', 'fastpix-io'),
+                'nothingWasQueued'=> __('Nothing was queued.', 'fastpix-io'),
+                'checked'         => __('Checked', 'fastpix-io'),
+                'notReachable'    => __('Not a reachable video file — check the address and add it again', 'fastpix-io'),
+                'openInLibrary'   => __('Open in library', 'fastpix-io'),
                 /* translators: %s: an optional " — ERROR_CODE" suffix */
-                'processFailedMsg'=> __('FastPix could not process this file%s. Nothing was published and nothing was charged.', 'fastpix'),
+                'processFailedMsg'=> __('FastPix could not process this file%s. Nothing was published and nothing was charged.', 'fastpix-io'),
             ),
         ));
         if (current_user_can(Fastpix_Capabilities::MANAGE_SETTINGS)) {
             wp_enqueue_style('fastpix-dialog');
             wp_enqueue_script('fastpix-migration', FASTPIX_PLUGIN_URL . 'assets/js/migration.js', array('fastpix-add-media', 'fastpix-dialog', 'wp-i18n'), fastpix_asset_ver('assets/js/migration.js'), true);
-            wp_set_script_translations('fastpix-migration', 'fastpix');   // QA L25
+            wp_set_script_translations('fastpix-migration', 'fastpix-io');   // QA L25
         }
     }
 

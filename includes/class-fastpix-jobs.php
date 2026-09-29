@@ -187,17 +187,17 @@ class Fastpix_Jobs {
         if ($wp_cron_disabled) {
             $stall = array(
                 'cause'   => 'wp_cron_disabled',
-                'message' => __('Background work is not running: WP-Cron is disabled on this site and no system cron is calling wp-cron.php.', 'fastpix'),
+                'message' => __('Background work is not running: WP-Cron is disabled on this site and no system cron is calling wp-cron.php.', 'fastpix-io'),
             );
         } elseif (!$loopback_ok) {
             $stall = array(
                 'cause'   => 'loopback_blocked',
-                'message' => __('Background work is not running: this site cannot make a request to itself, so the queue is never started.', 'fastpix'),
+                'message' => __('Background work is not running: this site cannot make a request to itself, so the queue is never started.', 'fastpix-io'),
             );
         } else {
             $stall = array(
                 'cause'   => 'queue_stalled',
-                'message' => __('Background work has been waiting for over an hour with nothing completing.', 'fastpix'),
+                'message' => __('Background work has been waiting for over an hour with nothing completing.', 'fastpix-io'),
             );
         }
 

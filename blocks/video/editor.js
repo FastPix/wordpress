@@ -32,14 +32,14 @@
     // field name never lands in a sentence or gets capitalised by hand. The search only reports
     // timed hits (chapter, transcript); anything else reads as a plain match. (QA L26)
     var MATCH = {
-        title: { label: __('Title match', 'fastpix'), one: __('one in its title', 'fastpix') },
+        title: { label: __('Title match', 'fastpix-io'), one: __('one in its title', 'fastpix-io') },
         /* translators: %s: a timestamp like 1:23 */
-        chapter: { label: __('Chapter', 'fastpix'), one: __('one at %s in its chapters', 'fastpix') },
+        chapter: { label: __('Chapter', 'fastpix-io'), one: __('one at %s in its chapters', 'fastpix-io') },
         /* translators: %s: a timestamp like 1:23 */
-        transcript: { label: __('Transcript', 'fastpix'), one: __('one at %s in its transcript', 'fastpix') }
+        transcript: { label: __('Transcript', 'fastpix-io'), one: __('one at %s in its transcript', 'fastpix-io') }
     };
     /* translators: %s: a timestamp like 1:23 */
-    var MATCH_OTHER = { label: __('Match', 'fastpix'), one: __('one at %s', 'fastpix') };
+    var MATCH_OTHER = { label: __('Match', 'fastpix-io'), one: __('one at %s', 'fastpix-io') };
     function matchText(m) { return MATCH[m.field] || MATCH_OTHER; }
 
     /* ---------------------------------------------------------- picker */
@@ -56,7 +56,7 @@
             apiFetch({ path: '/fastpix/v1/videos?per_page=24' + (q ? '&search=' + encodeURIComponent(q) : '') }).then(function (res) {
                 if (!alive) { return; }
                 setR({ videos: res.videos || [], note: res.search_note || '', loading: false });
-            }).catch(function () { if (alive) { setR({ videos: [], note: __('The library could not be loaded.', 'fastpix'), loading: false }); } });
+            }).catch(function () { if (alive) { setR({ videos: [], note: __('The library could not be loaded.', 'fastpix-io'), loading: false }); } });
             return function () { alive = false; };
         }, [q]);
 
@@ -67,7 +67,7 @@
             provenance = r.videos.length
                 ? sprintf(
                     /* translators: 1: number of videos, 2: the search term */
-                    _n('%1$d video mentions “%2$s”', '%1$d videos mention “%2$s”', r.videos.length, 'fastpix'), r.videos.length, q) +
+                    _n('%1$d video mentions “%2$s”', '%1$d videos mention “%2$s”', r.videos.length, 'fastpix-io'), r.videos.length, q) +
                   (withMatch.length ? ' — ' + withMatch.slice(0, 2).map(function (v) {
                       return sprintf(matchText(v.match).one, fmt(v.match.seconds));
                   }).join(', ') : '') + '.'
@@ -83,31 +83,31 @@
                 el('span', { className: 'fp-pick-thumb' },
                     v.poster ? el('img', { src: v.poster, alt: '' }) : el('span', { className: 'fp-pick-nothumb' }),
                     v.duration ? el('span', { className: 'fp-pick-dur' }, fmt(v.duration)) : null,
-                    v.access_policy !== 'public' ? el('span', { className: 'fp-pick-lock', title: __('Private', 'fastpix') }, '🔒') : null),
-                el('span', { className: 'fp-pick-title' }, v.title || __('(untitled)', 'fastpix')),
+                    v.access_policy !== 'public' ? el('span', { className: 'fp-pick-lock', title: __('Private', 'fastpix-io') }, '🔒') : null),
+                el('span', { className: 'fp-pick-title' }, v.title || __('(untitled)', 'fastpix-io')),
                 reason ? el('span', { className: 'fp-pick-reason' }, reason) : null);
         }
 
-        return el(C.Modal, { title: __('Choose a video', 'fastpix'), onRequestClose: props.onClose, className: 'fp-picker', shouldCloseOnClickOutside: false },
-            el(C.TabPanel, { tabs: [{ name: 'library', title: __('Your library', 'fastpix') }, { name: 'upload', title: __('Upload', 'fastpix') }], onSelect: setTab },
+        return el(C.Modal, { title: __('Choose a video', 'fastpix-io'), onRequestClose: props.onClose, className: 'fp-picker', shouldCloseOnClickOutside: false },
+            el(C.TabPanel, { tabs: [{ name: 'library', title: __('Your library', 'fastpix-io') }, { name: 'upload', title: __('Upload', 'fastpix-io') }], onSelect: setTab },
                 function () { return null; }),
             tab === 'library'
                 ? el('div', null,
-                    el(C.SearchControl, { value: q, onChange: setQ, placeholder: __('Search titles, transcripts and chapters', 'fastpix'), label: __('Search', 'fastpix') }),
+                    el(C.SearchControl, { value: q, onChange: setQ, placeholder: __('Search titles, transcripts and chapters', 'fastpix-io'), label: __('Search', 'fastpix-io') }),
                     provenance ? el('p', { className: 'fp-pick-prov' }, provenance) : null,
                     r.note ? el('p', { className: 'fp-pick-prov' }, r.note) : null,
                     r.loading ? el(C.Spinner) : (r.videos.length
                         ? el('div', { className: 'fp-pick-grid' }, r.videos.map(card))
                         /* translators: %s: the search term */
-                        : el('p', { className: 'fp-pick-empty' }, q ? sprintf(__('Nothing matches “%s” — search reads titles, transcripts and chapters.', 'fastpix'), q) : __('Your library is empty. Upload a video first.', 'fastpix'))))
+                        : el('p', { className: 'fp-pick-empty' }, q ? sprintf(__('Nothing matches “%s” — search reads titles, transcripts and chapters.', 'fastpix-io'), q) : __('Your library is empty. Upload a video first.', 'fastpix-io'))))
                 : el('div', { className: 'fp-pick-upload' },
-                    el('p', null, __('Uploading here adds the video to your library and inserts it into this post when it is ready. You can keep writing — you do not have to wait.', 'fastpix')),
-                    el(C.Button, { variant: 'primary', href: ADD_URL, target: '_blank', rel: 'noopener' }, __('Open Add media', 'fastpix')),
-                    el('p', { className: 'fp-pick-prov' }, __('Then come back and choose it from Your library.', 'fastpix'))),
+                    el('p', null, __('Uploading here adds the video to your library and inserts it into this post when it is ready. You can keep writing — you do not have to wait.', 'fastpix-io')),
+                    el(C.Button, { variant: 'primary', href: ADD_URL, target: '_blank', rel: 'noopener' }, __('Open Add media', 'fastpix-io')),
+                    el('p', { className: 'fp-pick-prov' }, __('Then come back and choose it from Your library.', 'fastpix-io'))),
             el('div', { className: 'fp-pick-footer' },
-                el(C.Button, { variant: 'primary', disabled: !sel, onClick: function () { props.onInsert(sel); } }, __('Insert video', 'fastpix')),
-                el(C.Button, { variant: 'tertiary', onClick: props.onClose }, __('Cancel', 'fastpix')),
-                el('span', { className: 'fp-pick-prov' }, __('Private videos are marked. Focus returns to the block when this closes.', 'fastpix'))));
+                el(C.Button, { variant: 'primary', disabled: !sel, onClick: function () { props.onInsert(sel); } }, __('Insert video', 'fastpix-io')),
+                el(C.Button, { variant: 'tertiary', onClick: props.onClose }, __('Cancel', 'fastpix-io')),
+                el('span', { className: 'fp-pick-prov' }, __('Private videos are marked. Focus returns to the block when this closes.', 'fastpix-io'))));
     }
 
     /* ------------------------------------------------------------ edit */
@@ -147,9 +147,9 @@
 
         if (!a.videoId) {
             return el('div', blockProps,
-                el(C.Placeholder, { icon: 'video-alt3', label: __('FastPix Video', 'fastpix'), instructions: __('Pick a video from your FastPix library, or upload one now. Your site defaults are already applied — you do not have to configure anything to insert it.', 'fastpix') },
-                    el(C.Button, { variant: 'primary', onClick: function () { setPicking(true); } }, __('Choose from library', 'fastpix')),
-                    el(C.Button, { variant: 'secondary', href: ADD_URL, target: '_blank', rel: 'noopener' }, __('Upload', 'fastpix'))),
+                el(C.Placeholder, { icon: 'video-alt3', label: __('FastPix Video', 'fastpix-io'), instructions: __('Pick a video from your FastPix library, or upload one now. Your site defaults are already applied — you do not have to configure anything to insert it.', 'fastpix-io') },
+                    el(C.Button, { variant: 'primary', onClick: function () { setPicking(true); } }, __('Choose from library', 'fastpix-io')),
+                    el(C.Button, { variant: 'secondary', href: ADD_URL, target: '_blank', rel: 'noopener' }, __('Upload', 'fastpix-io'))),
                 picking ? el(Picker, { onClose: function () { setPicking(false); }, onInsert: insert }) : null);
         }
 
@@ -158,24 +158,24 @@
         var unavailable = video && video.status === 'Unavailable';
 
         var inspector = el(InspectorControls, null,
-            el(C.PanelBody, { title: __('Settings', 'fastpix'), initialOpen: true },
+            el(C.PanelBody, { title: __('Settings', 'fastpix-io'), initialOpen: true },
                 video ? el('div', { className: 'fp-insp-video' },
                     video.poster ? el('img', { src: video.poster, alt: '' }) : null,
-                    el('div', null, el('strong', null, video.title || __('(untitled)', 'fastpix')), el('div', { className: 'fp-insp-meta' }, (video.duration ? fmt(video.duration) : '—') + ' · ' + (isPrivate ? (video.access_policy === 'drm' ? '🔒 ' + __('DRM', 'fastpix') : '🔒 ' + __('Private', 'fastpix')) : __('Public', 'fastpix'))))) : null,
+                    el('div', null, el('strong', null, video.title || __('(untitled)', 'fastpix-io')), el('div', { className: 'fp-insp-meta' }, (video.duration ? fmt(video.duration) : '—') + ' · ' + (isPrivate ? (video.access_policy === 'drm' ? '🔒 ' + __('DRM', 'fastpix-io') : '🔒 ' + __('Private', 'fastpix-io')) : __('Public', 'fastpix-io'))))) : null,
                 // Access is a property of the video, set at upload — read-only
                 // here; change it in the video library. [ASSUME-046]
-                video ? el('p', { className: 'fp-insp-help' }, __('Access was set when the video was uploaded. Change it in the video library.', 'fastpix')) : null,
-                el(C.Button, { variant: 'secondary', onClick: function () { setPicking(true); } }, __('Replace video', 'fastpix'))),
-            el(C.PanelBody, { title: __('Playback', 'fastpix'), initialOpen: true },
-                el(C.ToggleControl, { label: __('Autoplay', 'fastpix'), checked: !!a.autoplay, onChange: function (v) { set({ autoplay: v }); } }),
-                el(C.ToggleControl, { label: __('Start muted', 'fastpix'), checked: !!a.muted, onChange: function (v) { set({ muted: v }); } }),
-                el(C.ToggleControl, { label: __('Loop', 'fastpix'), checked: !!a.loop, onChange: function (v) { set({ loop: v }); } }),
-                el(C.ToggleControl, { label: __('Resume where they stopped', 'fastpix'), checked: a.resume !== false, onChange: function (v) { set({ resume: v }); } }),
-                el('p', { className: 'fp-insp-help' }, __('Site default unless changed here.', 'fastpix'))),
-            el(C.PanelBody, { title: __('Controls', 'fastpix'), initialOpen: true },
-                el(C.ToggleControl, { label: __('Player controls', 'fastpix'), checked: !!a.controls, onChange: function (v) { set({ controls: v }); } }),
-                el(C.ToggleControl, { label: __('Click the video to play / pause', 'fastpix'), checked: a.clickToPlay !== false, onChange: function (v) { set({ clickToPlay: v }); } }),
-                el(C.ToggleControl, { label: __('Keyboard shortcuts', 'fastpix'), checked: a.keyboard !== false, onChange: function (v) { set({ keyboard: v }); } })),
+                video ? el('p', { className: 'fp-insp-help' }, __('Access was set when the video was uploaded. Change it in the video library.', 'fastpix-io')) : null,
+                el(C.Button, { variant: 'secondary', onClick: function () { setPicking(true); } }, __('Replace video', 'fastpix-io'))),
+            el(C.PanelBody, { title: __('Playback', 'fastpix-io'), initialOpen: true },
+                el(C.ToggleControl, { label: __('Autoplay', 'fastpix-io'), checked: !!a.autoplay, onChange: function (v) { set({ autoplay: v }); } }),
+                el(C.ToggleControl, { label: __('Start muted', 'fastpix-io'), checked: !!a.muted, onChange: function (v) { set({ muted: v }); } }),
+                el(C.ToggleControl, { label: __('Loop', 'fastpix-io'), checked: !!a.loop, onChange: function (v) { set({ loop: v }); } }),
+                el(C.ToggleControl, { label: __('Resume where they stopped', 'fastpix-io'), checked: a.resume !== false, onChange: function (v) { set({ resume: v }); } }),
+                el('p', { className: 'fp-insp-help' }, __('Site default unless changed here.', 'fastpix-io'))),
+            el(C.PanelBody, { title: __('Controls', 'fastpix-io'), initialOpen: true },
+                el(C.ToggleControl, { label: __('Player controls', 'fastpix-io'), checked: !!a.controls, onChange: function (v) { set({ controls: v }); } }),
+                el(C.ToggleControl, { label: __('Click the video to play / pause', 'fastpix-io'), checked: a.clickToPlay !== false, onChange: function (v) { set({ clickToPlay: v }); } }),
+                el(C.ToggleControl, { label: __('Keyboard shortcuts', 'fastpix-io'), checked: a.keyboard !== false, onChange: function (v) { set({ keyboard: v }); } })),
             // Completion panel — registered ONLY on LMS lesson post types, not
             // merely hidden: on any other post type the panel is never created.
             // [ASSUME-046]
@@ -186,11 +186,11 @@
                 // Prototype-matched (fastpix-block-prototype.html): a number
                 // field with a % unit, and a "lesson" pill on the panel title.
                 return el(C.PanelBody, {
-                    title: el(Fragment, null, __('Completion', 'fastpix'), ' ', el('span', { className: 'fp-lesson-pill' }, __('lesson', 'fastpix'))),
+                    title: el(Fragment, null, __('Completion', 'fastpix-io'), ' ', el('span', { className: 'fp-lesson-pill' }, __('lesson', 'fastpix-io'))),
                     initialOpen: true
                 },
                     el('div', { className: 'fp-complete-row' },
-                        el('label', { htmlFor: 'fp-complete-at' }, __('Mark complete at', 'fastpix')),
+                        el('label', { htmlFor: 'fp-complete-at' }, __('Mark complete at', 'fastpix-io')),
                         el('span', { className: 'fp-complete-input' },
                             el('input', {
                                 id: 'fp-complete-at', type: 'number', min: 10, max: 100, step: 5,
@@ -201,39 +201,39 @@
                                 }
                             }),
                             el('span', { className: 'fp-insp-help' }, '%'))),
-                    el('p', { className: 'fp-insp-help' }, __('Counts parts actually played. Skipping ahead does not fill them. When the student reaches it, this lesson is marked complete in your LMS automatically.', 'fastpix')),
+                    el('p', { className: 'fp-insp-help' }, __('Counts parts actually played. Skipping ahead does not fill them. When the student reaches it, this lesson is marked complete in your LMS automatically.', 'fastpix-io')),
                     el(C.ToggleControl, {
-                        label: __('Record who watched', 'fastpix'),
+                        label: __('Record who watched', 'fastpix-io'),
                         checked: !!a.trackViewer,
                         onChange: function (v) { set({ trackViewer: v }); },
                         help: a.trackViewer
-                            ? __('On — each learner’s watch data is stored against their account.', 'fastpix')
-                            : __('Off — only totals are stored. Turn on to see per-learner watch data in Analytics.', 'fastpix')
+                            ? __('On — each learner’s watch data is stored against their account.', 'fastpix-io')
+                            : __('Off — only totals are stored. Turn on to see per-learner watch data in Analytics.', 'fastpix-io')
                     }));
             })(),
-            el(C.PanelBody, { title: __('Chapters & transcript', 'fastpix'), initialOpen: true },
-                el(C.ToggleControl, { label: __('Chapters in the timeline', 'fastpix'), checked: !!a.showChapters, onChange: function (v) { set({ showChapters: v }); } }),
-                el(C.ToggleControl, { label: __('Transcript block below', 'fastpix'), checked: !!a.showTranscript, help: isPrivate ? __('Not shown for private or DRM video.', 'fastpix') : '', onChange: function (v) { set({ showTranscript: v }); } }),
-                el(C.ToggleControl, { label: __('Captions on by default', 'fastpix'), checked: !!a.captionsDefault, onChange: function (v) { set({ captionsDefault: v }); } })),
-            el(C.PanelBody, { title: __('Appearance', 'fastpix'), initialOpen: false },
-                el(C.BaseControl, { label: __('Accent colour', 'fastpix') }, el(C.ColorPalette, { value: a.accentColour, colors: [{ name: 'FastPix', color: '#6D22CD' }], onChange: function (v) { set({ accentColour: v || '#6D22CD' }); } })),
-                el('p', { className: 'fp-insp-help' }, __('Poster, start time and aspect ratio are under Advanced.', 'fastpix'))),
-            el(C.PanelBody, { title: __('Advanced', 'fastpix'), initialOpen: false },
-                el(C.TextControl, { label: __('Poster image URL', 'fastpix'), value: a.poster, help: __('An image URL wins; otherwise the frame at the time below is used.', 'fastpix'), onChange: function (v) { set({ poster: v }); } }),
-                el(C.NumberControl ? C.NumberControl : C.TextControl, { label: __('Poster frame time (seconds)', 'fastpix'), value: a.thumbnailTime, min: 0, onChange: function (v) { set({ thumbnailTime: Number(v) || 0 }); } }),
-                el(C.NumberControl ? C.NumberControl : C.TextControl, { label: __('Start time (seconds)', 'fastpix'), value: a.startTime, min: 0, onChange: function (v) { set({ startTime: Number(v) || 0 }); } }),
-                el(C.TextControl, { label: __('Aspect ratio', 'fastpix'), value: a.aspectRatio, placeholder: '16:9', onChange: function (v) { set({ aspectRatio: v }); } }),
-                el(C.ToggleControl, { label: __('Deferred loading', 'fastpix'), checked: !!a.lazyLoad, onChange: function (v) { set({ lazyLoad: v }); } })));
+            el(C.PanelBody, { title: __('Chapters & transcript', 'fastpix-io'), initialOpen: true },
+                el(C.ToggleControl, { label: __('Chapters in the timeline', 'fastpix-io'), checked: !!a.showChapters, onChange: function (v) { set({ showChapters: v }); } }),
+                el(C.ToggleControl, { label: __('Transcript block below', 'fastpix-io'), checked: !!a.showTranscript, help: isPrivate ? __('Not shown for private or DRM video.', 'fastpix-io') : '', onChange: function (v) { set({ showTranscript: v }); } }),
+                el(C.ToggleControl, { label: __('Captions on by default', 'fastpix-io'), checked: !!a.captionsDefault, onChange: function (v) { set({ captionsDefault: v }); } })),
+            el(C.PanelBody, { title: __('Appearance', 'fastpix-io'), initialOpen: false },
+                el(C.BaseControl, { label: __('Accent colour', 'fastpix-io') }, el(C.ColorPalette, { value: a.accentColour, colors: [{ name: 'FastPix', color: '#6D22CD' }], onChange: function (v) { set({ accentColour: v || '#6D22CD' }); } })),
+                el('p', { className: 'fp-insp-help' }, __('Poster, start time and aspect ratio are under Advanced.', 'fastpix-io'))),
+            el(C.PanelBody, { title: __('Advanced', 'fastpix-io'), initialOpen: false },
+                el(C.TextControl, { label: __('Poster image URL', 'fastpix-io'), value: a.poster, help: __('An image URL wins; otherwise the frame at the time below is used.', 'fastpix-io'), onChange: function (v) { set({ poster: v }); } }),
+                el(C.NumberControl ? C.NumberControl : C.TextControl, { label: __('Poster frame time (seconds)', 'fastpix-io'), value: a.thumbnailTime, min: 0, onChange: function (v) { set({ thumbnailTime: Number(v) || 0 }); } }),
+                el(C.NumberControl ? C.NumberControl : C.TextControl, { label: __('Start time (seconds)', 'fastpix-io'), value: a.startTime, min: 0, onChange: function (v) { set({ startTime: Number(v) || 0 }); } }),
+                el(C.TextControl, { label: __('Aspect ratio', 'fastpix-io'), value: a.aspectRatio, placeholder: '16:9', onChange: function (v) { set({ aspectRatio: v }); } }),
+                el(C.ToggleControl, { label: __('Deferred loading', 'fastpix-io'), checked: !!a.lazyLoad, onChange: function (v) { set({ lazyLoad: v }); } })));
 
         var notice = null;
         if (unavailable) {
             notice = el(C.Notice, { status: 'error', isDismissible: false },
-                __('This video no longer exists on FastPix. Your post has not been changed. Visitors are seeing the saved poster and a link.', 'fastpix'), ' ',
-                el(C.Button, { variant: 'link', onClick: function () { setPicking(true); } }, __('Replace video', 'fastpix')));
+                __('This video no longer exists on FastPix. Your post has not been changed. Visitors are seeing the saved poster and a link.', 'fastpix-io'), ' ',
+                el(C.Button, { variant: 'link', onClick: function () { setPicking(true); } }, __('Replace video', 'fastpix-io')));
         } else if (processing) {
-            notice = el(C.Notice, { status: 'info', isDismissible: false }, __('This video is still being processed. You can publish this post now — visitors will see the saved poster until it is ready, and the player appears by itself.', 'fastpix'));
+            notice = el(C.Notice, { status: 'info', isDismissible: false }, __('This video is still being processed. You can publish this post now — visitors will see the saved poster until it is ready, and the player appears by itself.', 'fastpix-io'));
         } else if (isPrivate) {
-            notice = el(C.Notice, { status: 'warning', isDismissible: false }, __('This video is private — it will play for your visitors on this page because the plugin authorises it at page load. The embed code will not work if it is copied to another site, and social previews will show the poster without a token.', 'fastpix'));
+            notice = el(C.Notice, { status: 'warning', isDismissible: false }, __('This video is private — it will play for your visitors on this page because the plugin authorises it at page load. The embed code will not work if it is copied to another site, and social previews will show the poster without a token.', 'fastpix-io'));
         }
 
         // Guard the canvas preview: if wp-server-side-render didn't load on this
@@ -245,13 +245,13 @@
             : el('div', { className: 'fp-canvas-fallback' },
                 (video && video.poster) ? el('img', { src: video.poster, alt: '', style: { maxWidth: '100%', display: 'block' } }) : null,
                 el('p', null, (video && video.title) || a.videoId),
-                el('p', { className: 'fp-canvas-note' }, __('Live preview is unavailable in this editor; the video plays on the published page.', 'fastpix')));
+                el('p', { className: 'fp-canvas-note' }, __('Live preview is unavailable in this editor; the video plays on the published page.', 'fastpix-io')));
 
         return el(Fragment, null, inspector,
             el('div', blockProps,
                 notice,
                 preview,
-                el('p', { className: 'fp-canvas-note' }, __('What you see here is what a visitor sees. The block renders on the server, so a private video never saves an expiring address into your post.', 'fastpix')),
+                el('p', { className: 'fp-canvas-note' }, __('What you see here is what a visitor sees. The block renders on the server, so a private video never saves an expiring address into your post.', 'fastpix-io')),
                 picking ? el(Picker, { onClose: function () { setPicking(false); }, onInsert: insert }) : null));
     }
 
@@ -270,7 +270,7 @@
                 a.fallbackTitle ? el('figcaption', null, a.fallbackTitle) : null);
         }
         return el('figure', blockProps,
-            el('figcaption', null, __('This video is not available right now.', 'fastpix'), ' ', el('a', { href: link }, a.fallbackTitle || __('Open the post', 'fastpix'))));
+            el('figcaption', null, __('This video is not available right now.', 'fastpix-io'), ' ', el('a', { href: link }, a.fallbackTitle || __('Open the post', 'fastpix-io'))));
     }
 
     registerBlockType('fastpix/video', {

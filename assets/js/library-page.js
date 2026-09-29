@@ -160,7 +160,7 @@
             rowsEl.innerHTML = '';
             if (!res.ok) {
                 el.error.hidden = false;
-                el.errorBody.textContent = (res.json && res.json.message) || __('The list could not be loaded.', 'fastpix');
+                el.errorBody.textContent = (res.json && res.json.message) || __('The list could not be loaded.', 'fastpix-io');
                 return;
             }
             el.error.hidden = true;
@@ -179,7 +179,7 @@
             el.foot.hidden = !any;
             // "N of M" only once the unfiltered M is known; a filtered first load shows N alone, never "N of N". [QA L4/L6]
             /* translators: 1: videos matching the filters, 2: videos in the whole library (QA L25) */
-            el.totalPill.textContent = hasFilters() && state.libraryTotal != null ? sprintf(__('%1$s of %2$s', 'fastpix'), state.total, state.libraryTotal) : String(state.total);
+            el.totalPill.textContent = hasFilters() && state.libraryTotal != null ? sprintf(__('%1$s of %2$s', 'fastpix-io'), state.total, state.libraryTotal) : String(state.total);
             el.totalPill.hidden = false;
             if (!hasFilters()) { state.libraryTotal = state.total; }
 
@@ -193,9 +193,9 @@
             if (!any && hasFilters()) {
                 var parts = [];
                 if (el.search.value.trim()) { parts.push('“' + el.search.value.trim() + '”'); }
-                if (el.status.value) { parts.push(sprintf(__('Status: %s', 'fastpix'), el.status.value)); }
-                if (el.access.value) { parts.push(sprintf(__('Access: %s', 'fastpix'), el.access.value.charAt(0).toUpperCase() + el.access.value.slice(1))); }
-                if (el.source.value) { parts.push(sprintf(__('Source: %s', 'fastpix'), el.source.value)); }
+                if (el.status.value) { parts.push(sprintf(__('Status: %s', 'fastpix-io'), el.status.value)); }
+                if (el.access.value) { parts.push(sprintf(__('Access: %s', 'fastpix-io'), el.access.value.charAt(0).toUpperCase() + el.access.value.slice(1))); }
+                if (el.source.value) { parts.push(sprintf(__('Source: %s', 'fastpix-io'), el.source.value)); }
                 el.zeroFilters.textContent = parts.join(' · ');
                 el.zeroClearFilters.hidden = !(el.status.value || el.access.value || el.source.value);
                 closestMatchHint(seq);
@@ -212,12 +212,12 @@
     function renderChips() {
         var chips = [];
         if (el.search.value.trim()) { chips.push({ label: '“' + el.search.value.trim() + '”', clear: function () { el.search.value = ''; } }); }
-        if (el.status.value) { chips.push({ label: sprintf(__('Status: %s', 'fastpix'), el.status.value), clear: function () { el.status.value = ''; } }); }
-        if (el.access.value) { chips.push({ label: sprintf(__('Access: %s', 'fastpix'), el.access.value), clear: function () { el.access.value = ''; } }); }
-        if (el.source.value) { chips.push({ label: sprintf(__('Source: %s', 'fastpix'), el.source.value), clear: function () { el.source.value = ''; } }); }
+        if (el.status.value) { chips.push({ label: sprintf(__('Status: %s', 'fastpix-io'), el.status.value), clear: function () { el.status.value = ''; } }); }
+        if (el.access.value) { chips.push({ label: sprintf(__('Access: %s', 'fastpix-io'), el.access.value), clear: function () { el.access.value = ''; } }); }
+        if (el.source.value) { chips.push({ label: sprintf(__('Source: %s', 'fastpix-io'), el.source.value), clear: function () { el.source.value = ''; } }); }
         el.chipList.innerHTML = '';
         chips.forEach(function (c) {
-            var b = document.createElement('button'); b.type = 'button'; b.className = 'b neutral'; b.textContent = c.label + ' ✕'; b.title = __('Remove this filter', 'fastpix');
+            var b = document.createElement('button'); b.type = 'button'; b.className = 'b neutral'; b.textContent = c.label + ' ✕'; b.title = __('Remove this filter', 'fastpix-io');
             b.addEventListener('click', function () { c.clear(); query(true); });
             el.chipList.appendChild(b);
         });
@@ -229,12 +229,12 @@
         var per = parseInt(el.perPage.value || '25', 10);
         var pages = Math.max(1, Math.ceil(state.total / per));
         /* translators: %s: the count, in bold */
-        el.count.innerHTML = sprintf(_n('<b>%s</b> video', '<b>%s</b> videos', state.total, 'fastpix'), state.total) + (cfg.ownOnly ? ' ' + __('you uploaded', 'fastpix') : '');   // server int only
+        el.count.innerHTML = sprintf(_n('<b>%s</b> video', '<b>%s</b> videos', state.total, 'fastpix-io'), state.total) + (cfg.ownOnly ? ' ' + __('you uploaded', 'fastpix-io') : '');   // server int only
         el.pager.innerHTML = '';
         if (pages <= 1) { return; }
         function btn(label, page, on, disabled) {
             var b = document.createElement('button'); b.type = 'button';
-            if (label === '‹' || label === '›') { b.className = label === '‹' ? 'prev' : 'next'; b.innerHTML = ARROW; b.setAttribute('aria-label', label === '‹' ? __('Previous page', 'fastpix') : __('Next page', 'fastpix')); } else { b.textContent = label; }
+            if (label === '‹' || label === '›') { b.className = label === '‹' ? 'prev' : 'next'; b.innerHTML = ARROW; b.setAttribute('aria-label', label === '‹' ? __('Previous page', 'fastpix-io') : __('Next page', 'fastpix-io')); } else { b.textContent = label; }
             if (on) { b.className = 'on'; }
             b.disabled = !!disabled;
             if (!disabled && !on) { b.addEventListener('click', function () { state.page = page; query(false); window.scrollTo({ top: 0, behavior: 'smooth' }); }); }
@@ -259,7 +259,7 @@
         api('GET', '/videos?' + new URLSearchParams({ search: term }).toString()).then(function (res) {
             if (seq !== querySeq) { return; }   // the list moved on [QA L3]
             if (res.ok && res.json.videos.length) {
-                el.zeroHint.textContent = sprintf(_n('Your search matches %s video without the filters.', 'Your search matches %s videos without the filters.', res.json.videos.length, 'fastpix'), res.json.videos.length + (res.json.next ? '+' : ''));
+                el.zeroHint.textContent = sprintf(_n('Your search matches %s video without the filters.', 'Your search matches %s videos without the filters.', res.json.videos.length, 'fastpix-io'), res.json.videos.length + (res.json.next ? '+' : ''));
                 el.zeroHint.hidden = false;
             }
         });
@@ -272,7 +272,7 @@
         if (!value) { td.innerHTML = '<span class="faint">—</span>'; return; }
         var wrap = document.createElement('span'); wrap.className = 'idv';
         var v = document.createElement('span'); v.className = 'mono'; v.title = value; v.textContent = shortId(value);
-        var cp = document.createElement('button'); cp.type = 'button'; cp.className = 'cp'; cp.title = __('Copy', 'fastpix'); cp.textContent = '⧉';
+        var cp = document.createElement('button'); cp.type = 'button'; cp.className = 'cp'; cp.title = __('Copy', 'fastpix-io'); cp.textContent = '⧉';
         cp.addEventListener('click', function (e) { e.stopPropagation(); copyText(value, cp); });
         wrap.appendChild(v); wrap.appendChild(cp); td.appendChild(wrap);
     }
@@ -284,17 +284,17 @@
 
     function stBadge(status) {
         var s = (status || '').toLowerCase();
-        if (s === 'ready') { return '<span class="b ok"><span class="dot"></span>' + esc(__('Ready', 'fastpix')) + '</span>'; }
-        if (s === 'processing' || s === 'preparing' || s === 'created') { return '<span class="b proc">' + esc(__('Preparing…', 'fastpix')) + '</span>'; }
-        if (s === 'failed') { return '<span class="b err">' + esc(__('Failed', 'fastpix')) + '</span>'; }
-        if (s === 'queued') { return '<span class="b neutral">◷ ' + esc(__('Queued', 'fastpix')) + '</span>'; }
-        if (s === 'unavailable') { return '<span class="b err">' + esc(__('Unavailable', 'fastpix')) + '</span>'; }
+        if (s === 'ready') { return '<span class="b ok"><span class="dot"></span>' + esc(__('Ready', 'fastpix-io')) + '</span>'; }
+        if (s === 'processing' || s === 'preparing' || s === 'created') { return '<span class="b proc">' + esc(__('Preparing…', 'fastpix-io')) + '</span>'; }
+        if (s === 'failed') { return '<span class="b err">' + esc(__('Failed', 'fastpix-io')) + '</span>'; }
+        if (s === 'queued') { return '<span class="b neutral">◷ ' + esc(__('Queued', 'fastpix-io')) + '</span>'; }
+        if (s === 'unavailable') { return '<span class="b err">' + esc(__('Unavailable', 'fastpix-io')) + '</span>'; }
         return '<span class="b neutral"></span>';
     }
     function polBadge(p) {
-        if (p === 'private') { return '<span class="b info">🔒 ' + esc(__('Private', 'fastpix')) + '</span>'; }
-        if (p === 'drm') { return '<span class="b info">🛡 ' + esc(__('DRM', 'fastpix')) + '</span>'; }
-        return '<span class="b neutral"><span class="dot"></span>' + esc(__('Public', 'fastpix')) + '</span>';
+        if (p === 'private') { return '<span class="b info">🔒 ' + esc(__('Private', 'fastpix-io')) + '</span>'; }
+        if (p === 'drm') { return '<span class="b info">🛡 ' + esc(__('DRM', 'fastpix-io')) + '</span>'; }
+        return '<span class="b neutral"><span class="dot"></span>' + esc(__('Public', 'fastpix-io')) + '</span>';
     }
 
     function addRow(video) {
@@ -305,41 +305,41 @@
         var failed = video.status === 'Failed';
 
         tr.innerHTML =
-            '<td class="cbcell"><input type="checkbox" class="fp-check" aria-label="' + esc(__('Select', 'fastpix')) + '"></td>' +
+            '<td class="cbcell"><input type="checkbox" class="fp-check" aria-label="' + esc(__('Select', 'fastpix-io')) + '"></td>' +
             '<td class="thcell"><div class="thumb' + (failed ? ' ph' : '') + '">' +
                 (video.poster && !failed ? '<img alt="" loading="lazy" src="' + esc(video.poster) + '">' : '') +
                 (video.access_policy && video.access_policy !== 'public' ? '<span class="lock">🔒</span>' : '') +
                 (video.duration ? '<span class="dur">' + fmtTime(video.duration) + '</span>' : '') + '</div></td>' +
             '<td class="titlecell"><a class="vtitle" href="#"></a><div class="rowacts">' +
-                '<a href="#" class="act-edit">' + esc(__('Edit', 'fastpix')) + '</a><a href="#" class="act-embed">' + esc(__('Copy embed', 'fastpix')) + '</a>' +
-                (cfg.canDelete ? '<a href="#" class="act-del del">' + esc(__('Delete', 'fastpix')) + '</a>' : '') + '</div></td>' +
+                '<a href="#" class="act-edit">' + esc(__('Edit', 'fastpix-io')) + '</a><a href="#" class="act-embed">' + esc(__('Copy embed', 'fastpix-io')) + '</a>' +
+                (cfg.canDelete ? '<a href="#" class="act-del del">' + esc(__('Delete', 'fastpix-io')) + '</a>' : '') + '</div></td>' +
             '<td class="idcell media"></td><td class="idcell playback"></td>' +
             '<td class="statuscell">' + stBadge(video.status) + '</td>' +
             '<td class="acccell">' + polBadge(video.access_policy) + '</td>' +
             '<td class="toolcell"><div class="rowtools">' +
-                '<button type="button" class="btn sm ghost shortcode-btn" title="' + esc(__('Copy the shortcode for this video', 'fastpix')) + '"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V6a2 2 0 0 1 2-2h9"/></svg>' + esc(__('Shortcode', 'fastpix')) + '</button>' +
-                '<button type="button" class="kebab" title="' + esc(__('More', 'fastpix')) + '" aria-haspopup="menu" aria-expanded="false">⋮</button>' +
-                '<button type="button" class="chev" aria-expanded="false" title="' + esc(__('Expand', 'fastpix')) + '">' + ARROW + '</button>' +
+                '<button type="button" class="btn sm ghost shortcode-btn" title="' + esc(__('Copy the shortcode for this video', 'fastpix-io')) + '"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V6a2 2 0 0 1 2-2h9"/></svg>' + esc(__('Shortcode', 'fastpix-io')) + '</button>' +
+                '<button type="button" class="kebab" title="' + esc(__('More', 'fastpix-io')) + '" aria-haspopup="menu" aria-expanded="false">⋮</button>' +
+                '<button type="button" class="chev" aria-expanded="false" title="' + esc(__('Expand', 'fastpix-io')) + '">' + ARROW + '</button>' +
             '</div></td>';
 
         var title = tr.querySelector('.vtitle');
-        title.textContent = video.title || __('(untitled)', 'fastpix');
-        tr.querySelector('.fp-check').setAttribute('aria-label', sprintf(__('Select %s', 'fastpix'), video.title || __('this video', 'fastpix')));   // a per-row accessible name
-        if (unavailable) { var sb = tr.querySelector('.statuscell .b'); if (sb) { sb.title = __('This video no longer exists on FastPix. Posts using it are unchanged.', 'fastpix'); } }
+        title.textContent = video.title || __('(untitled)', 'fastpix-io');
+        tr.querySelector('.fp-check').setAttribute('aria-label', sprintf(__('Select %s', 'fastpix-io'), video.title || __('this video', 'fastpix-io')));   // a per-row accessible name
+        if (unavailable) { var sb = tr.querySelector('.statuscell .b'); if (sb) { sb.title = __('This video no longer exists on FastPix. Posts using it are unchanged.', 'fastpix-io'); } }
         var titleCell = tr.querySelector('.titlecell');
         if (video.match && typeof video.match.seconds === 'number') {
             var m = document.createElement('div');
             m.className = 'micro muted';
             // Whole sentences per field; the server only reports timed hits in these two. (QA L26)
             /* translators: %s: a timestamp like 1:23 */
-            var matchText = video.match.field === 'chapter' ? __('match at %s in its chapters', 'fastpix')
-                : video.match.field === 'transcript' ? __('match at %s in its transcript', 'fastpix') : __('match at %s', 'fastpix');
+            var matchText = video.match.field === 'chapter' ? __('match at %s in its chapters', 'fastpix-io')
+                : video.match.field === 'transcript' ? __('match at %s in its transcript', 'fastpix-io') : __('match at %s', 'fastpix-io');
             m.textContent = sprintf(matchText, fmtTime(video.match.seconds));
             titleCell.insertBefore(m, titleCell.querySelector('.rowacts'));   // transcript matches return timestamps [REQ-032]
         }
         idCell(tr.querySelector('.idcell.media'), video.media_id);
         idCell(tr.querySelector('.idcell.playback'), video.playback_id);
-        if (!video.playback_id) { tr.querySelector('.idcell.playback').title = __('A playback id exists once processing has produced something to play', 'fastpix'); }
+        if (!video.playback_id) { tr.querySelector('.idcell.playback').title = __('A playback id exists once processing has produced something to play', 'fastpix-io'); }
 
         var open = function (e) { if (e) { e.preventDefault(); } toggleOpen(tr, video.id); };
         title.addEventListener('click', open);
@@ -353,7 +353,7 @@
         });
         var del = tr.querySelector('.act-del');
         if (del) {
-            if (video.status === 'Unavailable') { del.textContent = __('Remove', 'fastpix'); del.title = __('Remove this record from the library', 'fastpix'); }
+            if (video.status === 'Unavailable') { del.textContent = __('Remove', 'fastpix-io'); del.title = __('Remove this record from the library', 'fastpix-io'); }
             del.addEventListener('click', function (e) { e.preventDefault(); video.status === 'Unavailable' ? removeVideo(video.id, video.title) : deleteVideo(video.id, video.title); });
         }
         var kebab = tr.querySelector('.kebab');
@@ -374,13 +374,13 @@
         // Focus goes back to the ⋮ BEFORE the item is removed, so a confirm dialog opened by the action can return focus there. [QA L21]
         function item(label, cls, fn) { var b = document.createElement('button'); b.type = 'button'; b.textContent = label; if (cls) { b.className = cls; } b.setAttribute('role', 'menuitem'); b.addEventListener('click', function () { button.focus(); closeMenus(); fn(); }); menu.appendChild(b); }
         menuKeys(menu);
-        item(tr.classList.contains('isopen') ? __('Close', 'fastpix') : __('Edit', 'fastpix'), '', function () { toggleOpen(tr, video.id); });
-        item(__('Copy shortcode', 'fastpix'), '', function () { copyEmbed(video.id, button); });   // owner 2026-09-09: "Copy embed" was the same call twice
-        if (cfg.analyticsUrl) { item(__('View analytics', 'fastpix'), '', function () { location.href = cfg.analyticsUrl + '&video=' + video.id; }); }
+        item(tr.classList.contains('isopen') ? __('Close', 'fastpix-io') : __('Edit', 'fastpix-io'), '', function () { toggleOpen(tr, video.id); });
+        item(__('Copy shortcode', 'fastpix-io'), '', function () { copyEmbed(video.id, button); });   // owner 2026-09-09: "Copy embed" was the same call twice
+        if (cfg.analyticsUrl) { item(__('View analytics', 'fastpix-io'), '', function () { location.href = cfg.analyticsUrl + '&video=' + video.id; }); }
         if (cfg.canDelete) {
             video.status === 'Unavailable'
-                ? item(__('Remove from library…', 'fastpix'), 'del', function () { removeVideo(video.id, video.title); })
-                : item(__('Delete…', 'fastpix'), 'del', function () { deleteVideo(video.id, video.title); });
+                ? item(__('Remove from library…', 'fastpix-io'), 'del', function () { removeVideo(video.id, video.title); })
+                : item(__('Delete…', 'fastpix-io'), 'del', function () { deleteVideo(video.id, video.title); });
         }
         button.parentNode.appendChild(menu);
         placeMenu(menu, button);
@@ -444,17 +444,17 @@
             var posts = (u.ok && u.json && u.json.posts) ? u.json.posts : [];
             var usageNote = '';
             if (posts.length) {
-                var names = posts.slice(0, 5).map(function (p) { return '• ' + (p.title || sprintf(__('Post #%d', 'fastpix'), p.post_id)); }).join('\n');
-                var more = posts.length > 5 ? '\n' + sprintf(__('…and %d more', 'fastpix'), posts.length - 5) : '';
-                usageNote = '\n\n' + sprintf(_n('Used in %d post:', 'Used in %d posts:', posts.length, 'fastpix'), posts.length) + '\n' + names + more +
-                    '\n' + __('They keep working from the saved poster and a link.', 'fastpix');
+                var names = posts.slice(0, 5).map(function (p) { return '• ' + (p.title || sprintf(__('Post #%d', 'fastpix-io'), p.post_id)); }).join('\n');
+                var more = posts.length > 5 ? '\n' + sprintf(__('…and %d more', 'fastpix-io'), posts.length - 5) : '';
+                usageNote = '\n\n' + sprintf(_n('Used in %d post:', 'Used in %d posts:', posts.length, 'fastpix-io'), posts.length) + '\n' + names + more +
+                    '\n' + __('They keep working from the saved poster and a link.', 'fastpix-io');
             }
-            fpDialog.confirm({ title: sprintf(__('Delete "%s" from this site?', 'fastpix'), title || __('this video', 'fastpix')), message: usageNote + '\n\n' + __('Nothing is deleted on FastPix unless you say so next.', 'fastpix'), ok: __('Delete', 'fastpix'), danger: true }).then(function (ok) {
+            fpDialog.confirm({ title: sprintf(__('Delete "%s" from this site?', 'fastpix-io'), title || __('this video', 'fastpix-io')), message: usageNote + '\n\n' + __('Nothing is deleted on FastPix unless you say so next.', 'fastpix-io'), ok: __('Delete', 'fastpix-io'), danger: true }).then(function (ok) {
                 if (!ok) { return; }
-                return fpDialog.confirm({ title: __('Also delete it on FastPix?', 'fastpix'), message: __('“Delete on FastPix too” removes it from your FastPix account as well — anything else that plays it stops working, and it can’t be undone. “Only this site” removes it from this library and leaves it on FastPix.', 'fastpix'), ok: __('Delete on FastPix too', 'fastpix'), cancel: __('Only this site', 'fastpix'), danger: true }).then(function (alsoPlatform) {
+                return fpDialog.confirm({ title: __('Also delete it on FastPix?', 'fastpix-io'), message: __('“Delete on FastPix too” removes it from your FastPix account as well — anything else that plays it stops working, and it can’t be undone. “Only this site” removes it from this library and leaves it on FastPix.', 'fastpix-io'), ok: __('Delete on FastPix too', 'fastpix-io'), cancel: __('Only this site', 'fastpix-io'), danger: true }).then(function (alsoPlatform) {
                 if (alsoPlatform === null) { return; }   // Escape / backdrop = dismissed, not "only this site"
                     api('DELETE', '/videos/' + id + '?delete_on_platform=' + (alsoPlatform ? 'true' : 'false')).then(function (res) {
-                        if (res.ok) { query(false); } else { fpDialog.alert((res.json && res.json.message) || __('Could not delete.', 'fastpix')); }
+                        if (res.ok) { query(false); } else { fpDialog.alert((res.json && res.json.message) || __('Could not delete.', 'fastpix-io')); }
                     });
                 });
             });
@@ -468,12 +468,12 @@
         api('GET', '/videos/' + id + '/usage').then(function (u) {
             var posts = (u.ok && u.json && u.json.posts) ? u.json.posts : [];
             var usageNote = posts.length
-                ? '\n\n' + sprintf(_n('Still embedded in %d post — that embed will show "video not found" instead of the saved poster.', 'Still embedded in %d posts — those embeds will show "video not found" instead of the saved poster.', posts.length, 'fastpix'), posts.length)
+                ? '\n\n' + sprintf(_n('Still embedded in %d post — that embed will show "video not found" instead of the saved poster.', 'Still embedded in %d posts — those embeds will show "video not found" instead of the saved poster.', posts.length, 'fastpix-io'), posts.length)
                 : '';
-            fpDialog.confirm({ title: sprintf(__('Remove "%s" from the library?', 'fastpix'), title || __('this video', 'fastpix')), message: usageNote + '\n\n' + __('The record and its local data go for good. Nothing changes on FastPix.', 'fastpix'), ok: __('Remove', 'fastpix'), danger: true }).then(function (ok) {
+            fpDialog.confirm({ title: sprintf(__('Remove "%s" from the library?', 'fastpix-io'), title || __('this video', 'fastpix-io')), message: usageNote + '\n\n' + __('The record and its local data go for good. Nothing changes on FastPix.', 'fastpix-io'), ok: __('Remove', 'fastpix-io'), danger: true }).then(function (ok) {
                 if (!ok) { return; }
                 api('DELETE', '/videos/' + id + '?purge=true').then(function (res) {
-                    if (res.ok) { query(false); } else { fpDialog.alert((res.json && res.json.message) || __('Could not remove.', 'fastpix')); }
+                    if (res.ok) { query(false); } else { fpDialog.alert((res.json && res.json.message) || __('Could not remove.', 'fastpix-io')); }
                 });
             });
         });
@@ -488,8 +488,8 @@
 
     function markOpen(tr, on) {
         tr.classList.toggle('isopen', on);
-        var chev = tr.querySelector('.chev'); if (chev) { chev.classList.toggle('open', on); chev.setAttribute('aria-expanded', String(on)); chev.title = on ? __('Collapse', 'fastpix') : __('Expand', 'fastpix'); }
-        var edit = tr.querySelector('.act-edit'); if (edit) { edit.textContent = on ? __('Close', 'fastpix') : __('Edit', 'fastpix'); }
+        var chev = tr.querySelector('.chev'); if (chev) { chev.classList.toggle('open', on); chev.setAttribute('aria-expanded', String(on)); chev.title = on ? __('Collapse', 'fastpix-io') : __('Expand', 'fastpix-io'); }
+        var edit = tr.querySelector('.act-edit'); if (edit) { edit.textContent = on ? __('Close', 'fastpix-io') : __('Edit', 'fastpix-io'); }
     }
     function h(tag, cls, text) { var e = document.createElement(tag); if (cls) { e.className = cls; } if (text !== undefined && text !== null) { e.textContent = text; } return e; }
     // Escapes &<> via textContent AND quotes, since esc() output also lands in
@@ -527,11 +527,11 @@
     function langName(code) { code = String(code || ''); return LANG_NAME[code] || LANG_NAME[code.split('-')[0]] || code; }
     // Languages the dashboard marks Beta (docs, 2026-09-20) — label only, never sent to the platform. [QA U5]
     var BETA = { pl: 1, ru: 1, nl: 1, ca: 1, tr: 1, sv: 1, uk: 1, no: 1, fi: 1, sk: 1, el: 1, cs: 1, hr: 1, da: 1, ro: 1, bg: 1 };
-    function langLabel(code) { return langName(code) + (BETA[String(code || '').split('-')[0]] ? ' · ' + __('Beta', 'fastpix') : ''); }
-    var AI_LABELS = { chapters: __('Chapters', 'fastpix'), summary: __('Summary', 'fastpix'), entities: __('People & places mentioned', 'fastpix'), moderation: __('Moderation', 'fastpix'), transcript: __('Transcript', 'fastpix'), subtitles: __('Subtitles', 'fastpix') };
+    function langLabel(code) { return langName(code) + (BETA[String(code || '').split('-')[0]] ? ' · ' + __('Beta', 'fastpix-io') : ''); }
+    var AI_LABELS = { chapters: __('Chapters', 'fastpix-io'), summary: __('Summary', 'fastpix-io'), entities: __('People & places mentioned', 'fastpix-io'), moderation: __('Moderation', 'fastpix-io'), transcript: __('Transcript', 'fastpix-io'), subtitles: __('Subtitles', 'fastpix-io') };
     function aiLabel(kind) { return AI_LABELS[kind] || kind; }
     // The same three words the ACCESS column, its filter and every policy dropdown use. (owner 2026-09-22)
-    var ACCESS_LABEL = { public: __('Public', 'fastpix'), private: __('Private', 'fastpix'), drm: __('DRM', 'fastpix') };
+    var ACCESS_LABEL = { public: __('Public', 'fastpix-io'), private: __('Private', 'fastpix-io'), drm: __('DRM', 'fastpix-io') };
     // phrase = true: a whole translatable sentence ("5 minutes ago") for track rows. Without it the
     // live list gets its short units and the 'now' / 'yesterday' keys agoPhrase() translates. (QA L25)
     function timeAgo(iso, phrase) {
@@ -540,18 +540,18 @@
         if (isNaN(t)) { return ''; }
         var s = Math.max(0, Math.round((Date.now() - t) / 1000));
         if (phrase) {
-            if (s < 60) { return __('just now', 'fastpix'); }
+            if (s < 60) { return __('just now', 'fastpix-io'); }
             var n = s < 3600 ? Math.round(s / 60) : Math.round(s / 3600);
             /* translators: %s: a number of minutes */
-            if (s < 3600) { return sprintf(_n('%s minute ago', '%s minutes ago', n, 'fastpix'), n); }
+            if (s < 3600) { return sprintf(_n('%s minute ago', '%s minutes ago', n, 'fastpix-io'), n); }
             /* translators: %s: a number of hours */
-            if (s < 86400) { return sprintf(_n('%s hour ago', '%s hours ago', n, 'fastpix'), n); }
+            if (s < 86400) { return sprintf(_n('%s hour ago', '%s hours ago', n, 'fastpix-io'), n); }
             n = Math.round(s / 86400);
             /* translators: %s: a number of days */
-            return n === 1 ? __('yesterday', 'fastpix') : sprintf(_n('%s day ago', '%s days ago', n, 'fastpix'), n);
+            return n === 1 ? __('yesterday', 'fastpix-io') : sprintf(_n('%s day ago', '%s days ago', n, 'fastpix-io'), n);
         }
-        if (s < 60) { return 'now'; } if (s < 3600) { return sprintf(__('%d min', 'fastpix'), Math.round(s / 60)); } if (s < 86400) { return sprintf(__('%d h', 'fastpix'), Math.round(s / 3600)); }
-        var d = Math.round(s / 86400); return d === 1 ? 'yesterday' : sprintf(__('%d d', 'fastpix'), d);   // 'now' / 'yesterday' stay keys — agoPhrase() translates them
+        if (s < 60) { return 'now'; } if (s < 3600) { return sprintf(__('%d min', 'fastpix-io'), Math.round(s / 60)); } if (s < 86400) { return sprintf(__('%d h', 'fastpix-io'), Math.round(s / 3600)); }
+        var d = Math.round(s / 86400); return d === 1 ? 'yesterday' : sprintf(__('%d d', 'fastpix-io'), d);   // 'now' / 'yesterday' stay keys — agoPhrase() translates them
     }
 
     var openSeq = 0;   // only the latest open may mount its panel — quick clicks leave no orphans [QA L19]
@@ -601,26 +601,26 @@
         /* ================= LEFT: Basics ================= */
         // Title only (frame 9376:105215): "Who can watch" is fixed at creation and lives under More options.
         var basics = h('div', 'fp-o-card fp-o-basics');
-        var tf = h('label', 'fp-o-field'); tf.appendChild(h('span', 'fp-o-lab', __('Title', 'fastpix')));
-        var titleIn = h('input', 'fp-o-in'); titleIn.type = 'text'; titleIn.placeholder = __('Title', 'fastpix'); titleIn.value = v.title || ''; titleIn.disabled = ro; tf.appendChild(titleIn); basics.appendChild(tf);
-        basics.appendChild(h('p', 'fp-o-hint', __('Edits here are sent to FastPix, and a title changed on the FastPix dashboard shows up here.', 'fastpix')));
+        var tf = h('label', 'fp-o-field'); tf.appendChild(h('span', 'fp-o-lab', __('Title', 'fastpix-io')));
+        var titleIn = h('input', 'fp-o-in'); titleIn.type = 'text'; titleIn.placeholder = __('Title', 'fastpix-io'); titleIn.value = v.title || ''; titleIn.disabled = ro; tf.appendChild(titleIn); basics.appendChild(tf);
+        basics.appendChild(h('p', 'fp-o-hint', __('Edits here are sent to FastPix, and a title changed on the FastPix dashboard shows up here.', 'fastpix-io')));
         if (v.other_workspace) {   // kept for its embeds; nothing here can reach FastPix with the current credentials
-            basics.appendChild(msg(__('This video belongs to a previously connected FastPix workspace. Posts that embed it are unchanged; reconnect that workspace to manage it.', 'fastpix'), 'warn'));
+            basics.appendChild(msg(__('This video belongs to a previously connected FastPix workspace. Posts that embed it are unchanged; reconnect that workspace to manage it.', 'fastpix-io'), 'warn'));
         }
         if (v.suggestions && v.suggestions.title && !ro) {
-            var sug = msg(__('The FastPix dashboard has a different title: ', 'fastpix')); sug.appendChild(h('b', null, v.suggestions.title)); sug.appendChild(document.createTextNode(' '));
-            sug.appendChild(bt(__('Use it', 'fastpix'), 'fp-o-link', function () { api('PATCH', '/videos/' + id, { suggestion: 'accept_title' }).then(function () { refreshOpen(tr, id); query(false); }); }));
-            sug.appendChild(bt(__('Keep mine', 'fastpix'), 'fp-o-link', function () { api('PATCH', '/videos/' + id, { suggestion: 'dismiss' }).then(function () { refreshOpen(tr, id); }); }));
+            var sug = msg(__('The FastPix dashboard has a different title: ', 'fastpix-io')); sug.appendChild(h('b', null, v.suggestions.title)); sug.appendChild(document.createTextNode(' '));
+            sug.appendChild(bt(__('Use it', 'fastpix-io'), 'fp-o-link', function () { api('PATCH', '/videos/' + id, { suggestion: 'accept_title' }).then(function () { refreshOpen(tr, id); query(false); }); }));
+            sug.appendChild(bt(__('Keep mine', 'fastpix-io'), 'fp-o-link', function () { api('PATCH', '/videos/' + id, { suggestion: 'dismiss' }).then(function () { refreshOpen(tr, id); }); }));
             basics.appendChild(sug);
         }
         if (st === 'failed' && !ro) {
             // No platform call re-processes a failed media; the honest way back is a fresh upload. [QA L16]
-            var f = msg(__('This video could not be processed', 'fastpix') + (v.error_code ? ' — ' + v.error_code : '') + '. ' + __('Nothing was published and nothing was charged. Upload it again from', 'fastpix') + ' ', 'err');
-            var again = h('a', 'fp-o-link', __('Add media', 'fastpix')); again.href = cfg.addMediaUrl; f.appendChild(again); f.appendChild(document.createTextNode('.')); basics.appendChild(f);
+            var f = msg(__('This video could not be processed', 'fastpix-io') + (v.error_code ? ' — ' + v.error_code : '') + '. ' + __('Nothing was published and nothing was charged. Upload it again from', 'fastpix-io') + ' ', 'err');
+            var again = h('a', 'fp-o-link', __('Add media', 'fastpix-io')); again.href = cfg.addMediaUrl; f.appendChild(again); f.appendChild(document.createTextNode('.')); basics.appendChild(f);
         }
         if (st === 'unavailable') {
-            var g = msg(__('This video no longer exists on FastPix. Nothing here has been deleted and no post has been edited; posts using it show the saved poster and a link. ', 'fastpix'), 'err');
-            if (cfg.canDelete && !ro) { g.appendChild(bt(__('Remove from library', 'fastpix'), 'fp-o-link del', function () { removeVideo(id, v.title); })); }
+            var g = msg(__('This video no longer exists on FastPix. Nothing here has been deleted and no post has been edited; posts using it show the saved poster and a link. ', 'fastpix-io'), 'err');
+            if (cfg.canDelete && !ro) { g.appendChild(bt(__('Remove from library', 'fastpix-io'), 'fp-o-link del', function () { removeVideo(id, v.title); })); }
             basics.appendChild(g);
         }
         left.appendChild(basics);
@@ -636,28 +636,28 @@
         function thumbUrl(t) { return cfg.imageBase + '/' + encodeURIComponent(v.playback_id) + '/thumbnail.png?time=' + t + '&width=184'; }
         function fmt(s) { s = Number(s) || 0; return Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0'); }
 
-        var pc = h('div', 'fp-o-card fp-o-poster'); pc.appendChild(titleRow(__('Poster image', 'fastpix'), __('The still shown before playback. Pick a frame from the video or use your own image URL.', 'fastpix')));
+        var pc = h('div', 'fp-o-card fp-o-poster'); pc.appendChild(titleRow(__('Poster image', 'fastpix-io'), __('The still shown before playback. Pick a frame from the video or use your own image URL.', 'fastpix-io')));
         var prow = h('div', 'fp-o-prow'), thumb = h('span', 'fp-o-thumb'), tt = h('span', 'fp-o-tbadge', '0:01'); thumb.appendChild(tt); prow.appendChild(thumb);
-        var pinfo = h('div', 'fp-o-pinfo'), pline = h('div', 'fp-o-pline'), plab = h('span', null, __('Using the frame at ', 'fastpix')), ptime = h('span', 'fp-o-mono', '0:01');
+        var pinfo = h('div', 'fp-o-pinfo'), pline = h('div', 'fp-o-pline'), plab = h('span', null, __('Using the frame at ', 'fastpix-io')), ptime = h('span', 'fp-o-mono', '0:01');
         pline.appendChild(plab); pline.appendChild(ptime); pinfo.appendChild(pline);
         var pbtns = h('div', 'fp-o-pbtns');
-        var pickBtn = bt(__('Pick a frame', 'fastpix'), 'fp-o-btn sm accent'), urlBtn = bt(__('Use image URL', 'fastpix'), 'fp-o-btn sm');
+        var pickBtn = bt(__('Pick a frame', 'fastpix-io'), 'fp-o-btn sm accent'), urlBtn = bt(__('Use image URL', 'fastpix-io'), 'fp-o-btn sm');
         pickBtn.setAttribute('aria-expanded', 'false'); urlBtn.setAttribute('aria-expanded', 'false');
         pbtns.appendChild(pickBtn); pbtns.appendChild(urlBtn); pinfo.appendChild(pbtns); prow.appendChild(pinfo); pc.appendChild(prow);
 
         var fm = h('div', 'fp-o-reveal'); fm.hidden = true;
         // ponytail: no mini player any more to read the real length from — an unsynced duration falls back to a 60 s slider; the number box stays uncapped.
         var max = Math.floor(v.duration || 0) || 60;
-        var range = h('input'); range.type = 'range'; range.min = 0; range.max = max; range.value = 1; range.setAttribute('aria-label', __('Poster frame', 'fastpix')); range.disabled = held; fm.appendChild(range);
-        var fr = h('div', 'fp-o-row'), num = h('input', 'fp-o-in num'); num.type = 'number'; num.min = 0; if (v.duration) { num.max = max; } num.value = 1; num.disabled = held; num.setAttribute('aria-label', __('Poster frame (seconds)', 'fastpix'));
-        fr.appendChild(num); fr.appendChild(h('span', 'fp-o-hint', __('seconds in', 'fastpix'))); fm.appendChild(fr);
+        var range = h('input'); range.type = 'range'; range.min = 0; range.max = max; range.value = 1; range.setAttribute('aria-label', __('Poster frame', 'fastpix-io')); range.disabled = held; fm.appendChild(range);
+        var fr = h('div', 'fp-o-row'), num = h('input', 'fp-o-in num'); num.type = 'number'; num.min = 0; if (v.duration) { num.max = max; } num.value = 1; num.disabled = held; num.setAttribute('aria-label', __('Poster frame (seconds)', 'fastpix-io'));
+        fr.appendChild(num); fr.appendChild(h('span', 'fp-o-hint', __('seconds in', 'fastpix-io'))); fm.appendChild(fr);
         var um = h('div', 'fp-o-reveal'); um.hidden = true;
-        var urlIn = h('input', 'fp-o-in'); urlIn.type = 'text'; urlIn.placeholder = 'https://example.com/poster.jpg'; urlIn.setAttribute('aria-label', __('Poster image URL', 'fastpix')); um.appendChild(urlIn);
+        var urlIn = h('input', 'fp-o-in'); urlIn.type = 'text'; urlIn.placeholder = 'https://example.com/poster.jpg'; urlIn.setAttribute('aria-label', __('Poster image URL', 'fastpix-io')); um.appendChild(urlIn);
         pc.appendChild(fm); pc.appendChild(um); right.appendChild(pc);
 
         function paintPoster() {
             var useUrl = mode === 'url' && posterUrl;
-            plab.textContent = useUrl ? __('Using your image', 'fastpix') : __('Using the frame at ', 'fastpix');
+            plab.textContent = useUrl ? __('Using your image', 'fastpix-io') : __('Using the frame at ', 'fastpix-io');
             ptime.hidden = !!useUrl; ptime.textContent = tt.textContent = fmt(frameT);
             thumb.style.backgroundImage = useUrl ? 'url(' + JSON.stringify(posterUrl) + ')' : (isPublic ? 'url(' + thumbUrl(frameT) + ')' : '');
             tt.hidden = !!useUrl;
@@ -671,12 +671,12 @@
         urlBtn.addEventListener('click', function () { mode = 'url'; fm.hidden = true; um.hidden = !um.hidden; paintPoster(); if (!um.hidden) { urlIn.focus(); } });
 
         /* ================= RIGHT: Player options ================= */
-        var po = h('div', 'fp-o-card fp-o-player'); po.appendChild(titleRow(__('Player options', 'fastpix'), __('How this video plays where you embed it. The shortcode updates as you toggle.\n\nPlayer controls: the play button, progress bar, volume and fullscreen. Off gives a bare video.\nChapters: chapter markers on the progress bar so viewers can jump to a section. Needs the Chapters extra.\nTranscript: a written, timestamped text block under the video (not the captions — the player shows those on its own from the subtitle track). It appears only once a transcript has been captured for this video.\nClick to play: shows the poster and waits for a click instead of loading the video at once.\n\nAutoplay, Muted and Loop do what they say. Autoplay only works while muted.', 'fastpix')));
+        var po = h('div', 'fp-o-card fp-o-player'); po.appendChild(titleRow(__('Player options', 'fastpix-io'), __('How this video plays where you embed it. The shortcode updates as you toggle.\n\nPlayer controls: the play button, progress bar, volume and fullscreen. Off gives a bare video.\nChapters: chapter markers on the progress bar so viewers can jump to a section. Needs the Chapters extra.\nTranscript: a written, timestamped text block under the video (not the captions — the player shows those on its own from the subtitle track). It appears only once a transcript has been captured for this video.\nClick to play: shows the poster and waits for a click instead of loading the video at once.\n\nAutoplay, Muted and Loop do what they say. Autoplay only works while muted.', 'fastpix-io')));
         var chips = h('div', 'fp-o-chips');
-        [['controls', __('Player controls', 'fastpix')], ['autoplay', __('Autoplay', 'fastpix')], ['muted', __('Muted', 'fastpix')], ['loop', __('Loop', 'fastpix')], ['chapters', __('Chapters', 'fastpix')], ['transcript', __('Transcript', 'fastpix')], ['click', __('Click to play', 'fastpix')]].forEach(function (k) {
+        [['controls', __('Player controls', 'fastpix-io')], ['autoplay', __('Autoplay', 'fastpix-io')], ['muted', __('Muted', 'fastpix-io')], ['loop', __('Loop', 'fastpix-io')], ['chapters', __('Chapters', 'fastpix-io')], ['transcript', __('Transcript', 'fastpix-io')], ['click', __('Click to play', 'fastpix-io')]].forEach(function (k) {
             var c = bt('', 'fp-o-chip');
             if (k[0] === 'transcript' && !(v.ai || []).some(function (r) { return r.kind === 'transcript' && r.state === 'ready'; })) {
-                c.disabled = true; c.title = __('No transcript for this video yet — it is captured from the subtitle track once subtitles exist.', 'fastpix');
+                c.disabled = true; c.title = __('No transcript for this video yet — it is captured from the subtitle track once subtitles exist.', 'fastpix-io');
             }
             function paint() { c.textContent = k[1] + (on[k[0]] ? ' ✓' : ''); c.setAttribute('aria-pressed', String(!!on[k[0]])); }
             c.addEventListener('click', function () { on[k[0]] = !on[k[0]]; paint(); build(); });
@@ -685,27 +685,27 @@
         po.appendChild(chips);
         // Course lesson (LMS features on): track_viewer + complete_at ride the
         // shortcode/block and only take effect on lesson post types.
-        var atIn = h('input', 'fp-o-in num'); atIn.type = 'number'; atIn.min = 10; atIn.max = 100; atIn.value = 90; atIn.setAttribute('aria-label', __('Complete at (percent watched)', 'fastpix'));
+        var atIn = h('input', 'fp-o-in num'); atIn.type = 'number'; atIn.min = 10; atIn.max = 100; atIn.value = 90; atIn.setAttribute('aria-label', __('Complete at (percent watched)', 'fastpix-io'));
         atIn.addEventListener('input', function () { var n = parseInt(atIn.value, 10); lesson.at = (n >= 10 && n <= 100) ? n : 90; build(); });
         if (cfg.lms) {
-            var ls = h('div', 'fp-o-lesson'); ls.appendChild(h('h3', 'fp-o-h', __('Course lessons', 'fastpix')));
-            var tv = bt(__('Track viewer', 'fastpix'), 'fp-o-chip mini');
+            var ls = h('div', 'fp-o-lesson'); ls.appendChild(h('h3', 'fp-o-h', __('Course lessons', 'fastpix-io')));
+            var tv = bt(__('Track viewer', 'fastpix-io'), 'fp-o-chip mini');
             // Owner 2026-09-09: Complete at belongs to Track viewer — it lights up with it and rides the shortcode/block whenever tracking is on (90 included).
-            function paintTv() { tv.textContent = __('Track viewer', 'fastpix') + (lesson.track ? ' ✓' : ''); tv.setAttribute('aria-pressed', String(lesson.track)); atIn.disabled = !lesson.track; atIn.classList.toggle('on', lesson.track); }
+            function paintTv() { tv.textContent = __('Track viewer', 'fastpix-io') + (lesson.track ? ' ✓' : ''); tv.setAttribute('aria-pressed', String(lesson.track)); atIn.disabled = !lesson.track; atIn.classList.toggle('on', lesson.track); }
             tv.addEventListener('click', function () { lesson.track = !lesson.track; paintTv(); build(); }); paintTv();
             atIn.className = 'fp-o-in mini';
-            var lr = h('div', 'fp-o-row'); lr.appendChild(tv); lr.appendChild(h('span', 'fp-o-hint', __('Complete at', 'fastpix'))); lr.appendChild(atIn);
-            ls.appendChild(lr); ls.appendChild(h('p', 'fp-o-hint fp-o-lhint', __('% watched — on lesson pages', 'fastpix'))); po.appendChild(ls);
+            var lr = h('div', 'fp-o-row'); lr.appendChild(tv); lr.appendChild(h('span', 'fp-o-hint', __('Complete at', 'fastpix-io'))); lr.appendChild(atIn);
+            ls.appendChild(lr); ls.appendChild(h('p', 'fp-o-hint fp-o-lhint', __('% watched — on lesson pages', 'fastpix-io'))); po.appendChild(ls);
         }
         right.appendChild(po);
 
         /* ================= RIGHT: Shortcode ================= */
         var code = h('code', 'fp-o-mono');
-        var scc = h('div', 'fp-o-card fp-o-shortcode'); scc.appendChild(titleRow(__('Shortcode', 'fastpix'), __('Paste this into any post or page. It carries the poster and player options chosen here.', 'fastpix')));
+        var scc = h('div', 'fp-o-card fp-o-shortcode'); scc.appendChild(titleRow(__('Shortcode', 'fastpix-io'), __('Paste this into any post or page. It carries the poster and player options chosen here.', 'fastpix-io')));
         var scrow = h('div', 'fp-o-scrow'), codeBox = h('div', 'fp-o-code'); codeBox.appendChild(code); scrow.appendChild(codeBox); scc.appendChild(scrow);
         var scr = h('div', 'fp-o-scbtns');
-        var copyBtn = bt(__('Copy shortcode', 'fastpix'), 'fp-o-btn sm accent', function () { copyText(code.textContent, null); var w = copyBtn.textContent; copyBtn.textContent = __('Copied', 'fastpix'); setTimeout(function () { copyBtn.textContent = w; }, 1100); });
-        var blockBtn = bt(__('Insert block', 'fastpix'), 'fp-o-btn sm', function () {
+        var copyBtn = bt(__('Copy shortcode', 'fastpix-io'), 'fp-o-btn sm accent', function () { copyText(code.textContent, null); var w = copyBtn.textContent; copyBtn.textContent = __('Copied', 'fastpix-io'); setTimeout(function () { copyBtn.textContent = w; }, 1100); });
+        var blockBtn = bt(__('Insert block', 'fastpix-io'), 'fp-o-btn sm', function () {
             // The block form of the same embed, ready to paste into the editor (Ctrl/Cmd+V on a new line).
             var attrs = { videoId: v.media_id }; ['autoplay', 'muted', 'loop'].forEach(function (k) { if (on[k]) { attrs[k] = true; } }); if (on.chapters) { attrs.showChapters = true; } if (on.transcript) { attrs.showTranscript = true; }
             if (!on.controls) { attrs.controls = false; }
@@ -715,78 +715,78 @@
             if (lesson.track) { attrs.completeAt = lesson.at; }
             if (colourIn.value && colourIn.value.toLowerCase() !== '#6d22cd') { attrs.accentColour = colourIn.value; }
             if (mode === 'frame' && frameT !== 1) { attrs.thumbnailTime = frameT; } if (mode === 'url' && posterUrl) { attrs.poster = posterUrl; }
-            copyText('<!-- wp:fastpix/video ' + JSON.stringify(attrs) + ' /-->', null); var w = blockBtn.textContent; blockBtn.textContent = __('Block copied — paste in the editor', 'fastpix'); setTimeout(function () { blockBtn.textContent = w; }, 1800);
+            copyText('<!-- wp:fastpix/video ' + JSON.stringify(attrs) + ' /-->', null); var w = blockBtn.textContent; blockBtn.textContent = __('Block copied — paste in the editor', 'fastpix-io'); setTimeout(function () { blockBtn.textContent = w; }, 1800);
         });
         scr.appendChild(copyBtn); scr.appendChild(blockBtn); scrow.appendChild(scr); left.appendChild(scc);
 
         /* ================= RIGHT: Cancel / Save ================= */
         var acts = h('div', 'fp-o-acts'), stateEl = h('span', 'fp-o-state', '');
-        var cancelBtn = bt(__('Cancel', 'fastpix'), 'fp-o-btn', function () { toggleOpen(tr, id); });
-        var saveBtn = bt(__('Save changes', 'fastpix'), 'fp-o-btn primary', null); saveBtn.disabled = true;
+        var cancelBtn = bt(__('Cancel', 'fastpix-io'), 'fp-o-btn', function () { toggleOpen(tr, id); });
+        var saveBtn = bt(__('Save changes', 'fastpix-io'), 'fp-o-btn primary', null); saveBtn.disabled = true;
         acts.appendChild(stateEl); acts.appendChild(cancelBtn); acts.appendChild(saveBtn); right.appendChild(acts);
 
         /* ================= RIGHT: More options ================= */
-        var more = h('details', 'fp-o-more'), sum = h('summary', null, __('More options', 'fastpix')); more.appendChild(sum);
+        var more = h('details', 'fp-o-more'), sum = h('summary', null, __('More options', 'fastpix-io')); more.appendChild(sum);
         var mb = h('div', 'fp-o-morebody'); more.appendChild(mb);
         function mrow(label, fill) { var r = h('div', 'fp-o-mrow'); r.appendChild(h('span', 'fp-o-mlab', label)); var c = h('div', 'fp-o-mval'); fill(c); r.appendChild(c); mb.appendChild(r); return r; }
         function check(label, checked, fn) { var l = h('label', 'fp-o-check'), cb = h('input'); cb.type = 'checkbox'; cb.checked = checked; cb.addEventListener('change', function () { fn(cb.checked); }); l.appendChild(cb); l.appendChild(h('span', null, label)); return l; }
 
         // Downloadable file — FastPix mp4Support: none | capped_4k | audioOnly | audioOnly,capped_4k (docs).
         var drm = v.access_policy === 'drm';
-        var dlSel = h('select', 'fp-o-in'); dlSel.setAttribute('aria-label', __('Downloadable file', 'fastpix'));
-        [['off', __('Off', 'fastpix')], ['video', __('Video (MP4)', 'fastpix')], ['audio', __('Audio only (M4A)', 'fastpix')], ['both', __('Video + audio', 'fastpix')]].forEach(function (o) { var op = document.createElement('option'); op.value = o[0]; op.textContent = o[1]; dlSel.appendChild(op); });
+        var dlSel = h('select', 'fp-o-in'); dlSel.setAttribute('aria-label', __('Downloadable file', 'fastpix-io'));
+        [['off', __('Off', 'fastpix-io')], ['video', __('Video (MP4)', 'fastpix-io')], ['audio', __('Audio only (M4A)', 'fastpix-io')], ['both', __('Video + audio', 'fastpix-io')]].forEach(function (o) { var op = document.createElement('option'); op.value = o[0]; op.textContent = o[1]; dlSel.appendChild(op); });
         var dlSaved = v.mp4_support || 'off'; dlSel.value = dlSaved; dlSel.disabled = drm || held || ro;
-        mrow(__('Downloadable file', 'fastpix'), function (c) { c.appendChild(dlSel); c.appendChild(h('span', 'fp-o-hint', drm ? __('Unavailable with DRM — protection applies to streaming only.', 'fastpix') : __('Let visitors save a copy. Separate from who can watch it.', 'fastpix'))); });
+        mrow(__('Downloadable file', 'fastpix-io'), function (c) { c.appendChild(dlSel); c.appendChild(h('span', 'fp-o-hint', drm ? __('Unavailable with DRM — protection applies to streaming only.', 'fastpix-io') : __('Let visitors save a copy. Separate from who can watch it.', 'fastpix-io'))); });
 
-        mrow(__('Who can watch', 'fastpix'), function (c) { c.textContent = ACCESS_LABEL[v.access_policy] || ACCESS_LABEL.public; c.title = __('Set when the video was created — it cannot change here.', 'fastpix'); });
-        mrow(__('Keyboard shortcuts', 'fastpix'), function (c) { c.appendChild(check(__('Let viewers use the keyboard', 'fastpix'), true, function (val) { on.keys = val; build(); })); });
+        mrow(__('Who can watch', 'fastpix-io'), function (c) { c.textContent = ACCESS_LABEL[v.access_policy] || ACCESS_LABEL.public; c.title = __('Set when the video was created — it cannot change here.', 'fastpix-io'); });
+        mrow(__('Keyboard shortcuts', 'fastpix-io'), function (c) { c.appendChild(check(__('Let viewers use the keyboard', 'fastpix-io'), true, function (val) { on.keys = val; build(); })); });
 
-        var startIn = h('input', 'fp-o-in num'); startIn.type = 'number'; startIn.min = 0; startIn.value = 0; startIn.setAttribute('aria-label', __('Start at (seconds)', 'fastpix')); startIn.addEventListener('input', build);
-        mrow(__('Start at', 'fastpix'), function (c) { c.appendChild(startIn); c.appendChild(h('span', 'fp-o-hint', __('seconds', 'fastpix'))); });
+        var startIn = h('input', 'fp-o-in num'); startIn.type = 'number'; startIn.min = 0; startIn.value = 0; startIn.setAttribute('aria-label', __('Start at (seconds)', 'fastpix-io')); startIn.addEventListener('input', build);
+        mrow(__('Start at', 'fastpix-io'), function (c) { c.appendChild(startIn); c.appendChild(h('span', 'fp-o-hint', __('seconds', 'fastpix-io'))); });
 
-        var colourIn = h('input', 'fp-o-colour'); colourIn.type = 'color'; colourIn.value = '#6d22cd'; colourIn.setAttribute('aria-label', __('Accent colour', 'fastpix')); colourIn.addEventListener('input', build);
-        mrow(__('Accent colour', 'fastpix'), function (c) { c.appendChild(colourIn); });
+        var colourIn = h('input', 'fp-o-colour'); colourIn.type = 'color'; colourIn.value = '#6d22cd'; colourIn.setAttribute('aria-label', __('Accent colour', 'fastpix-io')); colourIn.addEventListener('input', build);
+        mrow(__('Accent colour', 'fastpix-io'), function (c) { c.appendChild(colourIn); });
 
         function copyIcon(text, label) { var b = bt('⧉', 'fp-o-cp', function () { copyText(text, b); }); b.setAttribute('aria-label', label); return b; }
-        function idRow(label, value) { mrow(label, function (c) { if (value) { c.appendChild(h('code', 'fp-o-mono', value)); c.appendChild(copyIcon(value, /* translators: %s: what is copied, e.g. Media ID (QA L25) */ sprintf(__('Copy %s', 'fastpix'), label))); } else { c.textContent = '—'; } }); }
-        idRow(__('Media ID', 'fastpix'), v.media_id);
-        idRow(__('Playback ID', 'fastpix'), v.playback_id);
-        mrow(__('Duration', 'fastpix'), function (c) { c.appendChild(h('span', 'fp-o-mono', v.duration ? hhmmss(v.duration) : '—')); });
-        mrow(__('Max resolution', 'fastpix'), function (c) { c.textContent = v.max_resolution || '—'; });
-        mrow(__('Aspect ratio', 'fastpix'), function (c) { c.textContent = v.aspect_ratio || '—'; });
-        mrow(__('Source', 'fastpix'), function (c) { c.textContent = v.source || '—'; });
-        mrow(__('Quality tier', 'fastpix'), function (c) { c.textContent = v.quality_tier || '—'; });
+        function idRow(label, value) { mrow(label, function (c) { if (value) { c.appendChild(h('code', 'fp-o-mono', value)); c.appendChild(copyIcon(value, /* translators: %s: what is copied, e.g. Media ID (QA L25) */ sprintf(__('Copy %s', 'fastpix-io'), label))); } else { c.textContent = '—'; } }); }
+        idRow(__('Media ID', 'fastpix-io'), v.media_id);
+        idRow(__('Playback ID', 'fastpix-io'), v.playback_id);
+        mrow(__('Duration', 'fastpix-io'), function (c) { c.appendChild(h('span', 'fp-o-mono', v.duration ? hhmmss(v.duration) : '—')); });
+        mrow(__('Max resolution', 'fastpix-io'), function (c) { c.textContent = v.max_resolution || '—'; });
+        mrow(__('Aspect ratio', 'fastpix-io'), function (c) { c.textContent = v.aspect_ratio || '—'; });
+        mrow(__('Source', 'fastpix-io'), function (c) { c.textContent = v.source || '—'; });
+        mrow(__('Quality tier', 'fastpix-io'), function (c) { c.textContent = v.quality_tier || '—'; });
         if (v.migration && v.migration.path) {
-            mrow(__('Came from', 'fastpix'), function (c) { c.appendChild(h('code', 'fp-o-mono', v.migration.path)); });
+            mrow(__('Came from', 'fastpix-io'), function (c) { c.appendChild(h('code', 'fp-o-mono', v.migration.path)); });
             if (!v.migration.reverted_at && !v.migration.cleaned && cfg.canManage) {
-                mrow(__('Local file', 'fastpix'), function (c) { c.appendChild(document.createTextNode(__('Still on disk ', 'fastpix'))); c.appendChild(bt(__('Revert to local', 'fastpix'), 'fp-o-link', function () {
-                    var warn = v.access_policy !== 'public' ? '\n\n' + sprintf(__('This video is %s on FastPix. Reverting returns it to an unprotected file on this server.', 'fastpix'), v.access_policy) : '';
-                    fpDialog.confirm({ title: sprintf(__('Restore local playback for "%s"?', 'fastpix'), v.title || __('this video', 'fastpix')), message: __('Posts go back to playing the local file. The FastPix copy stays.', 'fastpix') + warn, ok: __('Revert', 'fastpix') }).then(function (ok) {
+                mrow(__('Local file', 'fastpix-io'), function (c) { c.appendChild(document.createTextNode(__('Still on disk ', 'fastpix-io'))); c.appendChild(bt(__('Revert to local', 'fastpix-io'), 'fp-o-link', function () {
+                    var warn = v.access_policy !== 'public' ? '\n\n' + sprintf(__('This video is %s on FastPix. Reverting returns it to an unprotected file on this server.', 'fastpix-io'), v.access_policy) : '';
+                    fpDialog.confirm({ title: sprintf(__('Restore local playback for "%s"?', 'fastpix-io'), v.title || __('this video', 'fastpix-io')), message: __('Posts go back to playing the local file. The FastPix copy stays.', 'fastpix-io') + warn, ok: __('Revert', 'fastpix-io') }).then(function (ok) {
                         if (!ok) { return; }
                         api('POST', '/migration/items/' + v.migration.item_id + '/revert').then(function () { refreshOpen(tr, id); });
                     });
                 })); });
-            } else if (v.migration.reverted_at) { mrow(__('Local file', 'fastpix'), function (c) { c.textContent = __('Playing locally since ', 'fastpix') + v.migration.reverted_at.slice(0, 10); }); }
+            } else if (v.migration.reverted_at) { mrow(__('Local file', 'fastpix-io'), function (c) { c.textContent = __('Playing locally since ', 'fastpix-io') + v.migration.reverted_at.slice(0, 10); }); }
         }
         if (cfg.analyticsUrl) {
             // A single video's numbers only mean anything beside the rest of the library — they live on Analytics, one click away.
-            var anl = h('a', 'fp-o-link fp-o-anl', __('View analytics →', 'fastpix')); anl.href = cfg.analyticsUrl + '&video=' + id; mb.appendChild(anl);
+            var anl = h('a', 'fp-o-link fp-o-anl', __('View analytics →', 'fastpix-io')); anl.href = cfg.analyticsUrl + '&video=' + id; mb.appendChild(anl);
         }
         // Owner 2026-09-09: the "More options" disclosure is not shown. Its controls still exist
         // (unmounted) because the shortcode/block builder and Save read their defaults.
         // ponytail: strip the builder's dependence on them if this stays gone.
 
         /* ================= save + shortcode ================= */
-        function renderDirty() { var n = Object.keys(dirty).length; saveBtn.disabled = !n || ro; stateEl.textContent = n ? sprintf(_n('%d unsaved change', '%d unsaved changes', n, 'fastpix'), n) : ''; }
+        function renderDirty() { var n = Object.keys(dirty).length; saveBtn.disabled = !n || ro; stateEl.textContent = n ? sprintf(_n('%d unsaved change', '%d unsaved changes', n, 'fastpix-io'), n) : ''; }
         titleIn.addEventListener('input', function () { if (titleIn.value !== (v.title || '')) { dirty.title = true; } else { delete dirty.title; } renderDirty(); });
         dlSel.addEventListener('change', function () { if (dlSel.value !== dlSaved) { dirty.download = true; } else { delete dirty.download; } renderDirty(); });
         saveBtn.addEventListener('click', function () {
-            saveBtn.disabled = true; stateEl.textContent = __('Saving…', 'fastpix');
+            saveBtn.disabled = true; stateEl.textContent = __('Saving…', 'fastpix-io');
             var body = {}; if (dirty.title) { body.title = titleIn.value; } if (dirty.download) { body.downloadable = dlSel.value; }
             api('PATCH', '/videos/' + id, body).then(function (r) {
-                if (!r.ok) { stateEl.textContent = (r.json && r.json.message) || __('Not saved.', 'fastpix'); saveBtn.disabled = false; return; }
-                v.title = titleIn.value; v.mp4_support = dlSel.value; dlSaved = dlSel.value; dirty = {}; renderDirty(); stateEl.textContent = __('Saved', 'fastpix');
-                var t = tr.querySelector('.vtitle'); if (t) { t.textContent = v.title || __('(untitled)', 'fastpix'); }
+                if (!r.ok) { stateEl.textContent = (r.json && r.json.message) || __('Not saved.', 'fastpix-io'); saveBtn.disabled = false; return; }
+                v.title = titleIn.value; v.mp4_support = dlSel.value; dlSaved = dlSel.value; dirty = {}; renderDirty(); stateEl.textContent = __('Saved', 'fastpix-io');
+                var t = tr.querySelector('.vtitle'); if (t) { t.textContent = v.title || __('(untitled)', 'fastpix-io'); }
             });
         });
         function build() {
@@ -810,19 +810,19 @@
     function subsSec(v, tr, id, held, ro) {
         var card = h('div', 'fp-o-card fp-o-subs'); card.dataset.part = 'subs';
         var tracks = (v.tracks || []).filter(function (t) { return !t.type || t.type === 'subtitle'; });
-        var head = h('div', 'fp-o-head'); head.appendChild(h('h3', 'fp-o-h', __('Subtitles', 'fastpix'))); head.appendChild(h('span', 'fp-o-count', sprintf(_n('%d language', '%d languages', tracks.length, 'fastpix'), tracks.length))); card.appendChild(head);
-        card.appendChild(h('p', 'fp-o-body', __('Written from the audio for you, or upload your own .vtt / .srt file.', 'fastpix')));
+        var head = h('div', 'fp-o-head'); head.appendChild(h('h3', 'fp-o-h', __('Subtitles', 'fastpix-io'))); head.appendChild(h('span', 'fp-o-count', sprintf(_n('%d language', '%d languages', tracks.length, 'fastpix-io'), tracks.length))); card.appendChild(head);
+        card.appendChild(h('p', 'fp-o-body', __('Written from the audio for you, or upload your own .vtt / .srt file.', 'fastpix-io')));
         var byCode = {}; tracks.forEach(function (t) { byCode[String(t.language_code || '').split('-')[0]] = t; });
         var ferr = h('p', 'fp-o-msg err'); ferr.hidden = true;
         function showErr(m) { ferr.textContent = m; ferr.hidden = false; }
         // The card is only rebuilt on success — a rebuild would wipe the error it just showed. [QA L14]
-        function patchTracks(ops, then) { return api('PATCH', '/videos/' + id, { tracks: ops }).then(function (r) { if (then) { then(r); } if (r.ok) { refreshPart(tr, id, 'subs'); } else { showErr((r.json && r.json.message) || __('Could not update the subtitle track.', 'fastpix')); } }); }
+        function patchTracks(ops, then) { return api('PATCH', '/videos/' + id, { tracks: ops }).then(function (r) { if (then) { then(r); } if (r.ok) { refreshPart(tr, id, 'subs'); } else { showErr((r.json && r.json.message) || __('Could not update the subtitle track.', 'fastpix-io')); } }); }
 
         if (!ro) {
             var row = h('div', 'fp-o-btns'), code = LANGUAGES[0][0];
             // Split button: the label generates, the caret opens the language list.
             var split = h('div', 'fp-o-split'), gen = bt('', 'fp-o-btn primary'), caret = bt('▾', 'fp-o-btn primary caret');
-            caret.setAttribute('aria-haspopup', 'listbox'); caret.setAttribute('aria-expanded', 'false'); caret.setAttribute('aria-label', __('Choose a language', 'fastpix'));
+            caret.setAttribute('aria-haspopup', 'listbox'); caret.setAttribute('aria-expanded', 'false'); caret.setAttribute('aria-label', __('Choose a language', 'fastpix-io'));
             var menu = h('ul', 'fp-o-menu'); menu.setAttribute('role', 'listbox'); menu.hidden = true;
             menu.id = 'fp-o-langs-' + id; caret.setAttribute('aria-controls', menu.id);   // [QA L24]
             var items = LANGUAGES.map(function (lg) {
@@ -831,7 +831,7 @@
             });
             function label() {
                 var ex = byCode[code];
-                gen.textContent = sprintf(ex ? __('Regenerate — %s', 'fastpix') : __('Generate — %s', 'fastpix'), langLabel(code)); gen.title = ex ? __('Already added — this replaces it', 'fastpix') : __('From the audio track', 'fastpix');
+                gen.textContent = sprintf(ex ? __('Regenerate — %s', 'fastpix-io') : __('Generate — %s', 'fastpix-io'), langLabel(code)); gen.title = ex ? __('Already added — this replaces it', 'fastpix-io') : __('From the audio track', 'fastpix-io');
                 items.forEach(function (b, i) { b.setAttribute('aria-selected', String(LANGUAGES[i][0] === code)); });
             }
             function openMenu(open) { menu.hidden = !open; caret.setAttribute('aria-expanded', String(open)); if (open) { flipMenu(menu); var cur = menu.querySelector('[aria-selected="true"]'); if (cur) { cur.focus(); } } }
@@ -845,7 +845,7 @@
             gen.disabled = caret.disabled = held;
             gen.addEventListener('click', function () {
                 var ex = byCode[code], name = langName(code);
-                gen.disabled = true; var was = gen.textContent; gen.textContent = __('Queued…', 'fastpix');
+                gen.disabled = true; var was = gen.textContent; gen.textContent = __('Queued…', 'fastpix-io');
                 var op = ex ? { action: 'generate', track_id: ex.track_id, language_code: code, language_name: name } : { action: 'generate', language_code: code, language_name: name };
                 patchTracks([op], function (r) { if (!r.ok) { gen.disabled = false; gen.textContent = was; } });
             });
@@ -858,8 +858,8 @@
             var upLang = bt('', 'fp-o-btn outline fp-o-uplang', function (e) { e.stopPropagation(); upOpen(upMenu.hidden); });
             upLang.setAttribute('aria-haspopup', 'listbox'); upLang.setAttribute('aria-expanded', 'false'); upLang.disabled = held;
             var upMenu = h('div', 'fp-o-menu fp-o-upmenu'); upMenu.hidden = true;
-            var upFind = h('input', 'fp-o-in fp-o-upfind'); upFind.type = 'search'; upFind.placeholder = __('Search…', 'fastpix'); upFind.setAttribute('aria-label', __('Search languages', 'fastpix'));
-            var upList = h('ul'); upList.setAttribute('role', 'listbox'); upList.setAttribute('aria-label', __('Language of the subtitle file', 'fastpix'));
+            var upFind = h('input', 'fp-o-in fp-o-upfind'); upFind.type = 'search'; upFind.placeholder = __('Search…', 'fastpix-io'); upFind.setAttribute('aria-label', __('Search languages', 'fastpix-io'));
+            var upList = h('ul'); upList.setAttribute('role', 'listbox'); upList.setAttribute('aria-label', __('Language of the subtitle file', 'fastpix-io'));
             var upItems = UPLOAD_LANGUAGES.map(function (lg) {
                 var li = h('li'), b = bt(lg[1] + ' (' + lg[0] + ')', 'fp-o-mi', function () { upPick(lg[0]); upOpen(false); upLang.focus(); });
                 b.setAttribute('role', 'option'); li.appendChild(b); upList.appendChild(li); return { li: li, b: b, code: lg[0], text: (lg[1] + ' ' + lg[0]).toLowerCase() };
@@ -874,14 +874,14 @@
             });
             upMenu.appendChild(upFind); upMenu.appendChild(upList); upWrap.appendChild(upLang); upWrap.appendChild(upMenu);
             upPick('en');
-            var upBtn = bt(__('Upload file', 'fastpix'), 'fp-o-btn outline', function () { fin.click(); }); upBtn.disabled = held;
-            upBtn.title = __('Upload a .vtt / .srt file in the chosen language (up to 2 MB)', 'fastpix');
+            var upBtn = bt(__('Upload file', 'fastpix-io'), 'fp-o-btn outline', function () { fin.click(); }); upBtn.disabled = held;
+            upBtn.title = __('Upload a .vtt / .srt file in the chosen language (up to 2 MB)', 'fastpix-io');
             var prog = h('span', 'fp-o-prog'); prog.hidden = true; var barI = h('i'); prog.appendChild(barI);
             fin.addEventListener('change', function () {
                 var f = fin.files[0]; if (!f) { return; }
                 ferr.hidden = true;
-                if (!/\.(vtt|srt)$/i.test(f.name)) { fin.value = ''; return showErr(__('That is not a .vtt or .srt file.', 'fastpix')); }
-                if (f.size > 2 * 1024 * 1024) { fin.value = ''; return showErr(__('That file is over 2 MB.', 'fastpix')); }
+                if (!/\.(vtt|srt)$/i.test(f.name)) { fin.value = ''; return showErr(__('That is not a .vtt or .srt file.', 'fastpix-io')); }
+                if (f.size > 2 * 1024 * 1024) { fin.value = ''; return showErr(__('That file is over 2 MB.', 'fastpix-io')); }
                 // Same language replaces its track: exact tag first; a bare tag also matches its regional form (en ↔ en-US).
                 var up = upCode, ex = tracks.filter(function (t) { return t.language_code === up; })[0] || (up.indexOf('-') === -1 ? byCode[up] : null);
                 upBtn.disabled = true; prog.hidden = false; barI.style.width = '0';
@@ -889,14 +889,14 @@
                 var xhr = new XMLHttpRequest(); xhr.open('POST', cfg.restUrl + '/videos/' + id + '/track-file'); xhr.setRequestHeader('X-WP-Nonce', cfg.nonce); xhr.withCredentials = true;
                 xhr.upload.onprogress = function (e) { if (e.lengthComputable) { barI.style.width = Math.round(e.loaded / e.total * 100) + '%'; } };
                 var fail = function (m) { upBtn.disabled = false; prog.hidden = true; fin.value = ''; showErr(m); };
-                xhr.onload = function () { barI.style.width = '100%'; if (xhr.status >= 200 && xhr.status < 300) { setTimeout(function () { refreshPart(tr, id, 'subs'); }, 300); } else { var j = {}; try { j = JSON.parse(xhr.responseText); } catch (e2) {} fail(j.message || __('The upload did not complete.', 'fastpix')); } };
-                xhr.onerror = function () { fail(__('The upload did not complete.', 'fastpix')); };
+                xhr.onload = function () { barI.style.width = '100%'; if (xhr.status >= 200 && xhr.status < 300) { setTimeout(function () { refreshPart(tr, id, 'subs'); }, 300); } else { var j = {}; try { j = JSON.parse(xhr.responseText); } catch (e2) {} fail(j.message || __('The upload did not complete.', 'fastpix-io')); } };
+                xhr.onerror = function () { fail(__('The upload did not complete.', 'fastpix-io')); };
                 xhr.send(form);
             });
             var upGrp = h('div', 'fp-o-upgrp'); upGrp.appendChild(upWrap); upGrp.appendChild(upBtn); row.appendChild(upGrp); row.appendChild(fin); row.appendChild(prog);
             label();
             card.appendChild(row);
-            if (held) { card.appendChild(h('p', 'fp-o-hint', __('Subtitle tracks can be added once processing finishes.', 'fastpix'))); }
+            if (held) { card.appendChild(h('p', 'fp-o-hint', __('Subtitle tracks can be added once processing finishes.', 'fastpix-io'))); }
         }
         card.appendChild(ferr);
 
@@ -905,13 +905,13 @@
             tracks.forEach(function (t) {
                 var s = (t.state || '').toLowerCase(), li = h('li');
                 var n = h('span', 'fp-o-tname', (langName(t.language_code) || '?') + ' '); n.appendChild(h('span', 'fp-o-mono faint', t.language_code || '')); li.appendChild(n);
-                li.appendChild(s === 'failed' ? pill(__('Failed', 'fastpix'), 'err') : (s === 'ready' || s === 'available' ? pill(__('Ready', 'fastpix'), 'ok') : pill(__('Generating', 'fastpix'), 'busy')));
-                li.appendChild(h('span', 'fp-o-tsrc', (t.source === 'generated' || s === 'generating' ? __('auto', 'fastpix') : (t.source === 'uploaded' || !t.source ? __('uploaded', 'fastpix') : t.source)) + (t.updated_at ? ' · ' + timeAgo(t.updated_at, true) : '')));
+                li.appendChild(s === 'failed' ? pill(__('Failed', 'fastpix-io'), 'err') : (s === 'ready' || s === 'available' ? pill(__('Ready', 'fastpix-io'), 'ok') : pill(__('Generating', 'fastpix-io'), 'busy')));
+                li.appendChild(h('span', 'fp-o-tsrc', (t.source === 'generated' || s === 'generating' ? __('auto', 'fastpix-io') : (t.source === 'uploaded' || !t.source ? __('uploaded', 'fastpix-io') : t.source)) + (t.updated_at ? ' · ' + timeAgo(t.updated_at, true) : '')));
                 var acts = h('span', 'fp-o-tacts');
                 if (!ro) {
-                    if (s === 'failed') { acts.appendChild(bt(__('Retry', 'fastpix'), 'fp-o-link', function () { patchTracks([{ action: 'generate', track_id: t.track_id, language_code: t.language_code, language_name: langName(t.language_code) }]); })); }
-                    acts.appendChild(bt(__('Remove', 'fastpix'), 'fp-o-link del', function () {   // deletes on FastPix too — ask first [QA L17]
-                        fpDialog.confirm({ title: sprintf(__('Remove the %s subtitles?', 'fastpix'), langName(t.language_code)), message: __('The track is deleted on FastPix as well. Generate or upload it again to bring it back.', 'fastpix'), ok: __('Remove', 'fastpix'), danger: true }).then(function (ok) {
+                    if (s === 'failed') { acts.appendChild(bt(__('Retry', 'fastpix-io'), 'fp-o-link', function () { patchTracks([{ action: 'generate', track_id: t.track_id, language_code: t.language_code, language_name: langName(t.language_code) }]); })); }
+                    acts.appendChild(bt(__('Remove', 'fastpix-io'), 'fp-o-link del', function () {   // deletes on FastPix too — ask first [QA L17]
+                        fpDialog.confirm({ title: sprintf(__('Remove the %s subtitles?', 'fastpix-io'), langName(t.language_code)), message: __('The track is deleted on FastPix as well. Generate or upload it again to bring it back.', 'fastpix-io'), ok: __('Remove', 'fastpix-io'), danger: true }).then(function (ok) {
                             if (ok) { patchTracks([{ action: 'remove', track_id: t.track_id }]); }
                         });
                     }));
@@ -926,14 +926,14 @@
     /* Extras card: one row per AI output — the name and either "Completed" (toggles the output) or a Generate button. */
     var AI_OFFER = ['chapters', 'summary', 'entities'];
     function aiOutputText(kind, o) {
-        if (o == null || o === '') { return __('(empty)', 'fastpix'); }
+        if (o == null || o === '') { return __('(empty)', 'fastpix-io'); }
         if (kind === 'chapters' && o.chapters) { return o.chapters.map(function (c) { return (c.startTime || '') + '–' + (c.endTime || '') + '  ' + (c.title || '') + (c.summary ? ' — ' + c.summary : ''); }).join('\n'); }
         if (kind === 'entities' && o.namedEntities) { return o.namedEntities.map(function (e) { return e.entity + (e.category ? ' (' + e.category + ')' : ''); }).join('\n'); }
         return typeof o === 'string' ? o : JSON.stringify(o, null, 2);
     }
     function aiSec(v, tr, id, ro) {
         var card = h('div', 'fp-o-card fp-o-extras'); card.dataset.part = 'ai';
-        card.appendChild(titleRow(__('Extras, written by AI', 'fastpix'), __('FastPix writes these from what is said in the video, only when you press Generate.\n\nChapters: splits the video into timed sections viewers can jump to.\nSummary: a short paragraph describing what the video is about.\nPeople & places mentioned: the names, brands and locations that come up.\n\nThe results are saved here and used for search.', 'fastpix')));
+        card.appendChild(titleRow(__('Extras, written by AI', 'fastpix-io'), __('FastPix writes these from what is said in the video, only when you press Generate.\n\nChapters: splits the video into timed sections viewers can jump to.\nSummary: a short paragraph describing what the video is about.\nPeople & places mentioned: the names, brands and locations that come up.\n\nThe results are saved here and used for search.', 'fastpix-io')));
         var byKind = {}; (v.ai || []).forEach(function (r) { byKind[r.kind] = r; });
         var ul = h('ul', 'fp-o-ai');
         var aerr = h('p', 'fp-o-msg err'); aerr.hidden = true;   // a refused request is said, not swallowed [QA L15]
@@ -941,20 +941,20 @@
             var r = byKind[kind], li = h('li'); li.appendChild(h('span', 'fp-o-ailab', aiLabel(kind)));
             if (r && r.state === 'ready') {
                 // Completed is verifiable: the pill toggles the output FastPix returned.
-                var done = bt(__('Completed', 'fastpix'), 'fp-o-pill ok toggle', null); done.setAttribute('aria-expanded', 'false');
+                var done = bt(__('Completed', 'fastpix-io'), 'fp-o-pill ok toggle', null); done.setAttribute('aria-expanded', 'false');
                 var out = h('pre', 'fp-o-out'); out.hidden = true; out.textContent = aiOutputText(kind, r.output);
                 done.addEventListener('click', function () { out.hidden = !out.hidden; done.setAttribute('aria-expanded', out.hidden ? 'false' : 'true'); });
                 li.appendChild(done); li.appendChild(out);
             } else {
-                var g = bt(r && r.state === 'failed' ? __('Retry', 'fastpix') : __('Generate', 'fastpix'), 'fp-o-btn sm accent', function () {
+                var g = bt(r && r.state === 'failed' ? __('Retry', 'fastpix-io') : __('Generate', 'fastpix-io'), 'fp-o-btn sm accent', function () {
                     g.disabled = true; aerr.hidden = true;
                     api('POST', '/videos/' + id + '/ai', { kind: kind }).then(function (res) {
                         if (res.ok) { refreshPart(tr, id, 'ai'); return; }
-                        g.disabled = false; aerr.textContent = (res.json && res.json.message) || __('Could not start.', 'fastpix'); aerr.hidden = false;
+                        g.disabled = false; aerr.textContent = (res.json && res.json.message) || __('Could not start.', 'fastpix-io'); aerr.hidden = false;
                     });
                 });
                 if (ro || v.status !== 'Ready' || (r && r.state !== 'failed')) { g.disabled = true; }   // running, or nothing to run on yet
-                if (r && r.state !== 'failed') { g.textContent = __('Working…', 'fastpix'); }
+                if (r && r.state !== 'failed') { g.textContent = __('Working…', 'fastpix-io'); }
                 li.appendChild(g);
             }
             ul.appendChild(li);
@@ -993,7 +993,7 @@
     function syncBulk() {
         var count = Object.keys(state.selected).length;
         el.bulkbar.hidden = count === 0;
-        el.bulkCount.textContent = sprintf(_n('%d selected', '%d selected', count, 'fastpix'), count);
+        el.bulkCount.textContent = sprintf(_n('%d selected', '%d selected', count, 'fastpix-io'), count);
         // The header box follows the rows: ticked = all, dash = some, clear = none. (QA L2)
         var rows = rowsEl.querySelectorAll('.fp-check').length;
         el.checkAll.checked = count > 0 && count >= rows;
@@ -1025,9 +1025,9 @@
             });
         }
         if (action !== 'delete') { send(); return; }
-        fpDialog.confirm({ title: sprintf(_n('Delete %d video from this site?', 'Delete %d videos from this site?', body.ids.length, 'fastpix'), body.ids.length), message: __('Nothing is deleted on FastPix unless you say so next.', 'fastpix'), ok: __('Delete', 'fastpix'), danger: true }).then(function (ok) {
+        fpDialog.confirm({ title: sprintf(_n('Delete %d video from this site?', 'Delete %d videos from this site?', body.ids.length, 'fastpix-io'), body.ids.length), message: __('Nothing is deleted on FastPix unless you say so next.', 'fastpix-io'), ok: __('Delete', 'fastpix-io'), danger: true }).then(function (ok) {
             if (!ok) { return; }
-            return fpDialog.confirm({ title: __('Also delete these videos on FastPix?', 'fastpix'), message: __('“Delete on FastPix too” removes them from your FastPix account as well — anything else that plays them stops working, and it can’t be undone. “Only this site” removes them from this library and leaves them on FastPix.', 'fastpix'), ok: __('Delete on FastPix too', 'fastpix'), cancel: __('Only this site', 'fastpix'), danger: true }).then(function (alsoPlatform) {
+            return fpDialog.confirm({ title: __('Also delete these videos on FastPix?', 'fastpix-io'), message: __('“Delete on FastPix too” removes them from your FastPix account as well — anything else that plays them stops working, and it can’t be undone. “Only this site” removes them from this library and leaves them on FastPix.', 'fastpix-io'), ok: __('Delete on FastPix too', 'fastpix-io'), cancel: __('Only this site', 'fastpix-io'), danger: true }).then(function (alsoPlatform) {
                 if (alsoPlatform === null) { return; }   // Escape / backdrop = dismissed, not "only this site"
                 body.delete_on_platform = alsoPlatform;
                 send();
@@ -1149,7 +1149,7 @@
 
         function fail(res) {
             lv.error.hidden = false;
-            lv.errorBody.textContent = (res && res.json && res.json.message) || __('FastPix could not be reached. The list shows the last known state.', 'fastpix');
+            lv.errorBody.textContent = (res && res.json && res.json.message) || __('FastPix could not be reached. The list shows the last known state.', 'fastpix-io');
         }
 
         function loadStreams() {
@@ -1174,15 +1174,15 @@
                 if (streams.length) {
                     var foot = h('div'); foot.id = 'fp-live-foot';
                     var count = h('span', 'lv-count'); count.appendChild(h('b', 'mono', String(streams.length)));
-                    count.appendChild(document.createTextNode(' ' + _n('stream', 'streams', streams.length, 'fastpix') + ' · ' + sprintf(__('%d live', 'fastpix'), liveCount)));
+                    count.appendChild(document.createTextNode(' ' + _n('stream', 'streams', streams.length, 'fastpix-io') + ' · ' + sprintf(__('%d live', 'fastpix-io'), liveCount)));
                     foot.appendChild(count);
-                    foot.appendChild(h('span', 'lv-note', __('Idle streams don’t cost anything — they wait for your broadcast software.', 'fastpix')));
+                    foot.appendChild(h('span', 'lv-note', __('Idle streams don’t cost anything — they wait for your broadcast software.', 'fastpix-io')));
                     lv.table.after(foot);
                 }
                 // Always show a count (like "All videos 248"); go red "N live" while any stream is on air.
                 lv.pill.hidden = streams.length === 0;
                 lv.pill.className = 'pill' + (liveCount ? ' live' : '');
-                lv.pill.textContent = liveCount ? sprintf(__('%d live', 'fastpix'), liveCount) : String(streams.length);
+                lv.pill.textContent = liveCount ? sprintf(__('%d live', 'fastpix-io'), liveCount) : String(streams.length);
                 if (lstate.openAfterLoad) {
                     var id = lstate.openAfterLoad; lstate.openAfterLoad = null;
                     var host = lv.pane.querySelector('[data-stream="' + id + '"]');
@@ -1204,14 +1204,14 @@
             var a = timeAgo(iso);
             if (!a) { return verb; }
             /* translators: 1: a verb like Ended, 2: a relative time like 2 h */
-            if (a === 'now') { return sprintf(__('%s just now', 'fastpix'), verb); }
-            if (a === 'yesterday') { return sprintf(__('%s yesterday', 'fastpix'), verb); }
-            return sprintf(__('%1$s %2$s ago', 'fastpix'), verb, a);
+            if (a === 'now') { return sprintf(__('%s just now', 'fastpix-io'), verb); }
+            if (a === 'yesterday') { return sprintf(__('%s yesterday', 'fastpix-io'), verb); }
+            return sprintf(__('%1$s %2$s ago', 'fastpix-io'), verb, a);
         }
         function liveFor(s) {
             var a = timeAgo(s.last_active_at || s.created_at);
-            if (!a || a === 'now') { return __('Live for under a minute', 'fastpix'); }
-            return sprintf(__('Live for %s', 'fastpix'), a === 'yesterday' ? sprintf(__('%d d', 'fastpix'), 1) : a);
+            if (!a || a === 'now') { return __('Live for under a minute', 'fastpix-io'); }
+            return sprintf(__('Live for %s', 'fastpix-io'), a === 'yesterday' ? sprintf(__('%d d', 'fastpix-io'), 1) : a);
         }
         function parseIso(iso) {
             if (!iso) { return NaN; }
@@ -1225,14 +1225,14 @@
         // "Recording on" again. "on the way" is only the gap between the broadcast ending and the recording
         // arriving; the opened row links to it. (owner 2026-09-22)
         function recText(s) {
-            if (!s.recording) { return __('Recording off', 'fastpix'); }
-            if (s.status === 'ended' && !s.recorded_video) { return __('Recording on the way', 'fastpix'); }
-            return __('Recording on', 'fastpix');
+            if (!s.recording) { return __('Recording off', 'fastpix-io'); }
+            if (s.status === 'ended' && !s.recorded_video) { return __('Recording on the way', 'fastpix-io'); }
+            return __('Recording on', 'fastpix-io');
         }
         function copyStreamEmbed(s, btn) { copyText('[fastpix streamid="' + s.stream_id + '"]', btn); }
         // Owner 2026-09-09: the live buttons read "Shortcode" like the Videos row (same copy glyph), not "⧉ Embed".
         var COPY_ICON = '<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V6a2 2 0 0 1 2-2h9"/></svg>';
-        function shortcodeBtn(s, cls) { var b = bt('', cls, function () { copyStreamEmbed(s, this); }); b.innerHTML = COPY_ICON + __('Shortcode', 'fastpix'); b.title = __('Copy the shortcode for this stream', 'fastpix'); return b; }
+        function shortcodeBtn(s, cls) { var b = bt('', cls, function () { copyStreamEmbed(s, this); }); b.innerHTML = COPY_ICON + __('Shortcode', 'fastpix-io'); b.title = __('Copy the shortcode for this stream', 'fastpix-io'); return b; }
         function openRecording(s) {
             switchTab(false);
             el.search.value = (s.recorded_video && (s.recorded_video.title || s.recorded_video.media_id)) || '';
@@ -1240,12 +1240,12 @@
         }
         function chevron(host, s, extra) {
             var c = bt('', 'fp-lv-chev' + (extra || ''), function () { toggleStream(host, s.stream_id); }); c.innerHTML = ARROW;   // the frame's S / arrow (9509:119933…)
-            c.title = __('Expand', 'fastpix'); c.setAttribute('aria-expanded', 'false'); return c;
+            c.title = __('Expand', 'fastpix-io'); c.setAttribute('aria-expanded', 'false'); return c;
         }
         function markStream(host, on) {
             host.classList.toggle(host.tagName === 'TR' ? 'isopen' : 'is-open', on);
             var c = host.querySelector('.fp-lv-chev');
-            if (c) { c.classList.toggle('open', on); c.setAttribute('aria-expanded', String(on)); c.title = on ? __('Collapse', 'fastpix') : __('Expand', 'fastpix'); }
+            if (c) { c.classList.toggle('open', on); c.setAttribute('aria-expanded', String(on)); c.title = on ? __('Collapse', 'fastpix-io') : __('Expand', 'fastpix-io'); }
         }
 
         /* Lifted card for a live/preparing stream (sits above the table). */
@@ -1257,18 +1257,18 @@
             menuKeys(menu);   // [QA L21]
             // Owner 2026-09-09: Copy shortcode · Enable/Disable · Complete (live only) · Delete — nothing else.
             var live = s.status === 'active' || s.status === 'preparing';
-            item(__('Copy shortcode', 'fastpix'), '', function () { copyStreamEmbed(s, button); });
-            if (s.status === 'disabled') { item(__('Enable', 'fastpix'), '', function () { setEnabled(s, true); }); }
-            else { item(__('Disable', 'fastpix'), '', function () { setEnabled(s, false); }); }
-            item(__('Complete…', 'fastpix'), 'del', function () { endStream(s); });   // always listed (owner 2026-09-09); endStream explains when there is nothing to complete
-            item(__('Delete…', 'fastpix'), 'del', function () { deleteStream(s); });   // same gate as the Details pane's Delete (server-side capability)
+            item(__('Copy shortcode', 'fastpix-io'), '', function () { copyStreamEmbed(s, button); });
+            if (s.status === 'disabled') { item(__('Enable', 'fastpix-io'), '', function () { setEnabled(s, true); }); }
+            else { item(__('Disable', 'fastpix-io'), '', function () { setEnabled(s, false); }); }
+            item(__('Complete…', 'fastpix-io'), 'del', function () { endStream(s); });   // always listed (owner 2026-09-09); endStream explains when there is nothing to complete
+            item(__('Delete…', 'fastpix-io'), 'del', function () { deleteStream(s); });   // same gate as the Details pane's Delete (server-side capability)
             button.parentNode.appendChild(menu); placeMenu(menu, button);
             button.setAttribute('aria-expanded', 'true');
             menu.querySelector('button').focus({ preventScroll: true });   // a scroll would close the fixed menu
         }
         function kebab(host, s) {
             var k = bt('⋮', 'kebab', function (e) { e.stopPropagation(); streamMenu(k, host, s); });
-            k.title = __('More', 'fastpix'); k.setAttribute('aria-haspopup', 'menu'); k.setAttribute('aria-expanded', 'false');
+            k.title = __('More', 'fastpix-io'); k.setAttribute('aria-haspopup', 'menu'); k.setAttribute('aria-expanded', 'false');
             return k;
         }
 
@@ -1278,20 +1278,20 @@
             var head = h('div', 'fp-lv-head');
             var thumb = h('div', 'fp-lv-thumb');
             var preparing = s.status === 'preparing';
-            thumb.appendChild(h('span', 'fp-lv-badge' + (preparing ? ' prep' : ''), preparing ? __('PREPARING', 'fastpix') : __('LIVE', 'fastpix')));
+            thumb.appendChild(h('span', 'fp-lv-badge' + (preparing ? ' prep' : ''), preparing ? __('PREPARING', 'fastpix-io') : __('LIVE', 'fastpix-io')));
             head.appendChild(thumb);
 
             var info = h('div', 'fp-lv-info');
-            var title = h('a', 'fp-lv-title', s.name || __('Untitled stream', 'fastpix')); title.href = '#'; info.appendChild(title);
+            var title = h('a', 'fp-lv-title', s.name || __('Untitled stream', 'fastpix-io')); title.href = '#'; info.appendChild(title);
             var sub = h('div', 'fp-lv-sub');
             // No concurrent-viewer figure: real-time analytics is out of scope by owner ruling. (QA X26)
-            sub.appendChild(document.createTextNode(preparing ? __('Preparing · your encoder is connected', 'fastpix') : liveFor(s)));
-            if (s.recording) { sub.appendChild(document.createTextNode(__(' · recording', 'fastpix'))); }
+            sub.appendChild(document.createTextNode(preparing ? __('Preparing · your encoder is connected', 'fastpix-io') : liveFor(s)));
+            if (s.recording) { sub.appendChild(document.createTextNode(__(' · recording', 'fastpix-io'))); }
             info.appendChild(sub); head.appendChild(info);
 
             var tools = h('div', 'fp-lv-tools');
             tools.appendChild(shortcodeBtn(s, 'fp-lv-btn'));
-            tools.appendChild(bt(__('End stream', 'fastpix'), 'fp-lv-btn end', function () { endStream(s); }));
+            tools.appendChild(bt(__('End stream', 'fastpix-io'), 'fp-lv-btn end', function () { endStream(s); }));
             tools.appendChild(kebab(card, s));
             tools.appendChild(chevron(card, s, ''));
             head.appendChild(tools);
@@ -1307,11 +1307,11 @@
             var ended = s.status === 'ended';
 
             var name = h('td', 'lv-name');
-            var title = h('a', 'vtitle', s.name || __('Untitled stream', 'fastpix')); title.href = '#'; name.appendChild(title);
-            var sub = h('div', 'lv-sub', (ended ? agoPhrase(__('Ended', 'fastpix'), s.last_active_at || s.created_at) : __('Never streamed', 'fastpix')) + ' ');
+            var title = h('a', 'vtitle', s.name || __('Untitled stream', 'fastpix-io')); title.href = '#'; name.appendChild(title);
+            var sub = h('div', 'lv-sub', (ended ? agoPhrase(__('Ended', 'fastpix-io'), s.last_active_at || s.created_at) : __('Never streamed', 'fastpix-io')) + ' ');
             // frame: stream ids shorten to 8…6 (video ids use 8…3)
             var idEl = h('span', 'mono', s.stream_id.length > 17 ? s.stream_id.slice(0, 8) + '…' + s.stream_id.slice(-6) : s.stream_id); idEl.title = s.stream_id; sub.appendChild(idEl);
-            var cp = bt('⧉', 'lv-copy', function () { copyText(s.stream_id, this); }); cp.title = __('Copy stream ID', 'fastpix'); cp.setAttribute('aria-label', __('Copy stream ID', 'fastpix'));
+            var cp = bt('⧉', 'lv-copy', function () { copyText(s.stream_id, this); }); cp.title = __('Copy stream ID', 'fastpix-io'); cp.setAttribute('aria-label', __('Copy stream ID', 'fastpix-io'));
             sub.appendChild(cp); name.appendChild(sub); tr.appendChild(name);
 
             var st = h('td', 'lv-state');
@@ -1320,7 +1320,7 @@
             // the name carries when it last ended. Only a stream that refuses a broadcast reads Disabled. The stored
             // status stays 'ended' (the embed and the state poll depend on it); this is the wording. (owner 2026-09-22)
             var pillEl = h('span', 'lv-pill ' + (disabled ? 'disabled' : 'idle')); pillEl.appendChild(h('span', 'dot'));
-            pillEl.appendChild(document.createTextNode(disabled ? __('Disabled', 'fastpix') : __('Idle', 'fastpix'))); st.appendChild(pillEl); tr.appendChild(st);
+            pillEl.appendChild(document.createTextNode(disabled ? __('Disabled', 'fastpix-io') : __('Idle', 'fastpix-io'))); st.appendChild(pillEl); tr.appendChild(st);
 
             var recWord = recText(s), onOff = /off/i.test(recWord) ? 'off' : 'on';
             var rec = h('td', 'lv-rec ' + onOff); rec.appendChild(h('span', 'lv-recdot ' + onOff)); rec.appendChild(document.createTextNode(recWord)); tr.appendChild(rec);
@@ -1366,11 +1366,11 @@
             var code = h('code', 'mono' + (secret ? ' dots' : ''), secret ? DOTS : value); box.appendChild(code);
             if (secret) {
                 var shown = false;
-                box.appendChild(bt(__('Show', 'fastpix'), 'fp-lv-link', function () {
-                    shown = !shown; code.textContent = shown ? value : DOTS; code.classList.toggle('dots', !shown); this.textContent = shown ? __('Hide', 'fastpix') : __('Show', 'fastpix');
+                box.appendChild(bt(__('Show', 'fastpix-io'), 'fp-lv-link', function () {
+                    shown = !shown; code.textContent = shown ? value : DOTS; code.classList.toggle('dots', !shown); this.textContent = shown ? __('Hide', 'fastpix-io') : __('Show', 'fastpix-io');
                 }));
             }
-            box.appendChild(bt(__('Copy', 'fastpix'), 'fp-lv-link', function () { copyText(value, this); }));
+            box.appendChild(bt(__('Copy', 'fastpix-io'), 'fp-lv-link', function () { copyText(value, this); }));
             return box;
         }
         function kv(label, value) {
@@ -1386,8 +1386,8 @@
         }
 
         function endStream(s) {
-            if (s.status !== 'active' && s.status !== 'preparing') { fail({ json: { message: __('Nothing to complete — this stream is not broadcasting. Complete ends a live broadcast; the platform refuses it while idle.', 'fastpix') } }); return; }
-            fpDialog.confirm({ message: __('End this broadcast for everyone watching?', 'fastpix'), ok: __('End broadcast', 'fastpix'), danger: true }).then(function (ok) {
+            if (s.status !== 'active' && s.status !== 'preparing') { fail({ json: { message: __('Nothing to complete — this stream is not broadcasting. Complete ends a live broadcast; the platform refuses it while idle.', 'fastpix-io') } }); return; }
+            fpDialog.confirm({ message: __('End this broadcast for everyone watching?', 'fastpix-io'), ok: __('End broadcast', 'fastpix-io'), danger: true }).then(function (ok) {
                 if (!ok) { return; }
                 api('POST', '/streams/' + s.stream_id + '/finish').then(function (res) {
                     if (res.ok) { lstate.openAfterLoad = s.stream_id; loadStreams(); } else { fail(res); }
@@ -1397,7 +1397,7 @@
         /* Enable / disable: a disabled stream refuses every encoder until it is enabled again. */
         function setEnabled(s, on) {
             var live = s.status === 'active' || s.status === 'preparing';
-            var ask = (!on && live) ? fpDialog.confirm({ message: __('Disable this stream? The broadcast stops and viewers see the waiting message.', 'fastpix'), ok: __('Disable', 'fastpix'), danger: true }) : Promise.resolve(true);
+            var ask = (!on && live) ? fpDialog.confirm({ message: __('Disable this stream? The broadcast stops and viewers see the waiting message.', 'fastpix-io'), ok: __('Disable', 'fastpix-io'), danger: true }) : Promise.resolve(true);
             return ask.then(function (ok) {
                 if (!ok) { return false; }
                 api('POST', '/streams/' + s.stream_id + '/' + (on ? 'enable' : 'disable')).then(function (res) {
@@ -1415,7 +1415,7 @@
             return lab;
         }
         function renameStream(s) {
-            fpDialog.prompt({ title: __('Stream name', 'fastpix'), value: s.name || '', ok: __('Rename', 'fastpix') }).then(function (name) {
+            fpDialog.prompt({ title: __('Stream name', 'fastpix-io'), value: s.name || '', ok: __('Rename', 'fastpix-io') }).then(function (name) {
                 if (name === null) { return; }
                 api('PATCH', '/streams/' + s.stream_id, { name: name }).then(function (res) {
                     if (res.ok) { lstate.openAfterLoad = s.stream_id; loadStreams(); } else { fail(res); }
@@ -1423,7 +1423,7 @@
             });
         }
         function deleteStream(s) {
-            fpDialog.confirm({ title: __('Delete this stream and its key?', 'fastpix'), message: __('Pages using the shortcode show the recording if one exists, or nothing.', 'fastpix'), ok: __('Delete', 'fastpix'), danger: true }).then(function (ok) {
+            fpDialog.confirm({ title: __('Delete this stream and its key?', 'fastpix-io'), message: __('Pages using the shortcode show the recording if one exists, or nothing.', 'fastpix-io'), ok: __('Delete', 'fastpix-io'), danger: true }).then(function (ok) {
                 if (!ok) { return; }
                 api('DELETE', '/streams/' + s.stream_id).then(function (res) {
                     if (res.ok) { loadStreams(); } else { fail(res); }
@@ -1451,31 +1451,31 @@
 
             // ---- banner strip (preparing / ended; the live frames draw none — the LIVE badge is the context)
             if (preparing) {
-                out.push(strip('fp', __('Preparing your stream.', 'fastpix'), __('Your encoder is connected and we are receiving video. Viewers will be able to watch in a few seconds — this pause is normal.', 'fastpix')));
+                out.push(strip('fp', __('Preparing your stream.', 'fastpix-io'), __('Your encoder is connected and we are receiving video. Viewers will be able to watch in a few seconds — this pause is normal.', 'fastpix-io')));
             } else if (ended) {
                 var body = s.recorded_video
-                    ? __('The recording is in your library as an ordinary video. Nothing needs re-embedding — the embed on your page switched by itself.', 'fastpix')
+                    ? __('The recording is in your library as an ordinary video. Nothing needs re-embedding — the embed on your page switched by itself.', 'fastpix-io')
                     : (s.recording
-                        ? __('The recording is being finalised and will appear in your library within about a minute. The embed on your page switches to it by itself.', 'fastpix')
-                        : __('Recording was off for this stream, so there is nothing to replay.', 'fastpix'));
-                out.push(strip('success', __('This stream has ended.', 'fastpix'), body, s.recorded_video ? bt(__('Open the recording →', 'fastpix'), 'fp-lv-link', function () { openRecording(s); }) : null));
+                        ? __('The recording is being finalised and will appear in your library within about a minute. The embed on your page switches to it by itself.', 'fastpix-io')
+                        : __('Recording was off for this stream, so there is nothing to replay.', 'fastpix-io'));
+                out.push(strip('success', __('This stream has ended.', 'fastpix-io'), body, s.recorded_video ? bt(__('Open the recording →', 'fastpix-io'), 'fp-lv-link', function () { openRecording(s); }) : null));
             }
 
             // ---- Tab 1: Connect encoder
             function encoderPane() {
                 var p = h('div', 'fp-lv-pane enc');
                 var hr = h('div', 'fp-lv-hintrow');
-                hr.appendChild(h('p', 'fp-lv-hint', __('Paste these two into your streaming app — in OBS that’s Settings → Stream.', 'fastpix')));
-                infoIcon(__('Two ways to send your video. Pick one.\n\nRTMPS (left): works with OBS and most apps. Paste the Server and the Stream key.\n\nSRT (right): for apps that support SRT. Steadier on weak internet. Paste the address and the secret.\n\nThe key and the secret are passwords. Keep them private.', 'fastpix'), hr);
+                hr.appendChild(h('p', 'fp-lv-hint', __('Paste these two into your streaming app — in OBS that’s Settings → Stream.', 'fastpix-io')));
+                infoIcon(__('Two ways to send your video. Pick one.\n\nRTMPS (left): works with OBS and most apps. Paste the Server and the Stream key.\n\nSRT (right): for apps that support SRT. Steadier on weak internet. Paste the address and the secret.\n\nThe key and the secret are passwords. Keep them private.', 'fastpix-io'), hr);
                 p.appendChild(hr);
                 // Owner 2026-09-09: RTMPS and SRT side by side — no disclosure, no "Rotate key" (FastPix cannot reset a key).
                 var cols = h('div', 'fp-lv-enc2'), rtmp = h('div', 'fp-lv-sec fp-lv-enccol'), srt = h('div', 'fp-lv-sec fp-lv-enccol');   // two cards, like the Details tab's
-                rtmp.appendChild(h('label', 'fp-lv-lab', __('Server', 'fastpix'))); rtmp.appendChild(keyBox(ingest.rtmps || '', false));
-                rtmp.appendChild(h('label', 'fp-lv-lab', __('Stream key', 'fastpix'))); rtmp.appendChild(keyBox(s.stream_key || '', true));
-                rtmp.appendChild(h('p', 'fp-lv-fine', __('Anyone holding this can broadcast as you — it stays hidden so it survives a screen share.', 'fastpix')));
-                srt.appendChild(h('label', 'fp-lv-lab', __('SRT address', 'fastpix'))); srt.appendChild(keyBox(ingest.srt || '', false));
-                if (s.srt_secret) { srt.appendChild(h('label', 'fp-lv-lab', __('SRT secret', 'fastpix'))); srt.appendChild(keyBox(s.srt_secret, true)); }
-                srt.appendChild(h('p', 'fp-lv-fine', __('Use these instead if your encoder speaks SRT — same stream, same key rules.', 'fastpix')));
+                rtmp.appendChild(h('label', 'fp-lv-lab', __('Server', 'fastpix-io'))); rtmp.appendChild(keyBox(ingest.rtmps || '', false));
+                rtmp.appendChild(h('label', 'fp-lv-lab', __('Stream key', 'fastpix-io'))); rtmp.appendChild(keyBox(s.stream_key || '', true));
+                rtmp.appendChild(h('p', 'fp-lv-fine', __('Anyone holding this can broadcast as you — it stays hidden so it survives a screen share.', 'fastpix-io')));
+                srt.appendChild(h('label', 'fp-lv-lab', __('SRT address', 'fastpix-io'))); srt.appendChild(keyBox(ingest.srt || '', false));
+                if (s.srt_secret) { srt.appendChild(h('label', 'fp-lv-lab', __('SRT secret', 'fastpix-io'))); srt.appendChild(keyBox(s.srt_secret, true)); }
+                srt.appendChild(h('p', 'fp-lv-fine', __('Use these instead if your encoder speaks SRT — same stream, same key rules.', 'fastpix-io')));
                 cols.appendChild(rtmp); cols.appendChild(srt); p.appendChild(cols);
                 return p;
             }
@@ -1483,43 +1483,43 @@
             // ---- Tab 2: Put it in a page
             function pagePane() {
                 var p = h('div', 'fp-lv-pane page'), two = h('div', 'fp-lv-two'), left = h('div', 'fp-lv-l'), right = h('div', 'fp-lv-r');
-                left.appendChild(h('p', 'fp-lv-intro', __('One embed covers all three states — a waiting message before you start, the stream while you’re live, then the recording. You never edit the post.', 'fastpix')));
+                left.appendChild(h('p', 'fp-lv-intro', __('One embed covers all three states — a waiting message before you start, the stream while you’re live, then the recording. You never edit the post.', 'fastpix-io')));
 
                 // Embed options — the same controls + accent the video embed offers; the
                 // live player and the recording both honour them. (Autoplay/muted are
                 // forced for a live start, so they aren't offered.)
                 var ctlOn = { controls: true, click: true, keys: true };
                 var accent = '#6d22cd';
-                left.appendChild(h('label', 'fp-lv-lab', __('Player options', 'fastpix')));
+                left.appendChild(h('label', 'fp-lv-lab', __('Player options', 'fastpix-io')));
                 var chips = h('div', 'fp-lv-chips');
-                [['controls', __('Player controls', 'fastpix')], ['click', __('Click to play', 'fastpix')], ['keys', __('Keyboard shortcuts', 'fastpix')]].forEach(function (k) {
+                [['controls', __('Player controls', 'fastpix-io')], ['click', __('Click to play', 'fastpix-io')], ['keys', __('Keyboard shortcuts', 'fastpix-io')]].forEach(function (k) {
                     var c = bt(k[1], 'fp-lv-chip', function () { ctlOn[k[0]] = !ctlOn[k[0]]; c.setAttribute('aria-pressed', String(ctlOn[k[0]])); buildCode(); });
                     c.setAttribute('aria-pressed', 'true'); chips.appendChild(c);
                 });
                 left.appendChild(chips);
 
-                var acc = h('div', 'fp-lv-accent'); acc.appendChild(h('label', 'fp-lv-lab', __('Accent color', 'fastpix')));
+                var acc = h('div', 'fp-lv-accent'); acc.appendChild(h('label', 'fp-lv-lab', __('Accent color', 'fastpix-io')));
                 var swatch = h('span', 'fp-lv-swatch'); swatch.style.background = accent;
-                var accIn = h('input'); accIn.type = 'color'; accIn.value = accent; accIn.setAttribute('aria-label', __('Accent colour', 'fastpix')); swatch.appendChild(accIn);
-                var hex = h('input', 'fp-lv-hex'); hex.type = 'text'; hex.value = accent; hex.maxLength = 7; hex.spellcheck = false; hex.setAttribute('aria-label', __('Accent colour hex', 'fastpix'));
+                var accIn = h('input'); accIn.type = 'color'; accIn.value = accent; accIn.setAttribute('aria-label', __('Accent colour', 'fastpix-io')); swatch.appendChild(accIn);
+                var hex = h('input', 'fp-lv-hex'); hex.type = 'text'; hex.value = accent; hex.maxLength = 7; hex.spellcheck = false; hex.setAttribute('aria-label', __('Accent colour hex', 'fastpix-io'));
                 function setAccent(v) { accent = v.toLowerCase(); swatch.style.background = accent; accIn.value = accent; hex.value = accent; buildCode(); }
                 accIn.addEventListener('input', function () { setAccent(accIn.value); });
                 hex.addEventListener('change', function () { var v = hex.value.trim(); if (/^#[0-9a-f]{6}$/i.test(v)) { setAccent(v); } else { hex.value = accent; } });
-                acc.appendChild(swatch); acc.appendChild(hex); acc.appendChild(h('span', 'fp-lv-fine', __('used for the progress bar & buttons', 'fastpix')));
+                acc.appendChild(swatch); acc.appendChild(hex); acc.appendChild(h('span', 'fp-lv-fine', __('used for the progress bar & buttons', 'fastpix-io')));
                 left.appendChild(acc);
 
                 // The shortcode (posts, widgets, most page builders) or a PHP call for
                 // theme templates. The block only takes a videoId, so it isn't offered here.
                 var forms = { shortcode: '', php: '' }, fmt = 'shortcode';
                 var seg = h('div', 'fp-lv-seg');
-                var segSc = bt(__('Shortcode', 'fastpix'), 'fp-lv-segbtn', function () { pickFmt('shortcode'); }), segPhp = bt(__('PHP', 'fastpix'), 'fp-lv-segbtn', function () { pickFmt('php'); });
+                var segSc = bt(__('Shortcode', 'fastpix-io'), 'fp-lv-segbtn', function () { pickFmt('shortcode'); }), segPhp = bt(__('PHP', 'fastpix-io'), 'fp-lv-segbtn', function () { pickFmt('php'); });
                 seg.appendChild(segSc); seg.appendChild(segPhp); left.appendChild(seg);
                 var box = h('div', 'fp-lv-code'), codeEl = h('code', 'mono'); box.appendChild(codeEl);
-                box.appendChild(bt(__('Copy', 'fastpix'), 'fp-lv-copy', function () { copyText(forms[fmt], this); }));
+                box.appendChild(bt(__('Copy', 'fastpix-io'), 'fp-lv-copy', function () { copyText(forms[fmt], this); }));
                 left.appendChild(box);
-                var foot = h('p', 'fp-lv-fine', __('Paste it into any post or page — or ', 'fastpix'));
-                var ed = document.createElement('a'); ed.className = 'fp-lv-link'; ed.href = 'post-new.php'; ed.textContent = __('open the editor', 'fastpix'); foot.appendChild(ed);
-                foot.appendChild(document.createTextNode(__(' and add the FastPix block instead.', 'fastpix'))); left.appendChild(foot);
+                var foot = h('p', 'fp-lv-fine', __('Paste it into any post or page — or ', 'fastpix-io'));
+                var ed = document.createElement('a'); ed.className = 'fp-lv-link'; ed.href = 'post-new.php'; ed.textContent = __('open the editor', 'fastpix-io'); foot.appendChild(ed);
+                foot.appendChild(document.createTextNode(__(' and add the FastPix block instead.', 'fastpix-io'))); left.appendChild(foot);
 
                 function buildCode() {
                     var parts = ['fastpix streamid="' + s.stream_id + '"'];
@@ -1537,13 +1537,13 @@
                 }
                 buildCode(); pickFmt('shortcode');
 
-                right.appendChild(h('div', 'fp-lv-eyebrow', __('What visitors see right now', 'fastpix')));
+                right.appendChild(h('div', 'fp-lv-eyebrow', __('What visitors see right now', 'fastpix-io')));
                 var pv = h('div', 'fp-lv-preview ' + (live ? 'live' : ended ? 'ended' : 'waiting')), top = h('div', 'fp-lv-pvtop');
                 var l1, l2, showing;
-                if (live) { l1 = __('You’re live', 'fastpix'); l2 = __('Visitors are watching the stream', 'fastpix'); showing = __('live stream', 'fastpix'); }
-                else if (ended && s.recorded_video) { l1 = __('Showing the recording', 'fastpix'); l2 = __('It plays in place of the stream', 'fastpix'); showing = __('the recording', 'fastpix'); }
-                else if (ended) { l1 = __('The stream has ended', 'fastpix'); l2 = s.recording ? __('The recording is on its way', 'fastpix') : __('Recording was off — nothing to replay', 'fastpix'); showing = s.recording ? __('the recording, shortly', 'fastpix') : __('nothing', 'fastpix'); }
-                else { l1 = __('The stream hasn’t started yet', 'fastpix'); l2 = __('This page will update on its own', 'fastpix'); showing = __('waiting message', 'fastpix'); }
+                if (live) { l1 = __('You’re live', 'fastpix-io'); l2 = __('Visitors are watching the stream', 'fastpix-io'); showing = __('live stream', 'fastpix-io'); }
+                else if (ended && s.recorded_video) { l1 = __('Showing the recording', 'fastpix-io'); l2 = __('It plays in place of the stream', 'fastpix-io'); showing = __('the recording', 'fastpix-io'); }
+                else if (ended) { l1 = __('The stream has ended', 'fastpix-io'); l2 = s.recording ? __('The recording is on its way', 'fastpix-io') : __('Recording was off — nothing to replay', 'fastpix-io'); showing = s.recording ? __('the recording, shortly', 'fastpix-io') : __('nothing', 'fastpix-io'); }
+                else { l1 = __('The stream hasn’t started yet', 'fastpix-io'); l2 = __('This page will update on its own', 'fastpix-io'); showing = __('waiting message', 'fastpix-io'); }
                 if (live && s.playback_id) {
                     // Owner 2026-09-09: while live the rail plays the stream itself — the same
                     // <fastpix-player> the shortcode renders (muted autoplay, RULE-034), not a mock.
@@ -1558,7 +1558,7 @@
                     top.appendChild(h('p', 'fp-lv-pv1', l1)); top.appendChild(h('p', 'fp-lv-pv2', l2));
                 }
                 pv.appendChild(top);
-                var bar = h('div', 'fp-lv-pvbar'); bar.appendChild(h('span', null, sprintf(__('Showing: %s', 'fastpix'), showing))); bar.appendChild(h('span', 'faint', __('→ live → recording', 'fastpix'))); pv.appendChild(bar);
+                var bar = h('div', 'fp-lv-pvbar'); bar.appendChild(h('span', null, sprintf(__('Showing: %s', 'fastpix-io'), showing))); bar.appendChild(h('span', 'faint', __('→ live → recording', 'fastpix-io'))); pv.appendChild(bar);
                 right.appendChild(pv);
 
                 two.appendChild(left); two.appendChild(right); p.appendChild(two);
@@ -1570,46 +1570,46 @@
                 var p = h('div', 'fp-lv-pane det'), two = h('div', 'fp-lv-two det'), left = h('div', 'fp-lv-col'), right = h('div', 'fp-lv-col');
 
                 // IDs (Rename… lives here so it stays reachable while live, when the Delete card is hidden)
-                var ids = h('div', 'fp-lv-sec'), ih = h('div', 'fp-lv-head2'); ih.appendChild(h('h3', 'fp-lv-h', __('IDs', 'fastpix')));
-                ih.appendChild(bt(__('Rename…', 'fastpix'), 'fp-lv-link', function () { renameStream(s); })); ids.appendChild(ih);
+                var ids = h('div', 'fp-lv-sec'), ih = h('div', 'fp-lv-head2'); ih.appendChild(h('h3', 'fp-lv-h', __('IDs', 'fastpix-io')));
+                ih.appendChild(bt(__('Rename…', 'fastpix-io'), 'fp-lv-link', function () { renameStream(s); })); ids.appendChild(ih);
                 function idRow(label, value) {
                     var r = h('div', 'fp-lv-idrow'); r.appendChild(h('span', 'fp-lv-idlab', label));
                     var c = h('code', 'mono', value); c.title = value; r.appendChild(c);
-                    r.appendChild(bt(__('Copy', 'fastpix'), 'fp-lv-link', function () { copyText(value, this); })); return r;
+                    r.appendChild(bt(__('Copy', 'fastpix-io'), 'fp-lv-link', function () { copyText(value, this); })); return r;
                 }
-                ids.appendChild(idRow(__('Stream ID', 'fastpix'), s.stream_id));
-                if (s.playback_id) { ids.appendChild(idRow(__('Playback ID', 'fastpix'), s.playback_id)); }
-                ids.appendChild(h('p', 'fp-lv-fine', __('Only needed for support tickets or custom code — the shortcode already carries them.', 'fastpix')));
+                ids.appendChild(idRow(__('Stream ID', 'fastpix-io'), s.stream_id));
+                if (s.playback_id) { ids.appendChild(idRow(__('Playback ID', 'fastpix-io'), s.playback_id)); }
+                ids.appendChild(h('p', 'fp-lv-fine', __('Only needed for support tickets or custom code — the shortcode already carries them.', 'fastpix-io')));
                 left.appendChild(ids);
 
                 // Recording (read-only, set at creation)
-                var rc = h('div', 'fp-lv-sec'); rc.appendChild(h('h3', 'fp-lv-h', __('Recording', 'fastpix')));
+                var rc = h('div', 'fp-lv-sec'); rc.appendChild(h('h3', 'fp-lv-h', __('Recording', 'fastpix-io')));
                 var dl = h('dl', 'fp-lv-kv');
-                var rv = h('span'); rv.appendChild(h('b', null, s.recording ? __('On', 'fastpix') : __('Off', 'fastpix'))); rv.appendChild(document.createTextNode(__(' · chosen at creation, can’t change now', 'fastpix')));
-                dl.appendChild(kv(__('Recording', 'fastpix'), rv));
+                var rv = h('span'); rv.appendChild(h('b', null, s.recording ? __('On', 'fastpix-io') : __('Off', 'fastpix-io'))); rv.appendChild(document.createTextNode(__(' · chosen at creation, can’t change now', 'fastpix-io')));
+                dl.appendChild(kv(__('Recording', 'fastpix-io'), rv));
                 var where;
-                if (s.recorded_video) { where = bt(__('In your video library — open it', 'fastpix'), 'fp-lv-link', function () { openRecording(s); }); }
-                else { where = s.recording ? __('Your video library, after the stream ends', 'fastpix') : __('Nowhere — recording is off', 'fastpix'); }
-                dl.appendChild(kv(__('Where it lands', 'fastpix'), where));
+                if (s.recorded_video) { where = bt(__('In your video library — open it', 'fastpix-io'), 'fp-lv-link', function () { openRecording(s); }); }
+                else { where = s.recording ? __('Your video library, after the stream ends', 'fastpix-io') : __('Nowhere — recording is off', 'fastpix-io'); }
+                dl.appendChild(kv(__('Where it lands', 'fastpix-io'), where));
                 // The policy is the stream's playback id's, as FastPix reports it (`playback_policy`). This read
                 // `s.access`, which the server never sends, so every stream — private ones too — said "Anyone
                 // (public)". Unknown is shown as unknown, never as public. (QA report #11)
                 // Once the recording exists it carries its own policy (they are chosen separately at create);
                 // before that, the broadcast's is the only thing known here. (owner 2026-09-22)
                 var recPolicy = s.recorded_video && s.recorded_video.access_policy;
-                dl.appendChild(kv(__('Who can watch it', 'fastpix'), recPolicy
+                dl.appendChild(kv(__('Who can watch it', 'fastpix-io'), recPolicy
                     ? (ACCESS_LABEL[recPolicy] || recPolicy)
-                    : (s.playback_policy ? __('Same as the stream — ', 'fastpix') + (ACCESS_LABEL[s.playback_policy] || s.playback_policy) : '—')));
+                    : (s.playback_policy ? __('Same as the stream — ', 'fastpix-io') + (ACCESS_LABEL[s.playback_policy] || s.playback_policy) : '—')));
                 rc.appendChild(dl); right.appendChild(rc);
 
                 // Enable / disable, visible here instead of only in the ⋮ menu (QA #10).
                 var en = h('div', 'fp-lv-sec fp-lv-del'), et = h('div'), onNow = s.status !== 'disabled';
-                et.appendChild(h('b', null, __('Accept broadcasts', 'fastpix')));
+                et.appendChild(h('b', null, __('Accept broadcasts', 'fastpix-io')));
                 et.appendChild(h('p', 'fp-lv-fine', onNow
-                    ? __('On — the encoder can go live with this stream key.', 'fastpix')
-                    : __('Off — every encoder is refused until you turn this back on.', 'fastpix')));
+                    ? __('On — the encoder can go live with this stream key.', 'fastpix-io')
+                    : __('Off — every encoder is refused until you turn this back on.', 'fastpix-io')));
                 en.appendChild(et);
-                en.appendChild(lvSwitch(onNow, onNow ? __('On', 'fastpix') : __('Off', 'fastpix'), function (on, box) {
+                en.appendChild(lvSwitch(onNow, onNow ? __('On', 'fastpix-io') : __('Off', 'fastpix-io'), function (on, box) {
                     box.disabled = true;
                     setEnabled(s, on).then(function (went) { if (!went) { box.checked = !on; box.disabled = false; } });
                 }));
@@ -1617,9 +1617,9 @@
 
                 // Delete — the frame draws it on a live stream too; the confirm is the guard.
                 var del = h('div', 'fp-lv-sec fp-lv-del'), dt = h('div');
-                dt.appendChild(h('b', null, __('Delete this stream', 'fastpix')));
-                dt.appendChild(h('p', 'fp-lv-fine', __('Removes the stream key and embed. Recordings already in your library stay.', 'fastpix')));
-                del.appendChild(dt); del.appendChild(bt(__('Delete', 'fastpix'), 'fp-lv-btn danger', function () { deleteStream(s); }));
+                dt.appendChild(h('b', null, __('Delete this stream', 'fastpix-io')));
+                dt.appendChild(h('p', 'fp-lv-fine', __('Removes the stream key and embed. Recordings already in your library stay.', 'fastpix-io')));
+                del.appendChild(dt); del.appendChild(bt(__('Delete', 'fastpix-io'), 'fp-lv-btn danger', function () { deleteStream(s); }));
                 right.appendChild(del);
 
                 // Simulcast — targets change only while idle; the platform PUT takes only
@@ -1628,22 +1628,22 @@
                 // render; outside idle a click explains the lock instead of calling the API.
                 var sim = h('div', 'fp-lv-sec sim');
                 function locked() {
-                    fpDialog.alert(live || preparing ? __('Destinations lock while you’re live — add them before you start.', 'fastpix') : __('This stream has ended — its destinations can’t change any more.', 'fastpix'));
+                    fpDialog.alert(live || preparing ? __('Destinations lock while you’re live — add them before you start.', 'fastpix-io') : __('This stream has ended — its destinations can’t change any more.', 'fastpix-io'));
                 }
                 function render() {
                     while (sim.firstChild) { sim.removeChild(sim.firstChild); }
-                    var sh = h('div', 'fp-lv-head2'), st = h('div', 'fp-lv-hrow'); st.appendChild(h('h3', 'fp-lv-h', __('Simulcast', 'fastpix'))); infoIcon(__('Simulcast sends this broadcast to other platforms at the same time — YouTube, LinkedIn, X…\n\nPaste each platform’s RTMP address and stream key. Destinations lock while you’re live, so add them before you start.', 'fastpix'), st); sh.appendChild(st);
+                    var sh = h('div', 'fp-lv-head2'), st = h('div', 'fp-lv-hrow'); st.appendChild(h('h3', 'fp-lv-h', __('Simulcast', 'fastpix-io'))); infoIcon(__('Simulcast sends this broadcast to other platforms at the same time — YouTube, LinkedIn, X…\n\nPaste each platform’s RTMP address and stream key. Destinations lock while you’re live, so add them before you start.', 'fastpix-io'), st); sh.appendChild(st);
                     var form = null;
                     if (!idle) {
-                        sh.appendChild(bt(__('＋ Add destination', 'fastpix'), 'fp-lv-btn accent sm', locked));
+                        sh.appendChild(bt(__('＋ Add destination', 'fastpix-io'), 'fp-lv-btn accent sm', locked));
                     } else {
                         form = h('div', 'fp-lv-simform'); form.hidden = true;
-                        var url = h('input'); url.type = 'text'; url.placeholder = 'rtmps://host/app'; url.setAttribute('aria-label', __('Destination RTMP URL', 'fastpix')); url.autocomplete = 'off'; url.spellcheck = false;
-                        var key = h('input'); key.type = 'password'; key.placeholder = __('The platform’s stream key', 'fastpix'); key.setAttribute('aria-label', __('Destination stream key', 'fastpix')); key.autocomplete = 'new-password'; key.spellcheck = false;
+                        var url = h('input'); url.type = 'text'; url.placeholder = 'rtmps://host/app'; url.setAttribute('aria-label', __('Destination RTMP URL', 'fastpix-io')); url.autocomplete = 'off'; url.spellcheck = false;
+                        var key = h('input'); key.type = 'password'; key.placeholder = __('The platform’s stream key', 'fastpix-io'); key.setAttribute('aria-label', __('Destination stream key', 'fastpix-io')); key.autocomplete = 'new-password'; key.spellcheck = false;
                         form.appendChild(url); form.appendChild(key);
                         var acts = h('div', 'fp-lv-acts');
-                        acts.appendChild(bt(__('Cancel', 'fastpix'), 'fp-lv-btn sm', function () { form.hidden = true; }));
-                        var addBtn = bt(__('Add destination', 'fastpix'), 'fp-lv-btn sm primary', function () {
+                        acts.appendChild(bt(__('Cancel', 'fastpix-io'), 'fp-lv-btn sm', function () { form.hidden = true; }));
+                        var addBtn = bt(__('Add destination', 'fastpix-io'), 'fp-lv-btn sm primary', function () {
                             var u = url.value.trim();
                             if (!/^rtmps?:\/\/.+/i.test(u)) { url.focus(); return; }
                             if (!key.value) { key.focus(); return; }
@@ -1654,25 +1654,25 @@
                             });
                         });
                         acts.appendChild(addBtn); form.appendChild(acts);
-                        sh.appendChild(bt(__('＋ Add destination', 'fastpix'), 'fp-lv-btn accent sm', function () { form.hidden = false; url.focus(); }));
+                        sh.appendChild(bt(__('＋ Add destination', 'fastpix-io'), 'fp-lv-btn accent sm', function () { form.hidden = false; url.focus(); }));
                     }
                     sim.appendChild(sh);
-                    sim.appendChild(h('p', 'fp-lv-hint', __('Mirror this broadcast anywhere that takes an RTMP address — YouTube, LinkedIn, X…', 'fastpix')));
+                    sim.appendChild(h('p', 'fp-lv-hint', __('Mirror this broadcast anywhere that takes an RTMP address — YouTube, LinkedIn, X…', 'fastpix-io')));
                     if (form) { sim.appendChild(form); }
 
                     s.simulcast.forEach(function (t, i) {
                         var row = h('div', 'fp-lv-dest'), nm = targetName(t.url), yt = /youtube/i.test(t.url);
                         row.appendChild(h('span', 'fp-lv-tile' + (yt ? ' yt' : ''), yt ? '' : nm.charAt(0).toUpperCase()));
                         var info = h('div', 'fp-lv-dinfo'); info.appendChild(h('b', null, nm));
-                        var subT = h('span', null, sprintf(/* translators: %s: an RTMP address; the key stays masked */ __('%s · key •••••', 'fastpix'), t.url)); subT.title = t.url; info.appendChild(subT); row.appendChild(info);
-                        var tg = lvSwitch(t.enabled, t.enabled ? __('Mirror', 'fastpix') : __('Paused', 'fastpix'), function (on, box) {
+                        var subT = h('span', null, sprintf(/* translators: %s: an RTMP address; the key stays masked */ __('%s · key •••••', 'fastpix-io'), t.url)); subT.title = t.url; info.appendChild(subT); row.appendChild(info);
+                        var tg = lvSwitch(t.enabled, t.enabled ? __('Mirror', 'fastpix-io') : __('Paused', 'fastpix-io'), function (on, box) {
                             if (!idle) { box.checked = !on; locked(); return; }
                             box.disabled = true;
                             api('PATCH', '/streams/' + s.stream_id + '/simulcast/' + t.id, { enabled: on }).then(function (res) {
                                 if (res.ok) { t.enabled = res.json.enabled; } else { fail(res); } render();
                             });
                         });
-                        tg.title = idle ? __('On: this broadcast is sent here too. Off: this destination is skipped.', 'fastpix') : __('Locked while the stream is not idle', 'fastpix');
+                        tg.title = idle ? __('On: this broadcast is sent here too. Off: this destination is skipped.', 'fastpix-io') : __('Locked while the stream is not idle', 'fastpix-io');
                         row.appendChild(tg);
                         var x = bt('×', 'fp-lv-x', function () {
                             if (!idle) { locked(); return; }
@@ -1680,24 +1680,24 @@
                                 if (res.ok) { s.simulcast.splice(i, 1); } else { fail(res); } render();
                             });
                         });
-                        x.title = __('Remove', 'fastpix'); x.setAttribute('aria-label', __('Remove destination', 'fastpix')); row.appendChild(x);
+                        x.title = __('Remove', 'fastpix-io'); x.setAttribute('aria-label', __('Remove destination', 'fastpix-io')); row.appendChild(x);
                         sim.appendChild(row);
                     });
 
                     var add = bt('', 'fp-lv-dest add', function () { if (!idle) { locked(); return; } form.hidden = false; form.querySelector('input').focus(); });
-                    add.appendChild(h('span', 'fp-lv-tile', '+')); add.appendChild(h('span', null, __('Paste an RTMP address and key to add another', 'fastpix')));
+                    add.appendChild(h('span', 'fp-lv-tile', '+')); add.appendChild(h('span', null, __('Paste an RTMP address and key to add another', 'fastpix-io')));
                     sim.appendChild(add);
-                    sim.appendChild(h('p', 'fp-lv-fine', ended ? __('Shown as it was when the stream ran.', 'fastpix') : __('Destinations lock while you’re live — add them before you start.', 'fastpix')));
+                    sim.appendChild(h('p', 'fp-lv-fine', ended ? __('Shown as it was when the stream ran.', 'fastpix-io') : __('Destinations lock while you’re live — add them before you start.', 'fastpix-io')));
                 }
                 render();
                 left.appendChild(sim);
 
                 // History
-                var hist = h('div', 'fp-lv-sec hist'); hist.appendChild(h('div', 'fp-lv-eyebrow', __('History', 'fastpix')));
+                var hist = h('div', 'fp-lv-sec hist'); hist.appendChild(h('div', 'fp-lv-eyebrow', __('History', 'fastpix-io')));
                 var hl = h('dl', 'fp-lv-kv');
-                hl.appendChild(kv(__('Created', 'fastpix'), fmtDate(s.created_at) || '—'));
-                hl.appendChild(kv(__('Last broadcast', 'fastpix'), (idle ? '' : fmtDate(s.last_active_at)) || __('Never streamed', 'fastpix')));
-                hl.appendChild(kv(__('Recordings', 'fastpix'), sprintf(__('%d in library', 'fastpix'), s.recorded_video ? 1 : 0)));
+                hl.appendChild(kv(__('Created', 'fastpix-io'), fmtDate(s.created_at) || '—'));
+                hl.appendChild(kv(__('Last broadcast', 'fastpix-io'), (idle ? '' : fmtDate(s.last_active_at)) || __('Never streamed', 'fastpix-io')));
+                hl.appendChild(kv(__('Recordings', 'fastpix-io'), sprintf(__('%d in library', 'fastpix-io'), s.recorded_video ? 1 : 0)));
                 hist.appendChild(hl); left.appendChild(hist);
 
                 two.appendChild(left); two.appendChild(right); p.appendChild(two);
@@ -1707,7 +1707,7 @@
             var panes = [encoderPane(), pagePane(), detailsPane()];
             var tabs = h('div', 'fp-lv-tabs'); tabs.setAttribute('role', 'tablist');
             var bodyEl = h('div', 'fp-lv-body');
-            [__('Connect encoder', 'fastpix'), __('Put it in a page', 'fastpix'), __('Details & simulcast', 'fastpix')].forEach(function (label, i) {
+            [__('Connect encoder', 'fastpix-io'), __('Put it in a page', 'fastpix-io'), __('Details & simulcast', 'fastpix-io')].forEach(function (label, i) {
                 var t = bt(label, 'fp-lv-tab', function () { pick(i); }); t.setAttribute('role', 'tab');
                 tabs.appendChild(t); bodyEl.appendChild(panes[i]);
             });
@@ -1760,14 +1760,14 @@
                 enable: function (on) { btn.disabled = !on; wrap.classList.toggle('is-off', !on); btn.setAttribute('aria-disabled', String(!on)); } };
         }
         (function () {
-            var liveDd = ddFor(lv.access, __('Who can watch live', 'fastpix'), function (v) {   // live is public | private; the recording adds DRM
+            var liveDd = ddFor(lv.access, __('Who can watch live', 'fastpix-io'), function (v) {   // live is public | private; the recording adds DRM
                 // The recording follows the broadcast until someone chooses otherwise: a private stream whose
                 // recording is public would give away what the stream was protecting.
                 if (lv.mediaAccess.dataset.touched) { return; }
                 var opt = lv.mediaAccess.querySelector('option[value="' + v + '"]');
                 if (opt && !opt.disabled) { lv.mediaAccess.value = v; recDd.paint(); }
             });
-            var recDd = ddFor(lv.mediaAccess, __('Who can watch the recording', 'fastpix'), function () { lv.mediaAccess.dataset.touched = '1'; });
+            var recDd = ddFor(lv.mediaAccess, __('Who can watch the recording', 'fastpix-io'), function () { lv.mediaAccess.dataset.touched = '1'; });
             lv.liveDd = liveDd; lv.recDd = recDd;
             function syncRec() { recDd.enable(lv.rec.checked); }
             lv.rec.addEventListener('change', syncRec); syncRec();

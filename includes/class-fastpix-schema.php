@@ -95,7 +95,7 @@ class Fastpix_Schema {
         if (is_array($failed) && isset($failed['at']) && time() - (int) $failed['at'] < self::RETRY_AFTER) {
             $error = new \WP_Error('fastpix_schema_failed', (string) $failed['message']);
         } elseif (!self::acquire_lock()) {
-            $error = new \WP_Error('fastpix_schema_locked', __('A schema update is already running.', 'fastpix'));
+            $error = new \WP_Error('fastpix_schema_locked', __('A schema update is already running.', 'fastpix-io'));
         }
         if ($error) {
             return $error;
@@ -255,7 +255,7 @@ class Fastpix_Schema {
             return new \WP_Error(
                 'fastpix_schema_create_failed',
                 /* translators: %s: comma-separated table names */
-                sprintf(__('These tables could not be created: %s', 'fastpix'), implode(', ', $missing)),
+                sprintf(__('These tables could not be created: %s', 'fastpix-io'), implode(', ', $missing)),
                 $missing
             );
         }
@@ -572,7 +572,7 @@ class Fastpix_Schema {
             return new \WP_Error(
                 'fastpix_schema_create_failed',
                 /* translators: %s: comma-separated table names */
-                sprintf(__('These tables could not be created: %s', 'fastpix'), implode(', ', $missing)),
+                sprintf(__('These tables could not be created: %s', 'fastpix-io'), implode(', ', $missing)),
                 $missing
             );
         }
@@ -704,7 +704,7 @@ class Fastpix_Schema {
         $missing = array_diff(array('suggested_title', 'suggested_description', 'suggested_at'), (array) $wpdb->get_col("DESC {$table}", 0));
 
         return $missing
-            ? new \WP_Error('fastpix_schema_create_failed', __('The suggestion columns could not be added.', 'fastpix'), array('videos'))
+            ? new \WP_Error('fastpix_schema_create_failed', __('The suggestion columns could not be added.', 'fastpix-io'), array('videos'))
             : true;
     }
 
@@ -740,7 +740,7 @@ class Fastpix_Schema {
         $missing = array_diff($names, (array) $wpdb->get_col("DESC {$table}", 0));
 
         return $missing
-            ? new \WP_Error('fastpix_schema_create_failed', __('The QoE columns could not be added.', 'fastpix'), array('analytics_daily'))
+            ? new \WP_Error('fastpix_schema_create_failed', __('The QoE columns could not be added.', 'fastpix-io'), array('analytics_daily'))
             : true;
     }
 
@@ -771,7 +771,7 @@ class Fastpix_Schema {
 
         return self::table_exists('lesson_progress')
             ? true
-            : new \WP_Error('fastpix_schema_create_failed', __('The lesson progress table could not be created.', 'fastpix'), array('lesson_progress'));
+            : new \WP_Error('fastpix_schema_create_failed', __('The lesson progress table could not be created.', 'fastpix-io'), array('lesson_progress'));
     }
 
     /**
@@ -789,7 +789,7 @@ class Fastpix_Schema {
 
         return in_array('plays', (array) $wpdb->get_col("DESC {$table}", 0), true)
             ? true
-            : new \WP_Error('fastpix_schema_create_failed', __('The plays column could not be added.', 'fastpix'), array('lesson_progress'));
+            : new \WP_Error('fastpix_schema_create_failed', __('The plays column could not be added.', 'fastpix-io'), array('lesson_progress'));
     }
 
     /**
@@ -884,7 +884,7 @@ class Fastpix_Schema {
 
         return in_array('session_uri', (array) $wpdb->get_col("DESC {$table}", 0), true)
             ? true
-            : new \WP_Error('fastpix_schema_create_failed', __('The session_uri column could not be added.', 'fastpix'), array('uploads'));
+            : new \WP_Error('fastpix_schema_create_failed', __('The session_uri column could not be added.', 'fastpix-io'), array('uploads'));
     }
 
     /**
@@ -905,7 +905,7 @@ class Fastpix_Schema {
 
         return in_array('platform_created_at', (array) $wpdb->get_col("DESC {$table}", 0), true)
             ? true
-            : new \WP_Error('fastpix_schema_create_failed', __('The platform_created_at column could not be added.', 'fastpix'), array('videos'));
+            : new \WP_Error('fastpix_schema_create_failed', __('The platform_created_at column could not be added.', 'fastpix-io'), array('videos'));
     }
 
     /**
@@ -924,7 +924,7 @@ class Fastpix_Schema {
         }
 
         return in_array('ready_count', (array) $wpdb->get_col("DESC {$table}", 0), true)
-            ? new \WP_Error('fastpix_schema_create_failed', __('The ready_count column could not be dropped.', 'fastpix'), array('migrations'))
+            ? new \WP_Error('fastpix_schema_create_failed', __('The ready_count column could not be dropped.', 'fastpix-io'), array('migrations'))
             : true;
     }
 

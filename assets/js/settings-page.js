@@ -27,7 +27,7 @@
     }
     function showErr(el, text) { if (el) { el.textContent = text || ''; el.hidden = !text; } }
     function copy(text, button) {
-        var done = function () { if (button) { var was = button.textContent; button.textContent = __('Copied', 'fastpix'); setTimeout(function () { button.textContent = was; }, 1500); } };
+        var done = function () { if (button) { var was = button.textContent; button.textContent = __('Copied', 'fastpix-io'); setTimeout(function () { button.textContent = was; }, 1500); } };
         if (navigator.clipboard && navigator.clipboard.writeText) { navigator.clipboard.writeText(text).then(done, done); } else { done(); }
     }
 
@@ -35,12 +35,12 @@
     // same Show/Hide the stream key uses — a screen share should not catch it by accident.
     document.querySelectorAll('.fp-secret').forEach(function (f) {
         var btn = document.createElement('button');
-        btn.type = 'button'; btn.className = 'fp-st__show'; btn.textContent = __('Show', 'fastpix');
+        btn.type = 'button'; btn.className = 'fp-st__show'; btn.textContent = __('Show', 'fastpix-io');
         btn.setAttribute('aria-controls', f.id); btn.setAttribute('aria-pressed', 'false');
         btn.addEventListener('click', function () {
             var shown = f.type === 'text';
             f.type = shown ? 'password' : 'text';
-            btn.textContent = shown ? __('Show', 'fastpix') : __('Hide', 'fastpix');
+            btn.textContent = shown ? __('Show', 'fastpix-io') : __('Hide', 'fastpix-io');
             btn.setAttribute('aria-pressed', String(!shown));
         });
         f.parentNode.insertBefore(btn, f.nextSibling);
@@ -56,8 +56,8 @@
             if (v === wsSaved) { return; }
             showErr($('fp-workspace-err'), '');
             api('POST', '/connection/workspace', { workspace_id: v }).then(function (res) {
-                if (!res.ok) { showErr($('fp-workspace-err'), res.json.message || __('That workspace key was not accepted.', 'fastpix')); return; }
-                wsSaved = v; note($('fp-workspace-note'), __('Saved', 'fastpix'));
+                if (!res.ok) { showErr($('fp-workspace-err'), res.json.message || __('That workspace key was not accepted.', 'fastpix-io')); return; }
+                wsSaved = v; note($('fp-workspace-note'), __('Saved', 'fastpix-io'));
                 var acc = $('fp-account-workspace'); if (acc) { acc.textContent = v || '—'; }
             });
         }
@@ -73,8 +73,8 @@
             if (v === drmSaved) { return; }
             showErr($('fp-drm-err'), '');
             api('PATCH', '/settings', { drm_configuration_id: v }).then(function (res) {
-                if (!res.ok) { showErr($('fp-drm-err'), res.json.message || __('That does not look like a DRM configuration ID (UUID).', 'fastpix')); return; }
-                drmSaved = res.json.drm_configuration_id || ''; drm.value = drmSaved; note($('fp-drm-note'), drmSaved ? __('Saved', 'fastpix') : __('Cleared', 'fastpix'));
+                if (!res.ok) { showErr($('fp-drm-err'), res.json.message || __('That does not look like a DRM configuration ID (UUID).', 'fastpix-io')); return; }
+                drmSaved = res.json.drm_configuration_id || ''; drm.value = drmSaved; note($('fp-drm-note'), drmSaved ? __('Saved', 'fastpix-io') : __('Cleared', 'fastpix-io'));
             });
         }
         drm.addEventListener('change', saveDrm);
@@ -86,8 +86,8 @@
         ttl.addEventListener('change', function () {
             var minutes = Math.max(2, Math.min(1440, parseInt(ttl.value, 10) || 15));
             api('PATCH', '/settings', { playback_token_ttl: minutes * 60 }).then(function (res) {
-                if (!res.ok) { note($('fp-ttl-note'), res.json.message || __('Not saved', 'fastpix'), true); return; }
-                ttl.value = Math.round(res.json.playback_token_ttl / 60); note($('fp-ttl-note'), __('Saved', 'fastpix'));
+                if (!res.ok) { note($('fp-ttl-note'), res.json.message || __('Not saved', 'fastpix-io'), true); return; }
+                ttl.value = Math.round(res.json.playback_token_ttl / 60); note($('fp-ttl-note'), __('Saved', 'fastpix-io'));
             });
         });
     }
@@ -97,7 +97,7 @@
         lms.addEventListener('change', function () {
             api('PATCH', '/settings', { lms_enabled: lms.checked }).then(function (res) {
                 if (!res.ok) { return; }
-                note($('fp-lms-note'), __('Saved', 'fastpix'));
+                note($('fp-lms-note'), __('Saved', 'fastpix-io'));
                 var field = $('fp-lesson-retention-field');
                 if (field) { field.hidden = !lms.checked; }
             });
@@ -111,7 +111,7 @@
             var days = Math.max(1, Math.min(3650, parseInt(retention.value, 10) || 90));
             api('PATCH', '/settings', { lesson_retention_days: days }).then(function (res) {
                 if (!res.ok) { return; }
-                retention.value = res.json.lesson_retention_days; note($('fp-lesson-retention-note'), __('Saved', 'fastpix'));
+                retention.value = res.json.lesson_retention_days; note($('fp-lesson-retention-note'), __('Saved', 'fastpix-io'));
             });
         });
     }
@@ -119,7 +119,7 @@
     var seo = $('fp-structured-data');
     if (seo) {
         seo.addEventListener('change', function () {
-            api('PATCH', '/settings', { structured_data: seo.checked }).then(function (res) { note($('fp-seo-note'), res.ok ? __('Saved', 'fastpix') : __('Not saved', 'fastpix'), !res.ok); });
+            api('PATCH', '/settings', { structured_data: seo.checked }).then(function (res) { note($('fp-seo-note'), res.ok ? __('Saved', 'fastpix-io') : __('Not saved', 'fastpix-io'), !res.ok); });
         });
     }
 
@@ -140,7 +140,7 @@
             api('PATCH', '/settings', { webhook_secret: secret.value.trim() }).then(function (res) {
                 whBusy = false;
                 whSave.disabled = false;
-                if (!res.ok || !res.json.webhook_configured) { showErr(whNote, (res.json && res.json.message) || __('Could not save.', 'fastpix')); return; }
+                if (!res.ok || !res.json.webhook_configured) { showErr(whNote, (res.json && res.json.message) || __('Could not save.', 'fastpix-io')); return; }
                 whSaved = secret.value.trim();
                 $('fp-webhook-test').disabled = false; $('fp-webhook-test').removeAttribute('title');
                 showErr(whNote, '');
@@ -160,14 +160,14 @@
         var v = st.verdict, text, pill, cls;
         if (v === 'verified' && st.last_delivery) {
             /* translators: 1: webhook event type, 2: time, HH:MM */
-            text = st.last_delivery.at ? sprintf(__('Secret verified — %1$s from FastPix, %2$s UTC', 'fastpix'), st.last_delivery.type, st.last_delivery.at.slice(11, 16)) : sprintf(__('Secret verified — %s from FastPix', 'fastpix'), st.last_delivery.type);
-            pill = __('verified', 'fastpix'); cls = 'ok';
+            text = st.last_delivery.at ? sprintf(__('Secret verified — %1$s from FastPix, %2$s UTC', 'fastpix-io'), st.last_delivery.type, st.last_delivery.at.slice(11, 16)) : sprintf(__('Secret verified — %s from FastPix', 'fastpix-io'), st.last_delivery.type);
+            pill = __('verified', 'fastpix-io'); cls = 'ok';
         } else if (v === 'rejected') {
-            text = __('Not verified — this secret does not match the one on the endpoint in the FastPix dashboard.', 'fastpix');
-            pill = __('not verified', 'fastpix'); cls = 'warn';
+            text = __('Not verified — this secret does not match the one on the endpoint in the FastPix dashboard.', 'fastpix-io');
+            pill = __('not verified', 'fastpix-io'); cls = 'warn';
         } else {
-            text = (prefix || '') + __('Not verified — waiting for FastPix\u2019s next event to confirm this secret.', 'fastpix');
-            pill = __('not verified', 'fastpix'); cls = 'warn';
+            text = (prefix || '') + __('Not verified — waiting for FastPix\u2019s next event to confirm this secret.', 'fastpix-io');
+            pill = __('not verified', 'fastpix-io'); cls = 'warn';
         }
         le.dataset.verdict = v || '';
         le.appendChild(document.createTextNode(text + ' '));
@@ -181,7 +181,7 @@
                 if (!res.ok) { return; }
                 var st = res.json, nameEl = $('fp-account-workspace-name');
                 if (st.workspace_name && nameEl) { nameEl.textContent = st.workspace_name; }
-                var v = verdictLine(st, __('Receiver reachable.', 'fastpix') + ' ' + (why || ''));
+                var v = verdictLine(st, __('Receiver reachable.', 'fastpix-io') + ' ' + (why || ''));
                 if (v === 'verified' || v === 'rejected') { return; }
                 if (++tries < 40) { watchTimer = setTimeout(tick, 3000); }   // two minutes, then the next reload picks it up
             });
@@ -193,18 +193,18 @@
     // A reload that lands on a still-waiting secret keeps watching for FastPix's delivery.
     if ($('fp-last-event') && $('fp-last-event').dataset.verdict === 'pending') { watchStatus(''); }
     function sendTest(afterSave) {
-        testBtn.disabled = true; var was = testBtn.textContent; testBtn.textContent = __('Sending…', 'fastpix');
+        testBtn.disabled = true; var was = testBtn.textContent; testBtn.textContent = __('Sending…', 'fastpix-io');
         api('POST', '/settings/webhook-test').then(function (res) {
             testBtn.disabled = false; testBtn.textContent = was;
             var le = $('fp-last-event');
             if (res.ok && res.json.delivered) {
-                var why = (res.json.platform_nudged ? __('FastPix was asked for a delivery.', 'fastpix') : (res.json.nudge_reason ? /* translators: %s: the reason */ sprintf(__('FastPix could not be asked for a delivery (%s).', 'fastpix'), res.json.nudge_reason) : __('FastPix could not be asked for a delivery.', 'fastpix'))) + ' ';
-                verdictLine(res.json, (afterSave ? __('Saved.', 'fastpix') + ' ' : '') + __('Receiver reachable.', 'fastpix') + ' ' + why);
+                var why = (res.json.platform_nudged ? __('FastPix was asked for a delivery.', 'fastpix-io') : (res.json.nudge_reason ? /* translators: %s: the reason */ sprintf(__('FastPix could not be asked for a delivery (%s).', 'fastpix-io'), res.json.nudge_reason) : __('FastPix could not be asked for a delivery.', 'fastpix-io'))) + ' ';
+                verdictLine(res.json, (afterSave ? __('Saved.', 'fastpix-io') + ' ' : '') + __('Receiver reachable.', 'fastpix-io') + ' ' + why);
                 watchStatus(why);   // the platform's own delivery proves or refutes the secret
             } else {
                 le.innerHTML = '';
-                le.appendChild(document.createTextNode((res.json && res.json.message) || /* translators: %s: HTTP status code */ sprintf(__('The receiver answered HTTP %s — the URL is not reachable from this server.', 'fastpix'), res.json && res.json.status ? res.json.status : res.status)));
-                var bad = document.createElement('span'); bad.className = 'fp-st__pill sm warn'; bad.textContent = __('not reachable', 'fastpix'); le.appendChild(bad);
+                le.appendChild(document.createTextNode((res.json && res.json.message) || /* translators: %s: HTTP status code */ sprintf(__('The receiver answered HTTP %s — the URL is not reachable from this server.', 'fastpix-io'), res.json && res.json.status ? res.json.status : res.status)));
+                var bad = document.createElement('span'); bad.className = 'fp-st__pill sm warn'; bad.textContent = __('not reachable', 'fastpix-io'); le.appendChild(bad);
             }
         });
     }
@@ -221,24 +221,24 @@
         $('fp-token-id').addEventListener('input', credsDirty); $('fp-secret').addEventListener('input', credsDirty);
         credsBtn.addEventListener('click', function () {
             var t = $('fp-token-id').value.trim(), s = $('fp-secret').value.trim();
-            if (!t || !s) { showErr($('fp-creds-err'), __('Paste both the token ID and its secret key.', 'fastpix')); return; }
-            credsBtn.disabled = true; showErr($('fp-creds-err'), ''); note($('fp-creds-note'), __('Verifying…', 'fastpix'));
+            if (!t || !s) { showErr($('fp-creds-err'), __('Paste both the token ID and its secret key.', 'fastpix-io')); return; }
+            credsBtn.disabled = true; showErr($('fp-creds-err'), ''); note($('fp-creds-note'), __('Verifying…', 'fastpix-io'));
             api('POST', '/connection', { token_id: t, secret: s }).then(function (res) {
                 credsBtn.disabled = false;
-                if (!res.ok) { note($('fp-creds-note'), ''); showErr($('fp-creds-err'), res.json.message || __('The pair was not accepted. Nothing was saved.', 'fastpix')); return; }
-                note($('fp-creds-note'), __('Verified and saved', 'fastpix'));
+                if (!res.ok) { note($('fp-creds-note'), ''); showErr($('fp-creds-err'), res.json.message || __('The pair was not accepted. Nothing was saved.', 'fastpix-io')); return; }
+                note($('fp-creds-note'), __('Verified and saved', 'fastpix-io'));
                 setTimeout(function () { window.location.reload(); }, 900);   // the Account rows and the header pill come from the server
             });
         });
     }
 
     var uninstall = $('fp-delete-on-uninstall');
-    if (uninstall) { uninstall.addEventListener('change', function () { api('PATCH', '/settings', { delete_on_uninstall: uninstall.checked }).then(function (res) { note($('fp-uninstall-note'), res.ok ? __('Saved', 'fastpix') : __('Not saved', 'fastpix'), !res.ok); }); }); }
+    if (uninstall) { uninstall.addEventListener('change', function () { api('PATCH', '/settings', { delete_on_uninstall: uninstall.checked }).then(function (res) { note($('fp-uninstall-note'), res.ok ? __('Saved', 'fastpix-io') : __('Not saved', 'fastpix-io'), !res.ok); }); }); }
 
     var disconnect = $('fp-disconnect');
     if (disconnect) {
         disconnect.addEventListener('click', function () {
-            fpDialog.confirm({ title: __('Disconnect this site from FastPix?', 'fastpix'), message: __('Nothing is deleted. Videos on this site stop playing until an account is connected again.', 'fastpix'), ok: __('Disconnect', 'fastpix'), danger: true }).then(function (ok) {
+            fpDialog.confirm({ title: __('Disconnect this site from FastPix?', 'fastpix-io'), message: __('Nothing is deleted. Videos on this site stop playing until an account is connected again.', 'fastpix-io'), ok: __('Disconnect', 'fastpix-io'), danger: true }).then(function (ok) {
                 if (!ok) { return; }
                 api('DELETE', '/connection').then(function () { window.location.reload(); });
             });
@@ -249,8 +249,8 @@
     if (report) {
         report.addEventListener('click', function () {
             api('GET', '/system-report').then(function (res) {
-                if (!res.ok) { note($('fp-report-note'), __('Could not build the report', 'fastpix'), true); return; }
-                copy(JSON.stringify(res.json, null, 2), null); note($('fp-report-note'), __('Copied', 'fastpix'));
+                if (!res.ok) { note($('fp-report-note'), __('Could not build the report', 'fastpix-io'), true); return; }
+                copy(JSON.stringify(res.json, null, 2), null); note($('fp-report-note'), __('Copied', 'fastpix-io'));
             });
         });
     }

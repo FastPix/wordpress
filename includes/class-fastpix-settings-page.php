@@ -148,8 +148,8 @@ class Fastpix_Settings_Page {
     public static function add_menu() {
         add_submenu_page(
             'fastpix-settings',
-            __('Settings', 'fastpix'),
-            __('Settings', 'fastpix'),
+            __('Settings', 'fastpix-io'),
+            __('Settings', 'fastpix-io'),
             Fastpix_Capabilities::MANAGE_SETTINGS,
             self::SLUG,
             array(__CLASS__, 'render'),
@@ -167,7 +167,7 @@ class Fastpix_Settings_Page {
         wp_enqueue_style('fastpix-settings-page', FASTPIX_PLUGIN_URL . 'assets/css/settings-page.css', array('fastpix-onboarding'), fastpix_asset_ver('assets/css/settings-page.css'));
         wp_enqueue_style('fastpix-dialog');
         wp_enqueue_script('fastpix-settings-page', FASTPIX_PLUGIN_URL . 'assets/js/settings-page.js', array('fastpix-dialog', 'wp-i18n'), fastpix_asset_ver('assets/js/settings-page.js'), true);
-        wp_set_script_translations('fastpix-settings-page', 'fastpix');   // QA L25
+        wp_set_script_translations('fastpix-settings-page', 'fastpix-io');   // QA L25
 
         wp_localize_script('fastpix-settings-page', 'fastpixSettings', array(
             'restUrl' => esc_url_raw(rest_url(Fastpix_Rest::NS)),
@@ -177,7 +177,7 @@ class Fastpix_Settings_Page {
 
     public static function render() {
         if (!current_user_can(Fastpix_Capabilities::MANAGE_SETTINGS)) {
-            wp_die(esc_html__('Settings are limited to the settings capability.', 'fastpix'));   // REQ-004
+            wp_die(esc_html__('Settings are limited to the settings capability.', 'fastpix-io'));   // REQ-004
         }
 
         global $wpdb;
@@ -232,20 +232,20 @@ class Fastpix_Settings_Page {
 
         $sweep_meaning = !empty($sweep['last_success_at'])
             /* translators: 1: date and time, 2: records read, 3: records corrected */
-            ? sprintf(__('Last completed %1$s. %2$d records read, %3$d corrected.', 'fastpix'),
+            ? sprintf(__('Last completed %1$s. %2$d records read, %3$d corrected.', 'fastpix-io'),
                 $sweep['last_success_at'], (int) $sweep['items_seen'], (int) $sweep['items_changed'])
-            : __('Has not completed yet — it runs nightly.', 'fastpix');
+            : __('Has not completed yet — it runs nightly.', 'fastpix-io');
 
         $checks = array(
-            $map($health['connection'], __('Talking to FastPix', 'fastpix'), __('Answering normally.', 'fastpix')),
-            $map($health['scheduler'], __('Background jobs', 'fastpix'), __('Running.', 'fastpix')),
-            $map($health['webhook_delivery'], __('Instant updates', 'fastpix'), __('Webhook deliveries are arriving.', 'fastpix')),
-            array('name' => __('Nightly double-check', 'fastpix'), 'ok' => !empty($sweep['last_success_at']), 'warn' => empty($sweep['last_success_at']), 'meaning' => $sweep_meaning),
-            $map($health['signing'], __('Keys for private video', 'fastpix'), __('Valid. They renew themselves.', 'fastpix')),
-            $map($health['page_cache'], __('Page caching', 'fastpix'), __('No page cache detected.', 'fastpix')),
+            $map($health['connection'], __('Talking to FastPix', 'fastpix-io'), __('Answering normally.', 'fastpix-io')),
+            $map($health['scheduler'], __('Background jobs', 'fastpix-io'), __('Running.', 'fastpix-io')),
+            $map($health['webhook_delivery'], __('Instant updates', 'fastpix-io'), __('Webhook deliveries are arriving.', 'fastpix-io')),
+            array('name' => __('Nightly double-check', 'fastpix-io'), 'ok' => !empty($sweep['last_success_at']), 'warn' => empty($sweep['last_success_at']), 'meaning' => $sweep_meaning),
+            $map($health['signing'], __('Keys for private video', 'fastpix-io'), __('Valid. They renew themselves.', 'fastpix-io')),
+            $map($health['page_cache'], __('Page caching', 'fastpix-io'), __('No page cache detected.', 'fastpix-io')),
         );
         if (isset($health['drm'])) {   // only present while a DRM configuration fails to resolve (ERR-061)
-            $checks[] = $map($health['drm'], __('DRM configuration', 'fastpix'), '');
+            $checks[] = $map($health['drm'], __('DRM configuration', 'fastpix-io'), '');
         }
 
         return $checks;

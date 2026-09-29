@@ -40,7 +40,7 @@ class Fastpix_Lms_Privacy {
 
     public static function register_exporter($exporters) {
         $exporters['fastpix-lesson-progress'] = array(
-            'exporter_friendly_name' => __('FastPix lesson progress', 'fastpix'),
+            'exporter_friendly_name' => __('FastPix lesson progress', 'fastpix-io'),
             'callback'               => array(__CLASS__, 'export_personal_data'),
         );
 
@@ -49,7 +49,7 @@ class Fastpix_Lms_Privacy {
 
     public static function register_eraser($erasers) {
         $erasers['fastpix-lesson-progress'] = array(
-            'eraser_friendly_name' => __('FastPix lesson progress', 'fastpix'),
+            'eraser_friendly_name' => __('FastPix lesson progress', 'fastpix-io'),
             'callback'             => array(__CLASS__, 'erase_personal_data'),
         );
 
@@ -75,13 +75,13 @@ class Fastpix_Lms_Privacy {
         foreach (self::user_rows($email) as $row) {
             $items[] = array(
                 'group_id'    => 'fastpix-lesson-progress',
-                'group_label' => __('FastPix lesson progress', 'fastpix'),
+                'group_label' => __('FastPix lesson progress', 'fastpix-io'),
                 'item_id'     => 'fastpix-lesson-progress-' . $row['post_id'] . '-' . $row['media_id'],
                 'data'        => array(
-                    array('name' => __('Lesson', 'fastpix'), 'value' => get_the_title((int) $row['post_id'])),
-                    array('name' => __('Parts watched', 'fastpix'), 'value' => self::popcount((string) $row['slots']) . '%'),
-                    array('name' => __('Completed', 'fastpix'), 'value' => $row['completed_at'] ? $row['completed_at'] : __('No', 'fastpix')),
-                    array('name' => __('Last activity', 'fastpix'), 'value' => (string) $row['updated_at']),
+                    array('name' => __('Lesson', 'fastpix-io'), 'value' => get_the_title((int) $row['post_id'])),
+                    array('name' => __('Parts watched', 'fastpix-io'), 'value' => self::popcount((string) $row['slots']) . '%'),
+                    array('name' => __('Completed', 'fastpix-io'), 'value' => $row['completed_at'] ? $row['completed_at'] : __('No', 'fastpix-io')),
+                    array('name' => __('Last activity', 'fastpix-io'), 'value' => (string) $row['updated_at']),
                 ),
             );
         }

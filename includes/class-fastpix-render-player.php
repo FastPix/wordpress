@@ -197,10 +197,10 @@ class Fastpix_Render_Player {
             return $fallback;   // the saved poster + link the block wrote
         }
         if ($policy === 'public' && $playback !== '') {
-            return self::poster_message($video, $playback, __('This video is still being processed. It will play here as soon as it is ready.', 'fastpix'), $settings, true);
+            return self::poster_message($video, $playback, __('This video is still being processed. It will play here as soon as it is ready.', 'fastpix-io'), $settings, true);
         }
 
-        return self::message(__('This video is still being processed. It will play here as soon as it is ready.', 'fastpix'), '');
+        return self::message(__('This video is still being processed. It will play here as soon as it is ready.', 'fastpix-io'), '');
     }
 
     /** Poster (public only — a private poster is signed too) + a stated message. */
@@ -227,14 +227,14 @@ class Fastpix_Render_Player {
         $reason = '';
         // REQ-053 / TEST-044: DRM ships behind a flag; off ⇒ a stated reason, never a broken stream.
         if (!apply_filters('fastpix_feature_drm', true)) {
-            $reason = __('DRM playback is not enabled on this site.', 'fastpix');
+            $reason = __('DRM playback is not enabled on this site.', 'fastpix-io');
         } else {
             // Browsers only unlock DRM (EME) in a secure context: HTTPS — or
             // localhost / 127.0.0.1, which every browser treats as secure (dev sites).
             $host  = strtolower((string) wp_parse_url(home_url(), PHP_URL_HOST));
             $local = in_array($host, array('localhost', '127.0.0.1', '::1'), true) || substr($host, -10) === '.localhost';
             if (!is_ssl() && !$local && !(defined('WP_CLI') && WP_CLI) && !(defined('REST_REQUEST') && REST_REQUEST)) {
-                $reason = __('This protected video needs a secure (HTTPS) page to play.', 'fastpix');
+                $reason = __('This protected video needs a secure (HTTPS) page to play.', 'fastpix-io');
             } else {
                 $reason = self::drm_config_reason($video);
             }
@@ -255,7 +255,7 @@ class Fastpix_Render_Player {
         if ($config === '') {
             update_option(Fastpix_Render::OPT_DRM_BAD, array('media_id' => $video['media_id'], 'at' => time()), false);
 
-            return __('This protected video cannot play right now — its DRM configuration no longer resolves.', 'fastpix');
+            return __('This protected video cannot play right now — its DRM configuration no longer resolves.', 'fastpix-io');
         }
         if (get_option(Fastpix_Render::OPT_DRM_BAD)) {
             delete_option(Fastpix_Render::OPT_DRM_BAD);
@@ -342,7 +342,7 @@ class Fastpix_Render_Player {
         if (!$rows) {
             return '';
         }
-        $html = '<details class="fastpix-transcript"><summary>' . esc_html__('Transcript', 'fastpix') . '</summary>';
+        $html = '<details class="fastpix-transcript"><summary>' . esc_html__('Transcript', 'fastpix-io') . '</summary>';
         foreach ($rows as $row) {
             $html .= '<p><span class="fastpix-transcript__time">' . esc_html(self::hms((float) $row['start_seconds'])) . '</span> ' . esc_html((string) $row['content']) . '</p>';
         }

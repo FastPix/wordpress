@@ -80,7 +80,7 @@ class Fastpix_Rest_Connection {
             'methods'    => 'POST',
             'callback'   => function () {
                 if (!Fastpix_Credentials::has_pair()) {
-                    return new \WP_Error('fastpix_not_connected', __('This site is not connected to FastPix. Connect a workspace from the FastPix menu first.', 'fastpix'), array('status' => 409));
+                    return new \WP_Error('fastpix_not_connected', __('This site is not connected to FastPix. Connect a workspace from the FastPix menu first.', 'fastpix-io'), array('status' => 409));
                 }
                 Fastpix_Jobs::enqueue('fastpix_new_media_sweep', array(), Fastpix_Jobs::GROUP_SYNC);
 

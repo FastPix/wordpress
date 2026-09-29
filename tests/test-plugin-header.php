@@ -91,7 +91,7 @@ assert(preg_match('/href\s*=\s*["\']https?:/i', $svg) === 0, 'no external loads 
 
 // ------------------------------------- version chip agrees with the header
 
-$plugin_data = get_file_data(FASTPIX_PLUGIN_DIR . 'fastpix-video-embed.php', array('Version' => 'Version'));
+$plugin_data = get_file_data(FASTPIX_PLUGIN_DIR . 'fastpix-io.php', array('Version' => 'Version'));
 assert($plugin_data['Version'] === FASTPIX_VERSION, 'FASTPIX_VERSION matches the plugin file header — one version, stated twice');
 
 // ---------------------------------------------------------------- teardown

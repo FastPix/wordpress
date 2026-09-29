@@ -256,7 +256,7 @@ class Fastpix_Webhooks {
         // and non-media events (track/AI/live) have no sweep to reconstruct them.
         // Return 500 so the platform redelivers rather than dropping the event.
         if ($inserted === false && $wpdb->last_error !== '') {
-            return new \WP_Error('fastpix_webhook_store', __('The event could not be stored; retry.', 'fastpix'), array('status' => 500));
+            return new \WP_Error('fastpix_webhook_store', __('The event could not be stored; retry.', 'fastpix-io'), array('status' => 500));
         }
 
         self::enqueue_processing($event_id, $inserted, $foreign);

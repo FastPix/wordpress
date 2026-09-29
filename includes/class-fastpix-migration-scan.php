@@ -120,20 +120,20 @@ class Fastpix_Migration_Scan {
             return 1;   // no local file ⇒ nothing WordPress hosts here (ERR-052 is stated per item at submit time, not listed)
         }
         if ($already) {
-            $state = 'skipped'; $skip = __('Already on FastPix', 'fastpix');
+            $state = 'skipped'; $skip = __('Already on FastPix', 'fastpix-io');
         } elseif (!in_array($mime, $accepted, true)) {
-            $state = 'skipped'; $skip = __('Format not accepted', 'fastpix');                        // ERR-050
+            $state = 'skipped'; $skip = __('Format not accepted', 'fastpix-io');                        // ERR-050
         } elseif ($size > Fastpix_Migration::MAX_BYTES) {
-            $state = 'skipped'; $skip = __('Over the 20 GB ceiling', 'fastpix');                     // ERR-050
+            $state = 'skipped'; $skip = __('Over the 20 GB ceiling', 'fastpix-io');                     // ERR-050
         } elseif (!self::looks_like_video($path)) {
-            $state = 'skipped'; $skip = __('The extension says video; the contents do not.', 'fastpix');   // ERR-053
+            $state = 'skipped'; $skip = __('The extension says video; the contents do not.', 'fastpix-io');   // ERR-053
         }
 
         $reachable = null;   // unknown until we check; only worth checking for movable items
         if ($state === 'pending') {
             $reachable = self::reachable_from_outside($url);
             if (!$reachable) {
-                $skip = __('Not reachable from outside the site — will be uploaded from here instead.', 'fastpix');   // ERR-050 reroute (REQ-023)
+                $skip = __('Not reachable from outside the site — will be uploaded from here instead.', 'fastpix-io');   // ERR-050 reroute (REQ-023)
             }
         }
 
@@ -428,7 +428,7 @@ class Fastpix_Migration_Scan {
             return 0;   // submitted, video pending
         }
         if ($media_id === '') {
-            return new \WP_Error('fastpix_no_media', __('FastPix did not return a media id.', 'fastpix'));
+            return new \WP_Error('fastpix_no_media', __('FastPix did not return a media id.', 'fastpix-io'));
         }
         $media['_fastpix_source'] = 'Migrated';
         Fastpix_Sync::apply_media($media);
@@ -447,7 +447,7 @@ class Fastpix_Migration_Scan {
             Fastpix_Uploads_Ingest::push_title($media_id, array('title' => get_the_title($attachment_id)));   // the dashboard shows the same name (QA F7)
         }
 
-        return $video_id ?: new \WP_Error('fastpix_no_row', __('The video row could not be created.', 'fastpix'));
+        return $video_id ?: new \WP_Error('fastpix_no_row', __('The video row could not be created.', 'fastpix-io'));
     }
 
     /* ---------------------------------------------------------------- push */
@@ -475,11 +475,11 @@ class Fastpix_Migration_Scan {
     private static function push_guard($path) {
         $err = null;
         if (!$path || !file_exists($path)) {
-            $err = new \WP_Error('fastpix_file_missing', __('The attachment row exists but the file does not.', 'fastpix'));
+            $err = new \WP_Error('fastpix_file_missing', __('The attachment row exists but the file does not.', 'fastpix-io'));
         } elseif ((int) filesize($path) > Fastpix_Migration::PUSH_MAX) {
-            $err = new \WP_Error('fastpix_push_too_large', __('Not reachable from outside the site and too large to upload from here (over 2 GB). Make the uploads folder publicly reachable and retry.', 'fastpix'));
+            $err = new \WP_Error('fastpix_push_too_large', __('Not reachable from outside the site and too large to upload from here (over 2 GB). Make the uploads folder publicly reachable and retry.', 'fastpix-io'));
         } elseif (!function_exists('curl_init')) {
-            $err = new \WP_Error('fastpix_no_curl', __('This server cannot stream the file (cURL missing).', 'fastpix'));
+            $err = new \WP_Error('fastpix_no_curl', __('This server cannot stream the file (cURL missing).', 'fastpix-io'));
         }
 
         return $err;
@@ -497,7 +497,7 @@ class Fastpix_Migration_Scan {
         $data = isset($session['body']['data']) ? $session['body']['data'] : (array) $session['body'];
         $url  = (string) Fastpix_Sync::field($data, array('url', 'uploadUrl', 'signedUrl'));
         if ($url === '') {
-            return new \WP_Error('fastpix_no_signed_url', __('FastPix did not return an upload URL.', 'fastpix'));
+            return new \WP_Error('fastpix_no_signed_url', __('FastPix did not return an upload URL.', 'fastpix-io'));
         }
         $err = self::stream_put($path, $url, $attachment_id);
 
@@ -538,7 +538,7 @@ class Fastpix_Migration_Scan {
         // phpcs:enable WordPress.WP.AlternativeFunctions
         if ($status < 200 || $status >= 300) {
             /* translators: %s: error message or HTTP status */
-            return new \WP_Error('fastpix_push_failed', sprintf(__('The upload from this server did not complete (%s).', 'fastpix'), $err ?: 'HTTP ' . $status));
+            return new \WP_Error('fastpix_push_failed', sprintf(__('The upload from this server did not complete (%s).', 'fastpix-io'), $err ?: 'HTTP ' . $status));
         }
 
         return null;

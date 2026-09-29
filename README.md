@@ -89,7 +89,7 @@ git clone https://github.com/FastPix/wordpress.git /path/to/wordpress/wp-content
 
 | Path | What it holds |
 |---|---|
-| `fastpix-video-embed.php` | Plugin entry point; loads every class explicitly. |
+| `fastpix-io.php` | Plugin entry point; loads every class explicitly. |
 | `includes/class-fastpix-*.php` | One class per concern: API client, connection, uploads, sync, render, analytics, LMS, live, REST, schema, jobs. |
 | `templates/` | Admin screens (wizard, videos, add media, analytics, settings), rendered through `fastpix_template()`. |
 | `assets/css`, `assets/js` | Plain CSS and ES5-style JavaScript, no build step. |

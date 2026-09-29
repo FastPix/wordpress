@@ -146,7 +146,7 @@ class Fastpix_Signing {
         $kid  = (string) Fastpix_Sync::field($data, array('id', 'signingKeyId', 'keyId'));
         $pem  = (string) Fastpix_Sync::field($data, array('privateKey', 'private_key'));
         if ($kid === '' || $pem === '') {
-            return new \WP_Error('fastpix_signing_key_shape', __('FastPix did not return a signing key.', 'fastpix'), array('status' => 502));
+            return new \WP_Error('fastpix_signing_key_shape', __('FastPix did not return a signing key.', 'fastpix-io'), array('status' => 502));
         }
         if (strpos($pem, '-----BEGIN') === false) {
             $decoded = base64_decode($pem, true);
@@ -229,7 +229,7 @@ class Fastpix_Signing {
         $sig     = '';
         $pkey    = openssl_pkey_get_private($key['private_key']);
         if (!$pkey || !openssl_sign($header . '.' . $payload, $sig, $pkey, OPENSSL_ALGO_SHA256)) {
-            return new \WP_Error('fastpix_signing_failed', __('The playback signing key could not sign.', 'fastpix'), array('status' => 500));
+            return new \WP_Error('fastpix_signing_failed', __('The playback signing key could not sign.', 'fastpix-io'), array('status' => 500));
         }
 
         return $header . '.' . $payload . '.' . self::b64($sig);

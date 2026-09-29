@@ -230,7 +230,7 @@ class Fastpix_Rate_Limiter {
 
         return new \WP_Error(
             'fastpix_too_many_requests',
-            __('Too many requests. Try again shortly.', 'fastpix'),
+            __('Too many requests. Try again shortly.', 'fastpix-io'),
             array('status' => 429, 'retry_after' => $retry_after, 'bucket' => $bucket)
         );
     }

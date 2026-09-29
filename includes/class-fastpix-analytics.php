@@ -314,7 +314,7 @@ class Fastpix_Analytics {
         // that window's own view total so an error % is never computed against
         // the 1/6/24 h view count (600 % errors).
         $out['errors_views']  = (int) $out['totals']['views'];
-        $out['errors_window'] = __('yesterday and today (day grain)', 'fastpix');
+        $out['errors_window'] = __('yesterday and today (day grain)', 'fastpix-io');
         $cache = (array) get_option(self::OPT_HOURLY, array());
         $since = time() - $hours * HOUR_IN_SECONDS;
         $series = array();
@@ -348,7 +348,7 @@ class Fastpix_Analytics {
         $id    = (int) $request->get_param('id');
         $scope = self::scope_video_ids();
         if ($scope !== null && !in_array($id, $scope, true)) {
-            return new \WP_Error('fastpix_video_missing', __('No such video.', 'fastpix'), array('status' => 404));
+            return new \WP_Error('fastpix_video_missing', __('No such video.', 'fastpix-io'), array('status' => 404));
         }
 
         $video = $wpdb->get_row($wpdb->prepare(
@@ -356,7 +356,7 @@ class Fastpix_Analytics {
             $id
         ), ARRAY_A);
         if (!$video || Fastpix_Videos_Rest::is_other_workspace($video)) {   // a previous workspace's figures are not this workspace's [ASSUME-092]
-            return new \WP_Error('fastpix_video_missing', __('No such video.', 'fastpix'), array('status' => 404));
+            return new \WP_Error('fastpix_video_missing', __('No such video.', 'fastpix-io'), array('status' => 404));
         }
 
         list($from, $to) = self::range($request);

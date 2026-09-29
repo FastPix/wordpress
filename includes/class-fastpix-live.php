@@ -168,7 +168,7 @@ class Fastpix_Live {
         ), ARRAY_A);
 
         if (!$row) {
-            return new \WP_Error('fastpix_stream_missing', __('No such stream.', 'fastpix'), array('status' => 404));   // [QA B5]
+            return new \WP_Error('fastpix_stream_missing', __('No such stream.', 'fastpix-io'), array('status' => 404));   // [QA B5]
         }
 
         // A visitor waiting on the ended card polls this route: it is what makes the page switch to the
@@ -273,7 +273,7 @@ class Fastpix_Live {
         // the body mirrors the on-demand shape and a refusal comes back to the form verbatim.
         $drm_id = $media === 'drm' ? Fastpix_Settings_Page::drm_configuration_id() : '';
         if ($media === 'drm' && $drm_id === '') {
-            return new \WP_Error('fastpix_drm_unconfigured', __('DRM needs a DRM configuration ID — add it under FastPix → Settings → DRM, then try again.', 'fastpix'), array('status' => 409));
+            return new \WP_Error('fastpix_drm_unconfigured', __('DRM needs a DRM configuration ID — add it under FastPix → Settings → DRM, then try again.', 'fastpix-io'), array('status' => 409));
         }
         $playback = array('accessPolicy' => $access);
         $client = new Fastpix_Api_Client();
@@ -295,7 +295,7 @@ class Fastpix_Live {
         ));
         $data = !is_wp_error($result) && isset($result['body']['data']) ? (array) $result['body']['data'] : array();
         if (!is_wp_error($result) && empty($data['streamId'])) {
-            $result = new \WP_Error('fastpix_stream_create_failed', __('FastPix did not return a stream.', 'fastpix'), array('status' => 502));
+            $result = new \WP_Error('fastpix_stream_create_failed', __('FastPix did not return a stream.', 'fastpix-io'), array('status' => 502));
         }
         if (is_wp_error($result)) {
             return $result;
@@ -321,7 +321,7 @@ class Fastpix_Live {
             $stream_id
         ), ARRAY_A);
         if (!$row) {
-            return new \WP_Error('fastpix_stream_missing', __('No such stream.', 'fastpix'), array('status' => 404));
+            return new \WP_Error('fastpix_stream_missing', __('No such stream.', 'fastpix-io'), array('status' => 404));
         }
 
         $body = array();

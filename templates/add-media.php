@@ -36,22 +36,22 @@ $fastpix_sub  = isset($settings['subtitles']) && isset($fastpix_lang[$settings['
 ?>
 <div class="wrap fastpix-wrap">
 <div class="fp-am">
-  <h1 class="fp-am-title"><?php esc_html_e('Add videos', 'fastpix'); ?></h1>
-  <p class="fp-am-sub"><?php esc_html_e("Add the files first — you'll name them and choose settings next.", 'fastpix'); ?></p>
+  <h1 class="fp-am-title"><?php esc_html_e('Add videos', 'fastpix-io'); ?></h1>
+  <p class="fp-am-sub"><?php esc_html_e("Add the files first — you'll name them and choose settings next.", 'fastpix-io'); ?></p>
 
 <?php if (!$can_upload) : ?>
     <?php /* UI-004 restricted: surfaces disabled, reason stated. */ ?>
     <div class="fpnotice info">
         <span class="ni" aria-hidden="true">ⓘ</span>
-        <div class="nb"><p class="nt"><?php esc_html_e('Your role cannot upload video', 'fastpix'); ?></p>
-        <p><?php esc_html_e('Uploading needs the upload video capability. An administrator can grant it without granting access to settings or credentials.', 'fastpix'); ?></p></div>
+        <div class="nb"><p class="nt"><?php esc_html_e('Your role cannot upload video', 'fastpix-io'); ?></p>
+        <p><?php esc_html_e('Uploading needs the upload video capability. An administrator can grant it without granting access to settings or credentials.', 'fastpix-io'); ?></p></div>
     </div>
 <?php elseif (!$connected) : ?>
     <div class="fpnotice info">
         <span class="ni" aria-hidden="true">ⓘ</span>
-        <div class="nb"><p class="nt"><?php esc_html_e('Not connected', 'fastpix'); ?></p>
-        <p><?php esc_html_e('Connect this site to a FastPix workspace first.', 'fastpix'); ?></p>
-        <div class="na"><a class="btn sm" href="<?php echo esc_url(admin_url('admin.php?page=fastpix-connection')); ?>"><?php esc_html_e('Open Connection', 'fastpix'); ?></a></div></div>
+        <div class="nb"><p class="nt"><?php esc_html_e('Not connected', 'fastpix-io'); ?></p>
+        <p><?php esc_html_e('Connect this site to a FastPix workspace first.', 'fastpix-io'); ?></p>
+        <div class="na"><a class="btn sm" href="<?php echo esc_url(admin_url('admin.php?page=fastpix-connection')); ?>"><?php esc_html_e('Open Connection', 'fastpix-io'); ?></a></div></div>
     </div>
 <?php else : ?>
 
@@ -59,29 +59,29 @@ $fastpix_sub  = isset($settings['subtitles']) && isset($fastpix_lang[$settings['
 
 <?php /* Upload card (Figma 9376:104326): 760×378 gradient, 16px inset; drop zone 728×184; URL row 643 + 73 */ ?>
   <section class="fp-am-card">
-    <p class="fp-am-lead"><?php esc_html_e('Upload a file', 'fastpix'); ?></p>
+    <p class="fp-am-lead"><?php esc_html_e('Upload a file', 'fastpix-io'); ?></p>
 
-    <div class="drop" id="fp-drop" role="button" tabindex="0" onkeydown="if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); this.querySelector('#fp-file-input').click(); }" aria-label="<?php esc_attr_e('Choose video or audio files', 'fastpix'); ?>">
+    <div class="drop" id="fp-drop" role="button" tabindex="0" onkeydown="if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); this.querySelector('#fp-file-input').click(); }" aria-label="<?php esc_attr_e('Choose video or audio files', 'fastpix-io'); ?>">
       <img class="drop__ico" src="<?php echo esc_url(FASTPIX_PLUGIN_URL . 'assets/images/add-media-upload-cloud.svg'); ?>" alt="" width="53" height="48">
-      <h3><?php esc_html_e('Drag & drop video and audio or', 'fastpix'); ?> <button type="button" class="linkbtn" id="fp-pick"><?php esc_html_e('Browse', 'fastpix'); ?></button></h3>
-      <p class="dim"><?php esc_html_e('You can upload multiple files at once.', 'fastpix'); ?></p>
-      <input type="file" id="fp-file-input" multiple accept="video/*,audio/*,.mkv,.mts,.m2ts,.mxf,.rm,.wtv,.vob,.ts" aria-label="<?php esc_attr_e('Video or audio files to upload', 'fastpix'); ?>" hidden>
+      <h3><?php esc_html_e('Drag & drop video and audio or', 'fastpix-io'); ?> <button type="button" class="linkbtn" id="fp-pick"><?php esc_html_e('Browse', 'fastpix-io'); ?></button></h3>
+      <p class="dim"><?php esc_html_e('You can upload multiple files at once.', 'fastpix-io'); ?></p>
+      <input type="file" id="fp-file-input" multiple accept="video/*,audio/*,.mkv,.mts,.m2ts,.mxf,.rm,.wtv,.vob,.ts" aria-label="<?php esc_attr_e('Video or audio files to upload', 'fastpix-io'); ?>" hidden>
     </div>
 
-    <p class="fp-am-urllab"><?php esc_html_e('Or upload using video URL', 'fastpix'); ?></p>
+    <p class="fp-am-urllab"><?php esc_html_e('Or upload using video URL', 'fastpix-io'); ?></p>
     <div class="fp-am-links">
-      <input class="urlinput" id="fp-urls" type="text" placeholder="<?php esc_attr_e('Paste your video URL here...', 'fastpix'); ?>" spellcheck="false" aria-label="<?php esc_attr_e('Video links to add', 'fastpix'); ?>">
-      <button type="button" class="fp-am-addlinks" id="fp-ingest" disabled><?php esc_html_e('Upload', 'fastpix'); ?></button>
+      <input class="urlinput" id="fp-urls" type="text" placeholder="<?php esc_attr_e('Paste your video URL here...', 'fastpix-io'); ?>" spellcheck="false" aria-label="<?php esc_attr_e('Video links to add', 'fastpix-io'); ?>">
+      <button type="button" class="fp-am-addlinks" id="fp-ingest" disabled><?php esc_html_e('Upload', 'fastpix-io'); ?></button>
     </div>
-    <a class="fp-am-go fp-am-plat" href="https://fastpix.com/docs/upload-videos/upload-videos-from-a-url" target="_blank" rel="noopener"><?php esc_html_e('Supported platforms', 'fastpix'); ?><img src="<?php echo esc_url(FASTPIX_PLUGIN_URL . 'assets/images/onboarding-link-arrow.svg'); ?>" alt="" width="16" height="16"></a>
+    <a class="fp-am-go fp-am-plat" href="https://fastpix.com/docs/upload-videos/upload-videos-from-a-url" target="_blank" rel="noopener"><?php esc_html_e('Supported platforms', 'fastpix-io'); ?><img src="<?php echo esc_url(FASTPIX_PLUGIN_URL . 'assets/images/onboarding-link-arrow.svg'); ?>" alt="" width="16" height="16"></a>
 
     <?php /* The batch: staged files and links, then their upload progress. Appears only once something is staged (the frame draws the empty state). */ ?>
     <?php /* No aria-live here: it wraps every row, and progress rewrites each row on every chunk — a screen reader read "Uploading 3%… 4%…" without pause. State changes still re-render the row text. (QA 2026-09-22) */ ?>
     <div class="queue__list" id="fp-queue" hidden></div>
 
     <div class="fp-am-foot" id="fp-am-foot" hidden>
-      <p><?php esc_html_e('Keep this tab open until uploads finish — other pages open in a new tab meanwhile. If you leave, pick the same file again to resume.', 'fastpix'); ?></p>
-      <button type="button" class="fp-am-next" id="fp-next" disabled><?php esc_html_e('Name and Settings', 'fastpix'); ?></button>
+      <p><?php esc_html_e('Keep this tab open until uploads finish — other pages open in a new tab meanwhile. If you leave, pick the same file again to resume.', 'fastpix-io'); ?></p>
+      <button type="button" class="fp-am-next" id="fp-next" disabled><?php esc_html_e('Name and Settings', 'fastpix-io'); ?></button>
     </div>
   </section>
 
@@ -93,15 +93,15 @@ $fastpix_sub  = isset($settings['subtitles']) && isset($fastpix_lang[$settings['
   <?php /* Media settings for this batch (Figma 9489:119243, was 9437:116537). REQ-017 batch settings. */ ?>
   <div class="fp-am-modal" id="fp-am-modal" hidden>
     <div class="fp-am-modal__box" role="dialog" aria-modal="true" aria-labelledby="fp-am-modal-title">
-      <button type="button" class="fp-am-modal__x" id="fp-am-close" aria-label="<?php esc_attr_e('Close', 'fastpix'); ?>">×</button>
-      <h2 id="fp-am-modal-title"><?php esc_html_e('Media settings', 'fastpix'); ?></h2>
+      <button type="button" class="fp-am-modal__x" id="fp-am-close" aria-label="<?php esc_attr_e('Close', 'fastpix-io'); ?>">×</button>
+      <h2 id="fp-am-modal-title"><?php esc_html_e('Media settings', 'fastpix-io'); ?></h2>
       <p class="fp-am-modal__sub" id="fp-am-modal-sub"></p>
 
       <?php /* Header and footer stay put; only this part scrolls (dialog capped at 82vh). */ ?>
       <div class="fp-am-modal__body">
 
-      <label class="fp-am-lab" for="fp-set-title"><?php esc_html_e('Title', 'fastpix'); ?> <span><?php esc_html_e("(optional — blank uses each file's name)", 'fastpix'); ?></span></label>
-      <input type="text" id="fp-set-title" class="titleinput" maxlength="255" autocomplete="off" spellcheck="false" placeholder="<?php esc_attr_e('e.g. June product webinars', 'fastpix'); ?>">
+      <label class="fp-am-lab" for="fp-set-title"><?php esc_html_e('Title', 'fastpix-io'); ?> <span><?php esc_html_e("(optional — blank uses each file's name)", 'fastpix-io'); ?></span></label>
+      <input type="text" id="fp-set-title" class="titleinput" maxlength="255" autocomplete="off" spellcheck="false" placeholder="<?php esc_attr_e('e.g. June product webinars', 'fastpix-io'); ?>">
 
       <div class="fp-am-selects">
         <?php
@@ -110,19 +110,19 @@ $fastpix_sub  = isset($settings['subtitles']) && isset($fastpix_lang[$settings['
         $fastpix_drm_ready = \Fastpix\Fastpix_Settings_Page::drm_configuration_id() !== '';
         $fastpix_access    = $settings['access_policy'] ?? 'public';
         if ($fastpix_access === 'drm' && !$fastpix_drm_ready) { $fastpix_access = 'private'; }
-        $fastpix_sel('access', __('Who can watch', 'fastpix'), array('public' => __('Public', 'fastpix'), 'private' => __('Private', 'fastpix'), 'drm' => __('DRM', 'fastpix')), $fastpix_access,
-            $fastpix_drm_ready ? array() : array('drm' => __('Add a DRM configuration ID under FastPix → Settings to use DRM.', 'fastpix')));
-        $fastpix_sel('tier', __('Quality', 'fastpix'), array('standard' => __('Standard', 'fastpix'), 'pro' => __('Pro', 'fastpix'), 'premium' => __('Premium', 'fastpix')), $settings['quality_tier'] ?? 'standard');
-        $fastpix_sel('res', __('Top resolution', 'fastpix'), array('720p' => '720p', '1080p' => '1080p', '1440p' => '1440p', '2160p' => '2160p'), $settings['max_resolution'] ?? '1080p');
-        $fastpix_sel('download', __('Allow downloads', 'fastpix'), array('off' => __('Off', 'fastpix'), 'video' => __('Video (MP4)', 'fastpix'), 'audio' => __('Audio only (M4A)', 'fastpix'), 'both' => __('Video + audio', 'fastpix')), $settings['downloadable'] ?? 'off');
+        $fastpix_sel('access', __('Who can watch', 'fastpix-io'), array('public' => __('Public', 'fastpix-io'), 'private' => __('Private', 'fastpix-io'), 'drm' => __('DRM', 'fastpix-io')), $fastpix_access,
+            $fastpix_drm_ready ? array() : array('drm' => __('Add a DRM configuration ID under FastPix → Settings to use DRM.', 'fastpix-io')));
+        $fastpix_sel('tier', __('Quality', 'fastpix-io'), array('standard' => __('Standard', 'fastpix-io'), 'pro' => __('Pro', 'fastpix-io'), 'premium' => __('Premium', 'fastpix-io')), $settings['quality_tier'] ?? 'standard');
+        $fastpix_sel('res', __('Top resolution', 'fastpix-io'), array('720p' => '720p', '1080p' => '1080p', '1440p' => '1440p', '2160p' => '2160p'), $settings['max_resolution'] ?? '1080p');
+        $fastpix_sel('download', __('Allow downloads', 'fastpix-io'), array('off' => __('Off', 'fastpix-io'), 'video' => __('Video (MP4)', 'fastpix-io'), 'audio' => __('Audio only (M4A)', 'fastpix-io'), 'both' => __('Video + audio', 'fastpix-io')), $settings['downloadable'] ?? 'off');
         ?>
       </div>
 
       <div class="fp-am-toggles">
-        <?php $fastpix_sw('audio', __('Even out volume', 'fastpix'), false); ?>
+        <?php $fastpix_sw('audio', __('Even out volume', 'fastpix-io'), false); ?>
         <div class="fp-am-subs off" id="subrow">
-          <?php $fastpix_sw('subtitles', __('Subtitles ·', 'fastpix'), false); ?>
-          <div class="select" id="fp-set-lang" tabindex="-1" role="combobox" aria-disabled="true" aria-expanded="false" aria-haspopup="listbox" aria-controls="menu-lang" aria-label="<?php esc_attr_e('Subtitle language', 'fastpix'); ?>" data-value="<?php echo esc_attr($fastpix_sub); ?>">
+          <?php $fastpix_sw('subtitles', __('Subtitles ·', 'fastpix-io'), false); ?>
+          <div class="select" id="fp-set-lang" tabindex="-1" role="combobox" aria-disabled="true" aria-expanded="false" aria-haspopup="listbox" aria-controls="menu-lang" aria-label="<?php esc_attr_e('Subtitle language', 'fastpix-io'); ?>" data-value="<?php echo esc_attr($fastpix_sub); ?>">
             <span class="select__val"><?php echo esc_html(Fastpix\Fastpix_Utils::get_language_label($fastpix_sub)); ?></span>
             <svg class="select__chev" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M4 6.5L8 10L12 6.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
             <ul class="select__menu" role="listbox" id="menu-lang">
@@ -135,36 +135,36 @@ $fastpix_sub  = isset($settings['subtitles']) && isset($fastpix_lang[$settings['
         <label class="check">
           <input type="checkbox" id="fp-set-domainlock" checked aria-controls="fp-lock">
           <span class="box"></span>
-          <span class="txt"><?php esc_html_e('Lock to this site', 'fastpix'); ?></span>
+          <span class="txt"><?php esc_html_e('Lock to this site', 'fastpix-io'); ?></span>
         </label>
-        <?php $fastpix_sw('wm', __('Watermark', 'fastpix'), false); ?>
+        <?php $fastpix_sw('wm', __('Watermark', 'fastpix-io'), false); ?>
       </div>
 
       <?php /* Domain lock: default policy + the one list that applies to it (ASSUME-073). */ ?>
       <div class="fp-am-lock" id="fp-lock">
         <div class="fp-am-lock__head">
-          <span class="lab"><?php esc_html_e('Sites not on the list', 'fastpix'); ?></span>
-          <div class="fp-am-seg" role="group" aria-label="<?php esc_attr_e('Sites not on the list', 'fastpix'); ?>">
-            <button type="button" id="fp-pol-deny" aria-pressed="true"><?php esc_html_e('Blocked', 'fastpix'); ?></button>
-            <button type="button" id="fp-pol-allow" aria-pressed="false"><?php esc_html_e('Allowed', 'fastpix'); ?></button>
+          <span class="lab"><?php esc_html_e('Sites not on the list', 'fastpix-io'); ?></span>
+          <div class="fp-am-seg" role="group" aria-label="<?php esc_attr_e('Sites not on the list', 'fastpix-io'); ?>">
+            <button type="button" id="fp-pol-deny" aria-pressed="true"><?php esc_html_e('Blocked', 'fastpix-io'); ?></button>
+            <button type="button" id="fp-pol-allow" aria-pressed="false"><?php esc_html_e('Allowed', 'fastpix-io'); ?></button>
           </div>
         </div>
         <div id="fp-lock-allow">
-          <label class="lab" for="fp-allow-in"><?php esc_html_e('Allow on', 'fastpix'); ?></label>
+          <label class="lab" for="fp-allow-in"><?php esc_html_e('Allow on', 'fastpix-io'); ?></label>
           <div class="fp-am-chips" id="fp-allow-chips">
-            <span class="chip site" title="<?php esc_attr_e('This site is always allowed', 'fastpix'); ?>"><?php echo esc_html(wp_parse_url(home_url(), PHP_URL_HOST)); ?></span>
-            <input type="text" id="fp-allow-in" autocomplete="off" spellcheck="false" placeholder="<?php esc_attr_e('Add a domain, press Enter', 'fastpix'); ?>">
+            <span class="chip site" title="<?php esc_attr_e('This site is always allowed', 'fastpix-io'); ?>"><?php echo esc_html(wp_parse_url(home_url(), PHP_URL_HOST)); ?></span>
+            <input type="text" id="fp-allow-in" autocomplete="off" spellcheck="false" placeholder="<?php esc_attr_e('Add a domain, press Enter', 'fastpix-io'); ?>">
           </div>
           <p class="fp-am-err" id="fp-allow-err" hidden></p>
-          <p class="fp-am-hint"><?php esc_html_e('Your site is always here. Add www or other domains you own.', 'fastpix'); ?></p>
+          <p class="fp-am-hint"><?php esc_html_e('Your site is always here. Add www or other domains you own.', 'fastpix-io'); ?></p>
         </div>
         <div id="fp-lock-deny" hidden>
-          <label class="lab" for="fp-deny-in"><?php esc_html_e('Block on', 'fastpix'); ?></label>
+          <label class="lab" for="fp-deny-in"><?php esc_html_e('Block on', 'fastpix-io'); ?></label>
           <div class="fp-am-chips" id="fp-deny-chips">
-            <input type="text" id="fp-deny-in" autocomplete="off" spellcheck="false" placeholder="<?php esc_attr_e('Add a domain, press Enter', 'fastpix'); ?>">
+            <input type="text" id="fp-deny-in" autocomplete="off" spellcheck="false" placeholder="<?php esc_attr_e('Add a domain, press Enter', 'fastpix-io'); ?>">
           </div>
           <p class="fp-am-err" id="fp-deny-err" hidden></p>
-          <p class="fp-am-hint"><?php esc_html_e('Every other site can play the video.', 'fastpix'); ?></p>
+          <p class="fp-am-hint"><?php esc_html_e('Every other site can play the video.', 'fastpix-io'); ?></p>
         </div>
         <p class="fp-am-lock__sum" id="fp-lock-sum"></p>
       </div>
@@ -172,25 +172,25 @@ $fastpix_sub  = isset($settings['subtitles']) && isset($fastpix_lang[$settings['
       <?php /* Watermark: burned in during encoding, so it is settled at creation like who-can-watch
              and the quality tier — never editable afterwards. Off → no watermark input is sent. */ ?>
       <div class="fp-am-lock fp-am-wmcard" id="fp-wm-card" hidden>
-        <label class="lab" for="fp-set-wm"><?php esc_html_e('Image URL', 'fastpix'); ?></label>
+        <label class="lab" for="fp-set-wm"><?php esc_html_e('Image URL', 'fastpix-io'); ?></label>
         <input type="url" id="fp-set-wm" class="titleinput" maxlength="1000" autocomplete="off" spellcheck="false" placeholder="https://example.com/logo.png" aria-describedby="fp-wm-hint">
         <p class="fp-am-err" id="fp-wm-err" role="alert" hidden></p>
         <div class="fp-am-selects">
           <?php
-          $fastpix_sel('wmpos', __('Position', 'fastpix'), \Fastpix\Fastpix_Uploads_Settings::watermark_positions(), 'top-left');
-          $fastpix_sel('wmmargin', __('Margin', 'fastpix'), \Fastpix\Fastpix_Uploads_Settings::watermark_margins(), '6%', array(), __('gap from edge', 'fastpix'));
-          $fastpix_sel('wmsize', __('Size', 'fastpix'), \Fastpix\Fastpix_Uploads_Settings::watermark_sizes(), '10%');
-          $fastpix_sel('wmopacity', __('Opacity', 'fastpix'), \Fastpix\Fastpix_Uploads_Settings::watermark_opacities(), '65%');
+          $fastpix_sel('wmpos', __('Position', 'fastpix-io'), \Fastpix\Fastpix_Uploads_Settings::watermark_positions(), 'top-left');
+          $fastpix_sel('wmmargin', __('Margin', 'fastpix-io'), \Fastpix\Fastpix_Uploads_Settings::watermark_margins(), '6%', array(), __('gap from edge', 'fastpix-io'));
+          $fastpix_sel('wmsize', __('Size', 'fastpix-io'), \Fastpix\Fastpix_Uploads_Settings::watermark_sizes(), '10%');
+          $fastpix_sel('wmopacity', __('Opacity', 'fastpix-io'), \Fastpix\Fastpix_Uploads_Settings::watermark_opacities(), '65%');
           ?>
         </div>
-        <p class="fp-am-hint" id="fp-wm-hint"><?php esc_html_e('Public image URL, transparent PNG works best. Burned into the video, so it cannot be changed later.', 'fastpix'); ?></p>
+        <p class="fp-am-hint" id="fp-wm-hint"><?php esc_html_e('Public image URL, transparent PNG works best. Burned into the video, so it cannot be changed later.', 'fastpix-io'); ?></p>
       </div>
       </div>
 
       <div class="fp-am-modal__foot">
-        <span><?php esc_html_e('Nothing uploads until you press Upload.', 'fastpix'); ?></span>
-        <button type="button" class="fp-am-cancel" id="fp-am-cancel"><?php esc_html_e('Cancel', 'fastpix'); ?></button>
-        <button type="button" class="fp-am-upload" id="fp-upload"><?php esc_html_e('Upload', 'fastpix'); ?></button>
+        <span><?php esc_html_e('Nothing uploads until you press Upload.', 'fastpix-io'); ?></span>
+        <button type="button" class="fp-am-cancel" id="fp-am-cancel"><?php esc_html_e('Cancel', 'fastpix-io'); ?></button>
+        <button type="button" class="fp-am-upload" id="fp-upload"><?php esc_html_e('Upload', 'fastpix-io'); ?></button>
       </div>
     </div>
   </div>

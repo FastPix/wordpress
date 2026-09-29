@@ -21,10 +21,10 @@ class Fastpix_Analytics_Export {
     /** POST /analytics/export [API-P05] — a background job; never inline. */
     public static function start_export($request) {
         if ((string) get_option(Fastpix_Connection::OPT_PENDING_LEAVE, '') !== '') {   // the stored rollup may be the previous workspace's [ASSUME-092]
-            return new \WP_Error('fastpix_workspace_pending', __('Analytics for the newly connected workspace are not available until its first video syncs.', 'fastpix'), array('status' => 409));
+            return new \WP_Error('fastpix_workspace_pending', __('Analytics for the newly connected workspace are not available until its first video syncs.', 'fastpix-io'), array('status' => 409));
         }
         if (!Fastpix_Jobs::available()) {
-            return new \WP_Error('fastpix_jobs_unavailable', __('Background jobs are not running.', 'fastpix'), array('status' => 503));
+            return new \WP_Error('fastpix_jobs_unavailable', __('Background jobs are not running.', 'fastpix-io'), array('status' => 503));
         }
 
         $id  = substr(bin2hex(random_bytes(16)), 0, 16);
@@ -180,6 +180,6 @@ class Fastpix_Analytics_Export {
             }
         }
 
-        return new \WP_Error('fastpix_export_missing', __('No such export.', 'fastpix'), array('status' => 404));
+        return new \WP_Error('fastpix_export_missing', __('No such export.', 'fastpix-io'), array('status' => 404));
     }
 }

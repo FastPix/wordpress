@@ -48,7 +48,7 @@ class Fastpix_Outbox {
             if (count($entries) >= self::LIMIT) {
                 return new \WP_Error(
                     'fastpix_outbox_full',
-                    __('FastPix is not responding and the queue of waiting changes is full (500). Try again when the connection is back.', 'fastpix'),
+                    __('FastPix is not responding and the queue of waiting changes is full (500). Try again when the connection is back.', 'fastpix-io'),
                     array('status' => 503)
                 );
             }
