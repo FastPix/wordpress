@@ -1,0 +1,58 @@
+/* FastPix embed — front end + editor canvas. The player sizes itself; we only
+   keep the figure honest and give the degraded states a shape (RULE-016). */
+.fastpix-embed { margin: 0 0 1em; }
+.fastpix-embed fastpix-player { display: block; width: 100%; aspect-ratio: 16 / 9; background: #0e0a14; border-radius: 6px; overflow: hidden; }
+.fastpix-embed fastpix-player[aspect-ratio] { aspect-ratio: attr(aspect-ratio); }
+.fastpix-embed--message { position: relative; background: #f3eafe; border: 1px dashed #d3c1ee; border-radius: 6px; padding: 0; overflow: hidden; }
+.fastpix-embed--message .fastpix-embed__poster { display: block; width: 100%; height: auto; }
+.fastpix-embed--message .fastpix-embed__note { padding: 14px 16px; font-size: 14px; color: #3d3550; }
+.fastpix-embed--waiting .fastpix-embed__note::before { content: "●"; color: #6d22cd; margin-right: 8px; animation: fastpix-blink 1.2s ease-in-out infinite; }
+@keyframes fastpix-blink { 0%, 100% { opacity: .35; } 50% { opacity: 1; } }
+.fastpix-embed--fallback img { display: block; width: 100%; height: auto; border-radius: 6px; }
+.fastpix-transcript { margin-top: 10px; font-size: 14px; }
+.fastpix-transcript summary { cursor: pointer; font-weight: 600; }
+.fastpix-transcript p { margin: 6px 0; }
+.fastpix-transcript__time { color: #6d22cd; font-variant-numeric: tabular-nums; margin-right: 6px; }
+/* Editor: picker + inspector bits */
+.fp-picker .components-modal__content { min-width: min(820px, 92vw); }
+.fp-pick-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin: 12px 0; max-height: 52vh; overflow: auto; }
+.fp-pick-card { text-align: left; background: #fff; border: 2px solid #e2ddea; border-radius: 10px; padding: 8px; cursor: pointer; display: flex; flex-direction: column; gap: 6px; }
+.fp-pick-card.is-selected { border-color: #6d22cd; box-shadow: 0 0 0 3px rgba(109, 34, 205, .18); }
+.fp-pick-thumb { position: relative; display: block; aspect-ratio: 16 / 9; background: #f1ecf8; border-radius: 6px; overflow: hidden; }
+.fp-pick-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.fp-pick-dur { position: absolute; right: 6px; bottom: 6px; background: rgba(0,0,0,.7); color: #fff; font-size: 11px; padding: 1px 6px; border-radius: 4px; }
+.fp-pick-lock { position: absolute; left: 6px; top: 6px; font-size: 12px; }
+.fp-pick-title { font-weight: 600; font-size: 13px; }
+.fp-pick-reason, .fp-pick-prov { color: #6b6478; font-size: 12px; }
+.fp-pick-empty { color: #6b6478; padding: 24px 0; text-align: center; }
+/* Always visible while the modal content scrolls — the Insert button must
+   never sit below the fold. */
+.fp-pick-footer {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    position: sticky;
+    bottom: 0;
+    background: #fff;
+    border-top: 1px solid #eee;
+    padding: 12px 0;
+    margin: 12px 0 -8px;
+}
+.fp-pick-upload { padding: 12px 0; }
+.fp-insp-video { display: flex; gap: 10px; align-items: center; margin-bottom: 10px; }
+.fp-insp-video img { width: 72px; border-radius: 4px; }
+.fp-insp-meta, .fp-insp-help { color: #6b6478; font-size: 12px; }
+.fp-canvas-note { color: #6b6478; font-size: 12px; margin: 6px 0 0; }
+
+/* ---- Lesson learner UI (prototype-matched, ASSUME-046) ---- */
+
+/* ---- Completion panel (editor) ---- */
+.fp-lesson-pill { font-size: 10.5px; padding: 1px 7px; border-radius: 9px; background: #f6f7f7; color: #707070; font-weight: 400; vertical-align: 1px; }
+.fp-complete-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 4px; font-size: 13px; }
+.fp-complete-input { display: flex; align-items: center; gap: 5px; }
+.fp-complete-input input { width: 72px; height: 30px; padding: 0 8px; border: 1px solid #949494; border-radius: 2px; }
+
+/* TEST-032: the waiting-card pulse is decorative — still under reduced motion. */
+@media (prefers-reduced-motion: reduce) {
+    .fastpix-embed--waiting .fastpix-embed__note::before { animation: none; opacity: 1; }
+}

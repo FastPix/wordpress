@@ -1,0 +1,858 @@
+/* UI-001 — Connection wizard.
+   Values copied verbatim from references/FastPixWordPressPrototype (2).html
+   and scoped under .fastpix-wrap so nothing leaks into wp-admin. The prototype's
+   .notice class is renamed .fpnotice here so WP core neither restyles nor
+   relocates it. */
+
+.fastpix-wrap {
+    /* --u = one Figma frame pixel: 1px at 1440×972, scaled by the content column's width so the
+       frame keeps its aspect ratio on any screen (menu collapsed included). Fallback: viewport width. */
+    --u: max(1px, 0.069444vw);
+    /* WordPress admin substrate */
+    --wp-bg: #f0f0f1;
+    --wp-surface: #ffffff;
+    --wp-surface-alt: #f6f7f7;
+    --wp-border: #dcdcde;
+    --wp-border-strong: #c3c4c7;
+    --wp-text: #1d2327;
+    --wp-muted: #50575e;
+    --wp-faint: #787c82;
+    --wp-link: #2271b1;
+
+    /* FastPix accent layer */
+    --fp: #6D22CD;
+    --fp-hover: #5A1CAB;
+    --fp-active: #4a1590;
+    --fp-soft: #F1ECF8;
+    --fp-soft-2: #E7DDF7;
+    --fp-border: #D3C1EE;
+
+    /* Semantic status */
+    --ok: #0f7b52;   --ok-bg: #e4f4ec;   --ok-bd: #a7ddc4;
+    --warn: #8a6100; --warn-bg: #fdf5df; --warn-bd: #e8cf8e;
+    --err: #b3164a;  --err-bg: #fdeaf1;  --err-bd: #f0b6cc;
+    --info: #3f45c9; --info-bg: #eceefc; --info-bd: #c1c5f3;
+
+    --r: 4px;
+    --r-lg: 8px;
+    --f: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
+    --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+
+    /* Content column shared by every screen: Figma frames draw it 217..1412 at 1440,
+       fluid at any other width (.wrap already contributes 2px left / 20px right). */
+    padding: 0 8px 0 35px;
+    font-family: var(--f);
+    font-size: 13px;
+    line-height: 1.5;
+    color: var(--wp-text);
+}
+.fastpix-wrap a { color: var(--wp-link); text-decoration: none; }
+.fastpix-wrap a:hover { color: var(--fp); }
+.fastpix-wrap :focus-visible { outline: 2px solid var(--fp); outline-offset: 1px; border-radius: 2px; }
+@media (max-width: 782px) { .fastpix-wrap { padding: 0; } }   /* WP folds the menu; the column takes the whole width */
+
+/* ---------- global plugin header (shared partial, every screen) ---------- */
+.fastpix-wrap .fp-plugin-header {
+    background: #fff;
+    border: 1px solid var(--wp-border);
+    border-radius: 10px;
+    box-shadow: 0 1px 1px rgba(0, 0, 0, .04);
+    margin: 12px 0 16px;
+    overflow: hidden;
+}
+.fastpix-wrap .fp-plugin-header-bar { display: flex; align-items: center; justify-content: space-between; padding: 13px 20px; }
+.fastpix-wrap .fp-plugin-logo { height: 24px; width: auto; display: block; }
+.fastpix-wrap .fp-version-chip {
+    background: #F1ECF8;
+    color: #6D22CD;
+    font-family: var(--mono);
+    font-size: 12px;
+    font-weight: 600;
+    border-radius: 6px;
+    padding: 4px 10px;
+    line-height: 1;
+}
+.fastpix-wrap .fp-plugin-header-accent { height: 3px; background: linear-gradient(90deg, #6D22CD 0%, #9a5cf0 55%, #E7DDF7 100%); }
+
+/* ---------- page furniture ---------- */
+.fastpix-wrap .pagehead { display: flex; align-items: flex-start; gap: 12px; flex-wrap: wrap; padding: 16px 0 8px; }
+.fastpix-wrap h1.pt { font-size: 23px; font-weight: 400; line-height: 1.3; margin: 0; padding: 0; color: var(--wp-text); }
+.fastpix-wrap .muted { color: var(--wp-muted); }
+.fastpix-wrap .faint { color: var(--wp-faint); }
+.fastpix-wrap .small { font-size: 12px; }
+.fastpix-wrap .micro { font-size: 11px; }
+.fastpix-wrap .mono { font-family: var(--mono); font-size: 12px; }
+.fastpix-wrap .right { margin-left: auto; }
+.fastpix-wrap .grid { display: grid; gap: 14px; }
+.fastpix-wrap .g3 { grid-template-columns: repeat(3, 1fr); }
+
+/* ---------- buttons ---------- */
+.fastpix-wrap .btn { display: inline-flex; align-items: center; gap: 6px; height: 30px; padding: 0 12px; border-radius: var(--r); border: 1px solid var(--fp); background: var(--fp); color: #fff; font-size: 13px; font-weight: 500; cursor: pointer; white-space: nowrap; font-family: var(--f); text-decoration: none; }
+.fastpix-wrap .btn:hover { background: var(--fp-hover); border-color: var(--fp-hover); color: #fff; }
+.fastpix-wrap .btn.ghost { background: transparent; border-color: var(--wp-border-strong); color: var(--wp-text); }
+.fastpix-wrap .btn.ghost:hover { background: var(--wp-surface-alt); border-color: var(--wp-faint); color: var(--wp-text); }
+.fastpix-wrap .btn.lg { height: 36px; padding: 0 18px; font-size: 14px; }
+.fastpix-wrap .btn.sm { height: 26px; padding: 0 9px; font-size: 12px; }
+.fastpix-wrap .btn[disabled], .fastpix-wrap .btn.off { opacity: .45; cursor: not-allowed; pointer-events: none; }
+.fastpix-wrap .btn[hidden] { display: none; }
+.fastpix-wrap .btn .spin { width: 9px; height: 9px; border: 1.5px solid currentColor; border-right-color: transparent; border-radius: 50%; animation: fp-spin .7s linear infinite; flex: 0 0 9px; }
+@keyframes fp-spin { to { transform: rotate(360deg); } }
+
+/* ---------- badges ---------- */
+.fastpix-wrap .b { display: inline-flex; align-items: center; gap: 4px; height: 20px; padding: 0 7px; border-radius: 10px; font-size: 11px; font-weight: 600; border: 1px solid transparent; white-space: nowrap; line-height: 1; }
+.fastpix-wrap .b .dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; flex: 0 0 6px; }
+.fastpix-wrap .b.ok { background: var(--ok-bg); color: var(--ok); border-color: var(--ok-bd); }
+.fastpix-wrap .b.neutral { background: var(--wp-surface-alt); color: var(--wp-muted); border-color: var(--wp-border); }
+
+/* ---------- notices (prototype .notice, renamed) ---------- */
+.fastpix-wrap .fpnotice { border-left: 4px solid var(--wp-border-strong); background: #fff; padding: 10px 12px; border-radius: 0 var(--r) var(--r) 0; margin: 0 0 14px; display: flex; gap: 10px; align-items: flex-start; font-size: 13px; }
+.fastpix-wrap .fpnotice .ni { font-size: 14px; line-height: 1.3; flex: 0 0 auto; }
+.fastpix-wrap .fpnotice .nb { flex: 1; min-width: 0; }
+.fastpix-wrap .fpnotice .nt { font-weight: 600; margin: 0 0 2px; }
+.fastpix-wrap .fpnotice p { margin: 0; }
+.fastpix-wrap .fpnotice .na { margin-top: 8px; display: flex; gap: 8px; flex-wrap: wrap; }
+.fastpix-wrap .fpnotice.info { border-left-color: var(--info); background: #fff; }
+.fastpix-wrap .fpnotice.error { border-left-color: var(--err); background: var(--err-bg); }
+.fastpix-wrap .fpnotice[hidden] { display: none; }
+.fastpix-wrap .concol .fpnotice { margin: 12px 0 0; }
+
+/* ---------- inputs ---------- */
+.fastpix-wrap .fld { display: block; margin-bottom: 14px; }
+.fastpix-wrap .fld > label { display: block; font-size: 12px; font-weight: 600; color: var(--wp-text); margin-bottom: 4px; }
+.fastpix-wrap .help { font-size: 12px; color: var(--wp-muted); margin-top: 4px; line-height: 1.45; }
+.fastpix-wrap .fld input[type=text],
+.fastpix-wrap .fld input[type=password] { width: 100%; min-height: 30px; padding: 5px 8px; border: 1px solid var(--wp-border-strong); border-radius: var(--r); background: #fff; color: var(--wp-text); font-size: 13px; font-family: var(--f); box-shadow: none; }
+.fastpix-wrap .fld input.mono { font-family: var(--mono); font-size: 12px; }
+.fastpix-wrap .fld input:focus { border-color: var(--fp); box-shadow: 0 0 0 1px var(--fp); outline: none; }
+.fastpix-wrap .fld input[readonly] { background: var(--wp-surface-alt); color: var(--wp-muted); }
+/* a field that was left empty says so on blur, never while it is being typed */
+.fastpix-wrap .fld.bad input { border-color: var(--err); }
+.fastpix-wrap .fld.bad input:focus { box-shadow: 0 0 0 3px rgba(179, 22, 74, .13); }
+.fastpix-wrap .fld .berr { margin: 6px 0 0; font-size: 12px; color: var(--err); font-weight: 500; }
+.fastpix-wrap .fld .berr[hidden] { display: none; }
+.fastpix-wrap .fld.bad .help { display: none; }
+.fastpix-wrap .fld.locked input,
+.fastpix-wrap .fld.locked .pwt { pointer-events: none; opacity: .6; }
+.fastpix-wrap .pwwrap { position: relative; }
+.fastpix-wrap .pwwrap input { padding-right: 64px; }
+.fastpix-wrap .pwwrap .pwt { position: absolute; right: 8px; top: 50%; transform: translateY(-50%); font-size: 12px; color: var(--fp); background: none; border: 0; cursor: pointer; padding: 4px 6px; font-family: var(--f); }
+/* Show/Hide stays on a clear ground — the affordance is the color, never a fill. */
+.fastpix-wrap .pwt:hover,
+.fastpix-wrap .pwt:active { background: none; color: var(--fp-hover); }
+
+/* ---------- wizard chrome (Cloudinary-shape: wide card, labelled stepper, footer bar) ---------- */
+/* Every wizard page is the same size: the card fills the viewport left over
+   after wp-admin chrome (admin bar 32px + .wrap offsets ≈ 110px total), full
+   width. Steps never resize the card — taller content scrolls inside cwbody. */
+.fastpix-wrap .cwiz { width: 100%; max-width: none; margin: 0 0 20px; }
+.fastpix-wrap:not(.fp-landing-active) .cwiz { width: calc(100% + 20px); }
+.fastpix-wrap .cwcard {
+    background: #fff; border: 1px solid var(--wp-border);
+    display: flex; flex-direction: column;
+    /* Natural height: the footer follows the content, no filler band. */
+    min-height: 0;
+    box-sizing: border-box; border-radius: 16px; border-color: #D1CBD7; overflow: hidden; width: calc(100% - 75px); max-width: none; margin-left: auto; margin-right: auto;
+}
+.fastpix-wrap .cwcard > .cwhead, .fastpix-wrap .cwcard > .cwfoot { flex: 0 0 auto; }
+
+/* The body fills the card so the footer sits on the floor; content flows
+   naturally inside it — no internal scrolling, no stretched cards. */
+.fastpix-wrap .cwcard > .cwbody { flex: 1 1 auto; display: flex; flex-direction: column; }
+.fastpix-wrap .cwcard > .celebrate { flex: 1 1 auto; display: flex; flex-direction: column; justify-content: flex-start; }
+.fastpix-wrap .cwbody > section[data-fp-view] { flex: 1 1 auto; min-height: var(--fp-step-min, 0px); display: flex; flex-direction: column; }
+.fastpix-wrap .cwbody > section[data-fp-view][hidden] { display: none; }
+
+/* The drawn figure never balloons on wide screens. */
+
+/* Everything shrinks before it overflows. */
+.fastpix-wrap .cwbody input, .fastpix-wrap .cwbody select { max-width: 100%; min-width: 0; }
+.fastpix-wrap .cwbody .mono { overflow: hidden; text-overflow: ellipsis; }
+.fastpix-wrap .concols > * { min-width: 0; }
+.fastpix-wrap .wswebgrid > div { min-width: 0; display: flex; flex-direction: column; }
+
+/* Workspace & Webhooks rows sync like the connect step: each card stretches
+   to its row, slack sits inside the fields area, footer pinned to the floor —
+   so help column and card share top AND bottom edges per row. */
+.fastpix-wrap .wswebgrid .pair { flex: 1 1 auto; display: flex; flex-direction: column; }
+.fastpix-wrap .wswebgrid .pair > .pairflds { flex: 1 1 auto; }
+
+/* Content scales with the viewport — text, steps, chips, inputs and their
+   placeholders all ride the same fluid scale. */
+.fastpix-wrap .cwbody .fld input { font-size: clamp(12px, .3vw + 10.5px, 13px); }
+.fastpix-wrap .cwbody .fld input.mono { font-size: clamp(10.5px, .3vw + 9px, 12px); }
+.fastpix-wrap .cwbody input::placeholder { text-overflow: ellipsis; }
+.fastpix-wrap .cwhead { display: flex; align-items: flex-start; gap: 20px; border-bottom: 0; padding: calc(52 * var(--u)) 0 calc(42 * var(--u)); justify-content: center; }
+.fastpix-wrap .cwlogo { width: 38px; height: 38px; border-radius: 9px; background: var(--fp); color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 18px; flex: 0 0 38px; }
+.fastpix-wrap .cwsteps { display: flex; align-items: flex-start; margin: 0 auto; padding-right: 0; flex: 0 0 64.5%; width: 64.5%; max-width: none; padding-bottom: calc(30 * var(--u)); position: relative; left: -6px; }   /* 812 of the 1258 column at 1440 */
+.fastpix-wrap .cwsteps[hidden] { display: none; }
+.fastpix-wrap .cwstep { display: flex; flex-direction: column; align-items: center; gap: 7px; min-width: 0; position: relative; width: calc(30 * var(--u)); flex: 0 0 calc(30 * var(--u)); }
+.fastpix-wrap .cwstep .c { border-radius: 50%; background: #fff; display: flex; align-items: center; justify-content: center; font-weight: 700; box-sizing: border-box; width: calc(30 * var(--u)); height: calc(30 * var(--u)); font-size: calc(13 * var(--u)); border: 1.5px solid #D1CBD7; color: #777080; font-family: "IBM Plex Mono", var(--mono); }   /* 4.76:1 on #fff */
+.fastpix-wrap .cwstep .l { position: absolute; top: 100%; left: 50%; transform: translateX(-50%); margin-top: calc(6 * var(--u)); white-space: nowrap; font-size: calc(12.5 * var(--u)); color: #777080; font-family: "Inter", var(--f); }   /* 12.5 at 1440 · 4.76:1 on #fff */
+.fastpix-wrap .cwstep.on .c { background: #6D22CD; border-color: #6D22CD; color: #fff; }
+.fastpix-wrap .cwstep.on .l { color: #6d22cd; font-weight: 700; }
+.fastpix-wrap .cwstep.done .c { background: #E4FBF0; border-color: #E4FBF0; font-size: 0;   /* the number is hidden; the check icon below replaces it */ background-image: url(../images/onboarding-step-check.svg); background-repeat: no-repeat; background-position: center; background-size: 15px 12px; }
+.fastpix-wrap .cwstep.done .l { color: #6e6878; font-weight: 400; }
+.fastpix-wrap .cwline { width: auto; height: 2px; min-width: 20px; background: #E4E1E8; max-width: none; margin: calc(14 * var(--u)) calc(28 * var(--u)) 0; flex: 1 1 auto; }   /* the frame insets its rules ~19–36px from the circles */
+.fastpix-wrap .cwline.done { background: #14CC80; }
+.fastpix-wrap .cwbody { padding: clamp(16px, 2.2vw, 26px); }
+.fastpix-wrap .cwbody[hidden] { display: none; }
+.fastpix-wrap .cwbody h3 { font-size: 14px; font-weight: 700; margin: 0 0 8px; }
+.fastpix-wrap .cwbody p.lede { font-size: clamp(12.5px, .35vw + 10px, 13.5px); color: var(--wp-text); margin: 0 0 8px; max-width: 88ch; }
+.fastpix-wrap .cwbody .sub { font-size: 13px; color: var(--wp-muted); margin: 0 0 18px; max-width: 88ch; }
+.fastpix-wrap .cwbody h1.cwt { font-size: clamp(19px, 1.1vw + 12px, 24px); line-height: 1.25; letter-spacing: -.02em; font-weight: 600; color: var(--wp-text); margin: 0 0 6px; padding: 0; }
+.fastpix-wrap .cwfoot { display: flex; align-items: center; gap: 10px; padding: 14px 26px; border-top: 1px solid var(--wp-border); flex-wrap: wrap; padding-left: clamp(16px, 2.2vw, 26px); padding-right: clamp(16px, 2.2vw, 26px); }
+.fastpix-wrap .cwfoot[hidden] { display: none; }
+/* The card is always content-height; the step fills it, never stretches it. */
+.fastpix-wrap .cwiz.fit .cwbody { min-height: 0; }
+
+/* ---------- helpblock ---------- */
+.fastpix-wrap .helpblock { margin-top: 26px; }
+/* Beside a card, the columns start LEVEL: the card header line and the help
+   heading share the same top edge — no stagger, no overlap. */
+.fastpix-wrap .concols .helpblock,
+.fastpix-wrap .wswebgrid .helpblock { margin-top: 0; }
+.fastpix-wrap .concols .helpblock h3,
+.fastpix-wrap .wswebgrid .helpblock h3 { margin-top: 6px; }   /* optically aligns with the card header text */
+.fastpix-wrap .helpblock h3 { font-size: 14px; font-weight: 700; margin: 0 0 8px; }
+.fastpix-wrap .helpblock ol { margin: 0 0 16px; padding-left: 20px; font-size: 13px; line-height: 1.75; }
+.fastpix-wrap .helpblock code { font-family: var(--mono); font-size: 11.5px; white-space: nowrap; background: var(--wp-surface-alt); border: 1px solid var(--wp-border); border-radius: 3px; padding: 1px 5px; }
+
+/* ---------- welcome value cards ---------- */
+.fastpix-wrap .wcard { border: 1px solid var(--wp-border); border-radius: var(--r-lg); padding: 15px 16px; background: #fff; transition: border-color .12s, box-shadow .12s, transform .12s; }
+.fastpix-wrap .wcard:hover { border-color: var(--fp-border); box-shadow: 0 2px 10px rgba(109, 34, 205, .09); transform: translateY(-1px); }
+.fastpix-wrap .wcard .wi { width: 32px; height: 32px; border-radius: 8px; background: var(--fp-soft); color: var(--fp); display: flex; align-items: center; justify-content: center; font-size: 15px; margin-bottom: 9px; }
+.fastpix-wrap .wcard b { display: block; font-size: 13px; margin-bottom: 3px; }
+.fastpix-wrap .wcard p { font-size: 12.5px; color: var(--wp-muted); margin: 0; line-height: 1.55; }
+
+/* ---------- step 2: connect columns ---------- */
+/* Content reads from the top, as in the reference; the flexing body keeps the
+   footer on the card floor. */
+.fastpix-wrap .conbody { display: flex; flex-direction: column; width: 100%; }
+
+/* The in-card info note (reference: grey rounded box under the fields). */
+.fastpix-wrap .pairnote { display: flex; gap: 10px; align-items: flex-start; margin: 14px 0 16px; padding: 12px 14px; background: var(--wp-surface-alt); border: 1px solid var(--wp-border); border-radius: var(--r-lg); font-size: 12.5px; color: var(--wp-muted); line-height: 1.5; }
+.fastpix-wrap .pairnote .pn { flex: 0 0 16px; width: 16px; height: 16px; border-radius: 50%; background: var(--fp-soft); color: var(--fp); font-size: 10px; font-weight: 700; font-style: normal; display: flex; align-items: center; justify-content: center; margin-top: 1px; }
+/* Columns share one height; the CARD stays exactly content-tall (no hollow),
+   and the figure in the left column drops to the bottom edge — so the figure's
+   floor and the card's floor line up. */
+.fastpix-wrap .concols { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 36px; align-items: start; margin-top: 2px; }
+.fastpix-wrap .concols > div:first-child > .sampleimg { margin-top: auto; }
+.fastpix-wrap .concols > div:first-child > .helpblock { margin-bottom: 14px; }
+.fastpix-wrap .concols > div:first-child { min-height: 0; display: flex; flex-direction: column; }
+.fastpix-wrap .concols .helpblock { margin-top: 0; margin-bottom: 8px; }
+.fastpix-wrap .concols .numsteps li { margin-bottom: 5px; }
+.fastpix-wrap .concols > .concol { display: flex; flex-direction: column; }
+.fastpix-wrap .concols > .concol > .pair { flex: 1 1 auto; display: flex; flex-direction: column; }
+.fastpix-wrap .concols > .concol > .pair > .pairflds { flex: 1 1 auto; }   /* slack sits under the note, above the footer */
+/* The drawn dialog keeps its own aspect ratio and scales with the column —
+   never stretched into a void, never wider than it is legible. */
+.fastpix-wrap .sampleimg { display: block; width: min(100%, 640px); margin: 14px 0 0; box-sizing: border-box; border: 1px solid var(--wp-border); border-radius: var(--r-lg); overflow: hidden; background: #fff; }   /* margin reset: the browser's default figure margin (1em 40px) pushed it into the card */
+/* The picture is the only elastic thing on the step: absolutely positioned so
+   its intrinsic size never drives the row height — the credential pair does,
+   which keeps this step exactly as tall as step 1. */
+.fastpix-wrap .sampleimg .shotwrap { background: #fff; }
+.fastpix-wrap .sampleimg svg { display: block; width: 100%; height: auto; }   /* viewBox ratio, text scales with it */
+.fastpix-wrap .sampleimg figcaption { font-size: 11.5px; color: var(--wp-faint); padding: 7px 12px; border-top: 1px solid var(--wp-border); background: #fafafc; }
+
+/* numbered steps, so "three things in order" reads as three things in order */
+.fastpix-wrap ol.numsteps { margin: 10px 0 0; padding: 0; list-style: none; counter-reset: s; }
+.fastpix-wrap ol.numsteps li { counter-increment: s; position: relative; padding-left: 26px; margin-bottom: 9px; font-size: 13px; color: var(--wp-muted); line-height: 1.5; }
+.fastpix-wrap ol.numsteps li::before { content: counter(s); position: absolute; left: 0; top: 1px; width: 18px; height: 18px; border-radius: 50%; background: var(--fp-soft); color: var(--fp); font-size: 10.5px; font-weight: 600; display: flex; align-items: center; justify-content: center; }
+
+/* ---- step 2, the credential pair: header band, body, floor ---- */
+.fastpix-wrap .pair { display: flex; flex-direction: column; position: relative; background: #fff; border: 1px solid var(--wp-border); border-radius: 10px; padding: 0; overflow: hidden; }
+.fastpix-wrap .pairhd { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; padding: 8px 20px; border-bottom: 1px solid var(--wp-border); background: #fafafc; }
+.fastpix-wrap .pairhd .t { font-size: 11px; font-weight: 600; letter-spacing: .09em; text-transform: uppercase; color: var(--wp-muted); }
+.fastpix-wrap .pairhd .s { font-size: 12.5px; color: var(--wp-faint); transition: color .25s; }
+/* The header badge reflects the VERDICT, not field-fill: green only once the
+   pair is accepted, red when it was refused, nothing while typing. */
+.fastpix-wrap .pair.verified .pairhd .s { color: var(--ok); font-weight: 600; }
+.fastpix-wrap .pair.refused .pairhd .s { color: var(--err); font-weight: 600; }
+.fastpix-wrap .pairhd .s.okv { color: var(--ok); font-weight: 600; }
+
+/* Workspace & Webhooks — 2×2 grid, no figures, cards natural height. */
+/* Rows stretch so help column and card share top AND bottom edges;
+   minmax(0,1fr) lets the webhook URL shrink instead of overflowing. */
+.fastpix-wrap .wswebgrid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 22px 36px; align-items: start; margin-top: 4px; }
+@media (max-width: 1000px) { .fastpix-wrap .wswebgrid { grid-template-columns: 1fr; } }
+.fastpix-wrap .helpblock.plain { background: none; border: 0; padding: 0; }
+.fastpix-wrap .urlrow { display: flex; gap: 8px; align-items: center; }
+.fastpix-wrap .urlrow input { flex: 1; min-width: 0; }
+.fastpix-wrap .pairhd .b.warnb { background: var(--warn-bg); color: var(--warn); border-color: var(--warn-bd); }
+.fastpix-wrap .pairflds { display: block; padding: 12px 20px 16px; }   /* bottom breathing room before the action bar */
+.fastpix-wrap .pairflds .fld + .fld { margin-top: 12px; }
+.fastpix-wrap .pairflds .fld { margin-bottom: 0; max-width: none; }
+/* the note is a quiet block inside the body, not a paragraph floating in it */
+.fastpix-wrap .pairfoot { margin: 9px 20px 11px; padding: 9px 13px; background: #fafafc; border: 1px solid var(--wp-border); border-radius: 8px; font-size: 12px; color: var(--wp-muted); line-height: 1.55; display: flex; gap: 9px; align-items: flex-start; }
+.fastpix-wrap .pairfoot .pf { flex: 0 0 15px; height: 15px; border-radius: 50%; background: var(--fp-soft); color: var(--fp); font-size: 9.5px; font-weight: 700; display: flex; align-items: center; justify-content: center; margin-top: 2px; }
+.fastpix-wrap .pair.complete .pairfoot .pf { background: var(--ok-bg); color: var(--ok); }
+/* the floor */
+.fastpix-wrap .pairact { margin-top: auto;   /* pinned to the card floor */ padding: 9px 20px; border-top: 1px solid var(--wp-border); background: #fff; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.fastpix-wrap .pairact .btn { justify-content: center; }
+.fastpix-wrap .pairact .btn:not(.ghost) { min-width: 150px; }   /* only the primary is wide; Skip stays natural so the row fits one line */
+.fastpix-wrap .pairact .btn[hidden] { display: none; }
+.fastpix-wrap .pairact .st { font-size: 12.5px; color: var(--wp-muted); display: flex; align-items: center; gap: 7px; }
+.fastpix-wrap .pairact .st .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--warn); flex: 0 0 7px; }
+.fastpix-wrap .pairact .st.ok { color: var(--ok); font-weight: 600; }
+.fastpix-wrap .pairact .st.ok .dot { background: var(--ok); }
+.fastpix-wrap .pairact .st.err { color: var(--err); font-weight: 600; }
+.fastpix-wrap .pairact .st.err .dot { background: var(--err); }
+.fastpix-wrap .pairact .st.wait { color: var(--wp-muted); font-weight: 600; }
+.fastpix-wrap .pairact .st.wait .dot { background: var(--wp-border-strong); }
+.fastpix-wrap .pairact .st .spin { width: 9px; height: 9px; border: 1.5px solid currentColor; border-right-color: transparent; border-radius: 50%; animation: fp-spin .7s linear infinite; flex: 0 0 9px; }
+
+/* ---------- done: celebration ---------- */
+/* ---- Done (Figma 9342:95375): 1177×511 card, no stepper, content sits high
+   (118px above the tiles, 61px below the link). Tiles 87px r18, arrow 72×24. */
+.fastpix-wrap .cwiz[data-fp-current="done"] .cwhead { display: none; }
+.fastpix-wrap .cwiz[data-fp-current="done"] .cwcard { margin-top: 39px; }
+/* Done card (Figma 9342:95375): 1177×510, content stack from y=118; every measure in frame px so it scales with the column */
+.fastpix-wrap .celebrate { position: relative; overflow: hidden; box-sizing: border-box; min-height: calc(509 * var(--u)); padding: calc(118 * var(--u)) 30px calc(61 * var(--u)); background: #fff; font-family: "Inter", var(--f); }
+.fastpix-wrap .celebrate[hidden] { display: none; }
+.fastpix-wrap .celebrate .cinner { position: relative; z-index: 1; margin: 0 auto; text-align: center; display: flex; flex-direction: column; align-items: center; }
+.fp-done-icons { display: flex; align-items: center; gap: calc(18 * var(--u)); margin-bottom: calc(19 * var(--u)); }
+.fp-done-tile { box-sizing: border-box; width: calc(87 * var(--u)); height: calc(87 * var(--u)); border-radius: calc(18 * var(--u)); display: flex; align-items: center; justify-content: center; }
+.fp-done-tile.wp { background: #F8FAFB; border: 1px solid #E4E1E8; }
+.fp-done-tile.fp { background: #F8F5FB; border: 1px solid #D9C7EE; }
+.fp-done-tile img, .fp-done-arrow { display: block; }
+.fp-done-tile.wp img { width: calc(50 * var(--u)); height: calc(50 * var(--u)); }
+.fp-done-tile.fp img { width: calc(44 * var(--u)); height: auto; }
+.fp-done-arrow { width: calc(72 * var(--u)); height: auto; }
+.fastpix-wrap .celebrate h3 { margin: 0 0 calc(16 * var(--u)); font-family: "Inter", var(--f); font-weight: 700; font-size: calc(26 * var(--u)); line-height: 1.2; color: #212121; }   /* the frame sets it in Inter Bold */
+.fastpix-wrap .celebrate .fp-done-lede { margin: 0 0 calc(11 * var(--u)); font-size: calc(14 * var(--u)); line-height: 1.6; color: #6e6878; max-width: calc(650 * var(--u)); }
+.fastpix-wrap .celebrate .fp-done-sub { margin: 0 0 calc(28 * var(--u)); font-size: calc(14 * var(--u)); line-height: 1.5; color: #6e6878; }
+.fastpix-wrap .fp-done-cta { display: inline-block; padding: calc(10 * var(--u)) calc(12 * var(--u)); border-radius: 8px; background: #5d09c7; color: #fff; font-weight: 700; font-size: calc(14 * var(--u)); line-height: 1.2; }
+.fastpix-wrap .fp-done-cta:hover { background: var(--fp-hover); color: #fff; }
+.fastpix-wrap .confetti { position: absolute; inset: 0; pointer-events: none; z-index: 0; }
+.fastpix-wrap .confetti i { position: absolute; display: block; border-radius: 2px; }
+.fastpix-wrap .confetti i.dot { border-radius: 50%; }
+
+/* ---------- restricted: kv rows ---------- */
+.fastpix-wrap .kv { display: flex; gap: 8px; align-items: center; padding: 5px 0; border-bottom: 1px solid #f1f1f2; font-size: 12px; }
+.fastpix-wrap .kv > span:first-child { flex: 0 0 140px; color: var(--wp-muted); }
+
+/* ---------- responsive: one system, every screen ----------
+   The scale is fluid (clamp) so laptop/desktop breathe instead of jumping;
+   the breakpoints below only change STRUCTURE (columns, labels), never size. */
+
+/* Welcome value cards reflow 3 → 2 → 1 smoothly. */
+.fastpix-wrap .grid.g3 { grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); }
+
+@media (max-width: 1280px) {
+    .fastpix-wrap .concols { gap: 20px; }
+    .fastpix-wrap .wswebgrid { gap: 14px 18px; }
+}
+@media (max-width: 1000px) {
+    .fastpix-wrap .concols { grid-template-columns: minmax(0, 1fr); gap: 22px; }
+}
+@media (max-width: 780px) {
+    /* Circles carry the stepper alone; the active label is the page title anyway. */
+    .fastpix-wrap .cwstep .l { display: none; }
+    .fastpix-wrap .cwsteps { align-items: center; }
+    .fastpix-wrap .cwhead { gap: 12px; }
+    .fastpix-wrap .kv > span:first-child { flex-basis: 110px; }
+}
+@media (max-width: 600px) {
+    .fastpix-wrap .pairflds, .fastpix-wrap .pairhd, .fastpix-wrap .pairact { padding-left: 12px; padding-right: 12px; }
+    .fastpix-wrap .urlrow { flex-wrap: wrap; }
+    .fastpix-wrap .urlrow .btn { width: 100%; justify-content: center; }
+    .fastpix-wrap .pairact { flex-wrap: wrap; }
+    .fastpix-wrap .cwfoot .btn { flex: 1 1 auto; justify-content: center; }
+}
+@media (prefers-reduced-motion: reduce) {
+    .fastpix-wrap .wcard, .fastpix-wrap .wcard:hover { transform: none; transition: none; }
+    .fastpix-wrap .btn .spin { animation: none; }
+    .fastpix-wrap .confetti { display: none; }
+    .fastpix-wrap * { transition: none !important; }
+}
+
+/* connect-only: keep this step exactly as tall as the welcome step */
+.fastpix-wrap .conbody > .lede { margin-bottom: 0; }
+/* Step 3: the cards start close under the lede. */
+.fastpix-wrap section[data-fp-view="wsweb"] .conbody > .lede { margin-bottom: 2px; }
+.fastpix-wrap .pairflds .fld > label { margin-bottom: 3px; }
+.fastpix-wrap .pairflds .help { margin-top: 3px; }
+
+/* ---------------- Welcome page (Figma FastPix-V3 9342:73581).
+   1175px column · hero 299px r8 with a 5px #6D22CD→#FF6B00 strip · three
+   172px feature cards (r8, #D1CBD7) · 186px disclosure card. */
+.fastpix-wrap.fp-landing-active .cwcard { display: none; }
+
+.fp-landing {
+    width: 100%;   /* the shared .fastpix-wrap column = 1175 at 1440×972 (the frame); fluid elsewhere */
+    margin: calc(37 * var(--u)) 0 0;
+    display: flex;
+    flex-direction: column;
+    font-family: "Inter", var(--f);
+}
+.fp-landing, .fp-landing * { box-sizing: border-box; }   /* design heights are border-box */
+.fp-landing[hidden] { display: none; }   /* [hidden] must beat display:flex */
+/* Hero card (Figma 9342:73581): 1175×508, content stack centred, gap 32 */
+.fp-land-hero {
+    position: relative;
+    background: #fff;
+    border-radius: 8px;
+    min-height: calc(508 * var(--u));
+    padding: calc(20 * var(--u));
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: calc(32 * var(--u));
+    text-align: center;
+    overflow: hidden;
+}
+.fp-land-hero::before {
+    content: "";
+    position: absolute;
+    inset: 0 0 auto 0;
+    height: 5px;
+    background: linear-gradient(90deg, #6D22CD 0%, #FF6B00 100%);
+}
+.fp-land-brand img { display: block; width: calc(111 * var(--u)); height: auto; }   /* 111×25 at 1440 */
+.fp-land-head { display: flex; flex-direction: column; gap: calc(16 * var(--u)); align-items: center; width: 62.7%; max-width: 100%; }   /* 712 of the 1135 inner at 1440 */
+.fp-land-hero h2 {
+    margin: 0;
+    font-weight: 600;
+    line-height: 1.2;
+    color: #303132;
+    width: auto;
+    max-width: 100vw;
+    white-space: nowrap;
+    font-size: calc(36 * var(--u));
+}
+.fp-land-sub { margin: 0; font-size: calc(14 * var(--u)); line-height: 1.22; color: #6e6878; width: 100%; }   /* 14/17 at 1440 */
+.fp-land-start {
+    border: 0;
+    border-radius: 8px;
+    min-width: calc(121 * var(--u));
+    padding: calc(10 * var(--u)) calc(12 * var(--u));
+    background: #5d09c7;
+    color: #fff;
+    font-family: "Inter", var(--f);
+    font-weight: 600;
+    font-size: calc(14 * var(--u));
+    line-height: 1.4;
+    cursor: pointer;
+}
+.fp-land-start:hover { background: var(--fp-hover); }
+
+/* Feature strip 900×160 inside the hero: columns 272 / 272 / 246 with 22px
+   divider cells (1px rule + a 32px arrow ring centred on it), padding 27/35/–/31. */
+.fp-land-strip {
+    display: grid;
+    grid-template-columns: minmax(0, 272fr) 22px minmax(0, 272fr) 22px minmax(0, 246fr);
+    width: 79.3%;   /* 900 of the 1135 inner at 1440 */
+    max-width: 100%;
+    padding: calc(27 * var(--u)) calc(35 * var(--u)) calc(27 * var(--u)) calc(31 * var(--u));   /* 160 tall at 1440: 27 + 104 (divider cell) + 27 + border */
+    background: #fff;
+    border: 1px solid #D1CBD7;
+    border-radius: 16px;
+    text-align: left;
+}
+.fp-land-col { min-width: 0; }
+.fp-land-colhead { display: flex; align-items: flex-start; gap: calc(10 * var(--u)); height: calc(37 * var(--u)); }
+.fp-land-ic {
+    flex: 0 0 calc(37 * var(--u));
+    width: calc(37 * var(--u));
+    height: calc(37 * var(--u));
+    border-radius: 50%;
+    background: #F8F5FB;
+    border: 1.5px solid #BE9DE9;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+.fp-land-ic img { display: block; width: calc(16 * var(--u)); height: calc(16 * var(--u)); }
+.fp-land-colhead b {
+    font-family: "IBM Plex Sans", var(--f);
+    font-weight: 700;
+    font-size: calc(16 * var(--u));
+    line-height: 1.3;
+    color: #212121;
+    white-space: nowrap;
+    margin-top: 4px;   /* title box 31.5–52.5 sits above the circle's centre */
+}
+.fp-land-col p { margin: calc(8 * var(--u)) 0 0; max-width: 90.4%; font-size: calc(13 * var(--u)); line-height: 1.23; color: #6e6878; }   /* 244 of 272, 13/16 at 1440 */
+.fp-land-col:last-child p { max-width: 100%; }
+.fp-land-div { position: relative; height: calc(102 * var(--u)); margin-top: 2px; border-left: 1px solid #E4E1E8; }
+.fp-land-div .ring {
+    position: absolute;
+    left: calc(-18 * var(--u));
+    top: calc(34 * var(--u));
+    width: calc(32 * var(--u));
+    height: calc(32 * var(--u));
+    border-radius: 50%;
+    background: #fff;
+    border: 1px solid #D1CBD7;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.fp-land-div .ring img { display: block; width: calc(13 * var(--u)); height: calc(13 * var(--u)); }
+
+/* Disclosure box 1175×185, 12px under the hero: tinted #EFE6F9 @ 20 % on #D1CBD7 */
+.fp-land-sends {
+    background: rgba(239, 230, 249, .2);
+    border: 1px solid #D1CBD7;
+    border-radius: 16px;
+    min-height: calc(185 * var(--u));
+    margin-top: calc(12 * var(--u));
+    padding: calc(20 * var(--u)) 27px calc(27 * var(--u));
+}
+.fp-land-sends h3 {
+    margin: 0 0 calc(12 * var(--u));
+    line-height: 1.33;
+    font-family: "IBM Plex Sans", var(--f);
+    font-weight: 700;
+    font-size: calc(15 * var(--u));
+    color: #212121;
+}
+.fp-land-sends ol { list-style: none; margin: 0; padding: 0; }
+.fp-land-sends li { display: flex; gap: 8.5px; margin-bottom: calc(9.5 * var(--u)); font-size: calc(13.5 * var(--u)); line-height: 1.185; color: #303132; }   /* 13.5/16 at 1440 */
+.fp-land-sends li .n { font-family: "IBM Plex Mono", var(--mono); font-size: calc(12 * var(--u)); line-height: 1.33; color: #a39dab; flex: 0 0 calc(16 * var(--u)); margin: 2px 0 -2px; }
+.fp-land-sends .fine { margin: calc(24 * var(--u)) 0 0; font-size: calc(12.5 * var(--u)); line-height: 1.2; color: #6e6878; }
+.fastpix-wrap .fp-land-sends .fine a { color: #6d22cd; font-weight: 700; margin-left: 3px; }
+.fastpix-wrap .fp-land-sends .fine a:hover { text-decoration: underline; }
+
+/* ---- Welcome page states & motion (not specified by the static frame) ----
+   One orchestrated load moment: the brand strip draws across the hero, then
+   the content rises in a quiet stagger. Cards stay inert — they are not
+   interactive and must not pretend to be. */
+.fastpix-wrap .fp-land-start:active { transform: translateY(1px); }
+.fastpix-wrap .fp-land-start:focus-visible { outline: 2px solid #5d09c7; outline-offset: 2px; }
+
+@media (prefers-reduced-motion: no-preference) {
+    .fp-landing:not([hidden]) .fp-land-hero::before {
+        transform-origin: left center;
+        animation: fp-strip-draw .7s cubic-bezier(.22, .61, .36, 1) both;
+    }
+    .fp-landing:not([hidden]) .fp-land-brand,
+    .fp-landing:not([hidden]) .fp-land-head,
+    .fp-landing:not([hidden]) .fp-land-start,
+    .fp-landing:not([hidden]) .fp-land-strip,
+    .fp-landing:not([hidden]) .fp-land-sends {
+        animation: fp-rise .45s ease-out both;
+    }
+    .fp-landing:not([hidden]) .fp-land-head { animation-delay: .08s; }
+    .fp-landing:not([hidden]) .fp-land-start { animation-delay: .16s; }
+    .fp-landing:not([hidden]) .fp-land-strip { animation-delay: .24s; }
+    .fp-landing:not([hidden]) .fp-land-sends { animation-delay: .34s; }
+}
+@keyframes fp-strip-draw { from { transform: scaleX(0); } }
+@keyframes fp-rise { from { opacity: 0; transform: translateY(8px); } }
+
+/* ---------------- Wizard v3 (Figma FastPix-V3 9342:73208) — stepper above the
+   card + the two-column connect step. Colors verbatim from the export:
+   done #E4FBF0/#0EA66A/#14CC80 · active #6D22CD · todo #D1CBD7/#E4E1E8. */
+/* Frame 9342:95054 draws the Connect→Workspace rule grey while step 3 is active (owner: match it exactly). */
+.fastpix-wrap .cwiz[data-fp-current="wsweb"] .cwline[data-fp-line="2"] { background: #E4E1E8; }
+
+/* The connect step fills the card edge-to-edge (the side panel is full-bleed). */
+.fastpix-wrap .cwiz[data-fp-current="connect"] .cwbody,
+.fastpix-wrap .cwiz[data-fp-current="wsweb"] .cwbody { padding: 0; }
+.fp-con2 {
+    display: grid;
+    min-height: 476px;
+    flex: 1 1 auto;
+    font-family: "Inter", var(--f);
+    grid-template-columns: minmax(0, 1fr) 38.7%;
+}   /* 458 of 1183 */
+.fp-con2-main { display: flex; flex-direction: column; padding: 32px 20px 28px; }
+.fp-eyebrow {
+    margin: 0 0 8px;
+    font-size: calc(11 * var(--u)); font-weight: 700; letter-spacing: .06em; text-transform: uppercase;
+    color: #6d22cd;
+}
+.fp-con2-h {
+    margin: 0 0 10px;
+    font-family: "IBM Plex Sans", var(--f);
+    font-weight: 700; color: #212121;
+    font-size: calc(24 * var(--u)); text-wrap: balance;
+}
+.fp-con2-lede { margin: 0 0 24px; font-size: calc(14 * var(--u)); color: #6e6878; }
+.fp-con2-main .fld { margin-bottom: 18px; }
+.fp-con2-main .fld label {
+    display: block; margin-bottom: 6px;
+    font-size: calc(12.5 * var(--u)); font-weight: 700; color: #4a4452;
+}
+.fp-con2-main .fld input[type=text],
+.fp-con2-main .fld input[type=password],
+.fp-con2-main .fld input.mono {
+    width: 100%; max-width: 671px; height: 40px; min-height: 40px;
+    border: 1px solid #D1CBD7; border-radius: 10px; padding: 0 12px;
+    font-family: "IBM Plex Mono", var(--mono); font-size: 13px; color: var(--wp-text);
+    background: #fff;
+}
+.fp-con2-main .fld input::placeholder { color: #a39dab; }
+/* Outranks the legacy .cwbody clamp() that shrinks mono inputs to 12px. */
+.fastpix-wrap .fp-con2-main .fld input.mono { font-size: calc(13 * var(--u)); }
+/* Keep the Show toggle anchored INSIDE the field: the positioned wrapper must
+   share the input's max width, or the toggle rides the column edge instead. */
+.fp-con2-main .pwwrap { max-width: 671px; }
+.fp-fld-help { margin: 6px 0 0; font-size: calc(12 * var(--u)); color: #a39dab; }
+/* "link ↗" (Figma "Btn"): Inter 12/20 #5d09c7 + a 16px arrow, 4px gap, 4px after the help sentence */
+.fastpix-wrap .fp-go { display: inline-flex; align-items: center; gap: calc(4 * var(--u)); margin-left: 1px; font-size: calc(12 * var(--u)); line-height: calc(20 * var(--u)); color: #5d09c7; white-space: nowrap; vertical-align: top; }
+.fastpix-wrap .fp-go img { width: calc(16 * var(--u)); height: calc(16 * var(--u)); display: block; }
+.fastpix-wrap .fp-go:hover { color: var(--fp-hover); text-decoration: underline; }
+.fp-con2-act { display: flex; align-items: center; gap: 16px; margin-top: auto; padding-top: 18px; max-width: 671px; flex-wrap: wrap; }
+.fp-linklike {
+    background: none; border: 0; padding: 0; cursor: pointer;
+    font-size: calc(13.5 * var(--u)); color: #6e6878; font-family: "Inter", var(--f);
+}
+.fp-linklike:hover { color: var(--fp); }
+.fp-con2-status { margin-left: auto; font-size: calc(12.5 * var(--u)); color: #a39dab; }
+.fp-con2-status[hidden] { display: none; }
+.fp-con2-status.err { color: #d7263d; }
+.fp-con2-status .dot { display: none; }
+/* Connect → spinner "Checking…" inside the button → ✓ (37px #E4FBF0 / #0EA66A, the stepper's done mark) → Update + Next */
+.fp-con2-cta .spin { display: inline-block; width: calc(12 * var(--u)); height: calc(12 * var(--u)); margin-right: calc(7 * var(--u)); border: 2px solid rgba(255, 255, 255, .45); border-top-color: #fff; border-radius: 50%; vertical-align: -2px; animation: fp-spin .7s linear infinite; }
+.fp-con2-done { display: inline-flex; align-items: center; justify-content: center; width: calc(37 * var(--u)); height: calc(37 * var(--u)); border-radius: 50%; background: #E4FBF0; animation: fp-pop .25s ease-out both; }
+.fp-con2-done[hidden] { display: none; }
+.fp-con2-done img { width: calc(15 * var(--u)); height: calc(15 * var(--u)); display: block; }
+@keyframes fp-pop { from { transform: scale(.6); opacity: 0; } }
+@media (prefers-reduced-motion: reduce) { .fp-con2-done { animation: none; } .fp-con2-cta .spin { animation: none; } }
+.fp-con2-cta {
+    height: 39px; padding: 0 12px; border: 0; border-radius: 8px;
+    background: #5d09c7; color: #fff; cursor: pointer;
+    font-family: "Inter", var(--f); font-weight: 700; font-size: calc(14 * var(--u));
+}
+.fp-con2-cta:hover { background: var(--fp-hover); }
+.fp-con2-cta:disabled { opacity: .5; cursor: default; }
+.fp-con2-cta[hidden] { display: none; }
+
+.fp-con2-side { background: #F8F5FB; padding: clamp(18px, 2.6vw, 28px); }
+.fp-con2-steps { list-style: none; margin: 0 0 18px; padding: 0; }
+.fp-con2-steps li { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; font-size: calc(13 * var(--u)); color: #4a4452; }
+.fp-con2-steps .fp-go { line-height: calc(19 * var(--u)); vertical-align: baseline; }
+.fp-con2-steps b { color: #212121; }
+.fp-con2-steps .n {
+    flex: 0 0 24px; width: 24px; height: 23px; border-radius: 50%;
+    background: #fff; border: 1px solid #D9C7EE;
+    display: inline-flex; align-items: center; justify-content: center;
+    font-size: 11px; font-weight: 700; color: #6d22cd;
+}
+.fp-con2-cap { margin: 0 0 8px; font-size: calc(11.5 * var(--u)); color: #a39dab; }
+.fp-con2-popup {
+    background: #fff; border: 1px solid #D9C7EE; border-radius: 10px;
+    max-width: calc(381 * var(--u)); padding: calc(10 * var(--u)) calc(13 * var(--u)) 0; margin-bottom: 16px;
+    line-height: 1.3;
+    box-sizing: border-box;
+}
+.fp-con2-popup .ttl { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 7px; }
+.fp-con2-popup .ttl b { font-size: calc(11 * var(--u)); color: #212121; }
+.fp-con2-popup .ttl span { font-size: calc(11 * var(--u)); color: #a39dab; }
+.fp-con2-popup .lbl { display: block; font-size: calc(9 * var(--u)); color: #a39dab; margin-bottom: calc(3 * var(--u)); }
+.fp-con2-popup .key {
+    display: flex; align-items: center; justify-content: space-between;
+    height: calc(23 * var(--u)); border: 1px solid #E4E1E8; border-radius: 4px;
+    padding: 0 calc(7 * var(--u));
+    font-family: "IBM Plex Mono", var(--mono); font-size: calc(8.5 * var(--u)); color: #212121;
+    overflow: hidden; white-space: nowrap;
+    box-sizing: border-box; margin-bottom: calc(5 * var(--u));
+}
+.fp-con2-popup .env { display: block; font-size: calc(9 * var(--u)); font-weight: 700; color: #6d22cd; margin: 2px 0 8px; }
+.fp-con2-popup .foot {
+    border-top: 1px solid #F1F0F4; margin: 0 calc(-13 * var(--u));
+    padding: calc(6 * var(--u)) calc(13 * var(--u)) calc(7 * var(--u)); display: flex; justify-content: flex-end;
+    padding-top: calc(7 * var(--u));
+}
+.fp-con2-popup .go {
+    display: inline-flex; align-items: center; justify-content: center;
+    height: calc(20 * var(--u)); padding: 0 calc(10 * var(--u)); border: 1px solid #E4E1E8; border-radius: 5px;
+    font-size: calc(9 * var(--u)); font-weight: 700; color: #303132;
+    box-sizing: border-box;
+}
+.fastpix-wrap .fp-con2-link { font-size: calc(13 * var(--u)); color: #6d22cd; }   /* the frame's "… ↗" link (Inter 13, #6d22cd) */
+.fastpix-wrap .fp-con2-link:hover { color: var(--fp-hover); text-decoration: underline; }
+
+.fp-under-note { text-align: center; margin-top: calc(18 * var(--u)); }
+.fp-under-note p { margin: 0 0 6px; font-size: calc(12.5 * var(--u)); color: #a39dab; }
+
+/* ---- Connect step rhythm, measured against the Figma export (9342:94781):
+   single-line text sits in a "normal" leading box, so every gap below is the
+   export's box-to-box distance. Scoped to the step so step 3 keeps its own. */
+[data-fp-view="connect"] .fp-con2 { min-height: calc(474 * var(--u)); }   /* + 2px card border = the export's 476 */
+[data-fp-view="connect"] .fp-con2-main { padding: calc(30 * var(--u)) 36px calc(28 * var(--u)) 19px; }   /* input right edge = side panel − 31.5 */
+[data-fp-view="connect"] .fp-con2-main .fld input, [data-fp-view="connect"] .fp-con2-main .pwwrap, [data-fp-view="connect"] .fp-con2-act { max-width: none; }
+[data-fp-view="connect"] .fp-con2-main .fld input { height: calc(39 * var(--u)); min-height: 0; }
+[data-fp-view="connect"] .fp-eyebrow { line-height: 1.2; margin-bottom: 3px; letter-spacing: 0; }
+[data-fp-view="connect"] .fp-con2-side .fp-eyebrow { margin-bottom: calc(14 * var(--u)); }
+[data-fp-view="connect"] .fp-con2-h { line-height: 1.3; }
+[data-fp-view="connect"] .fp-con2-lede { line-height: 1.2; margin-bottom: calc(20 * var(--u)); }
+[data-fp-view="connect"] .fp-con2-main .fld { margin-bottom: calc(14 * var(--u)); }
+[data-fp-view="connect"] .fp-con2-main .fld label { line-height: 1.2; margin-bottom: calc(9 * var(--u)); }
+[data-fp-view="connect"] .fp-fld-help { line-height: calc(20 * var(--u)); margin-top: calc(4 * var(--u)); }   /* the link's 20px box sets the line */
+[data-fp-view="connect"] .fp-con2-act { gap: 18px; margin-top: calc(4 * var(--u)); padding-top: 0; }   /* frame 2026-09-07: Connect sits 21px under the last help line, not on the card floor */
+[data-fp-view="connect"] #fp-back2 { margin-left: 4px; }
+[data-fp-view="connect"] .fp-con2-cta { height: calc(37 * var(--u)); }
+[data-fp-view="connect"] .fp-con2-cta:disabled { opacity: 1; background: rgba(93, 9, 199, .25); }   /* the frame's disabled Connect */
+[data-fp-view="connect"] .fp-con2-side { padding: calc(28 * var(--u)) 48px calc(28 * var(--u)) 27px; }
+[data-fp-view="connect"] .fp-con2-steps { margin-bottom: calc(16 * var(--u)); }
+[data-fp-view="connect"] .fp-con2-steps li { align-items: flex-start; gap: calc(9 * var(--u)); margin-bottom: calc(13 * var(--u)); line-height: calc(19 * var(--u)); }
+[data-fp-view="connect"] .fp-con2-steps li:last-child { margin-bottom: 0; }
+[data-fp-view="connect"] .fp-con2-steps li > span:last-child { max-width: calc(340 * var(--u)); }   /* wraps before "into", as the export does */
+[data-fp-view="connect"] .fp-con2-steps .n { box-sizing: border-box; flex-basis: calc(23 * var(--u)); width: calc(23 * var(--u)); height: calc(23 * var(--u)); font-size: calc(11 * var(--u)); }
+[data-fp-view="connect"] .fp-con2-cap { line-height: 1.2; margin-bottom: calc(9 * var(--u)); }
+[data-fp-view="connect"] .fp-con2-popup { margin-bottom: calc(10 * var(--u)); }
+[data-fp-view="connect"] .fp-con2-popup .env { margin: 0 0 calc(10 * var(--u)); }
+
+/* ---------------- Responsive (landing + wizard, Figma v3) ---------------- */
+@media (max-width: 1000px) {
+    /* The key panel drops below the form, full width. */
+    .fp-con2 { grid-template-columns: 1fr; min-height: 0; }
+    .fp-con2-side { border-top: 1px solid #E4E1E8; }
+    .fp-con2-main .fld input, .fp-con2-act { max-width: none; }
+}
+@media (max-width: 1000px) {
+    /* the strip stacks; the hero grows with it */
+    .fp-land-hero { min-height: 0; padding: 32px 20px; }
+    .fp-land-hero h2 { width: auto; white-space: normal; text-wrap: balance; font-size: 26px; }
+    .fp-land-strip { grid-template-columns: 1fr; width: 100%; padding: 24px; gap: 18px; }
+    .fp-land-head { width: 100%; }
+    .fp-land-col p { max-width: none; }
+    .fp-land-div { display: none; }
+    .fp-land-sends { min-height: 0; }
+}
+@media (max-width: 600px) {
+    .fp-landing { margin-top: 16px; }
+    .fp-con2-status { order: 3; flex-basis: 100%; margin-left: 0; }
+    .fp-con2-cta { margin-left: auto; }
+    .fp-under-note { padding: 0 12px; }
+}
+
+/* ---- Onboarding page ground (Figma 9342:94781): quiet gray-violet to warm
+   cream, so the white cards sit on something with a temperature. */
+/* The admin content column is the query container: at 1440 it is 1260px wide (= 1 frame px per --u). */
+body.fastpix-onboarding-bg #wpbody-content { container-type: inline-size; }
+@supports (width: 1cqw) {
+    .fastpix-wrap { --u: max(1px, calc(100cqw / 1260)); }
+}
+body.fastpix-onboarding-bg #wpcontent {   /* the welcome frame (9342:73581) sits on the same ground */
+    min-height: calc(100vh - 32px);
+    background: linear-gradient(124deg, #F2F2F6 1%, #F7EEE7 100%);
+}
+
+/* Chrome autofill paints inputs pale blue on hover/click — keep them white. */
+.fastpix-wrap .fld input:-webkit-autofill,
+.fastpix-wrap .fld input:-webkit-autofill:hover,
+.fastpix-wrap .fld input:-webkit-autofill:focus {
+    -webkit-box-shadow: 0 0 0 1000px #fff inset;
+    -webkit-text-fill-color: var(--wp-text);
+}
+.fastpix-wrap .fp-linklike:active { background: none; }
+
+/* ---------------- Step 3: workspace & webhooks (Figma 9342:95054).
+   Panel 433px · sub-boxes 671×(156/276) #D1CBD7 r10 · Required #FCE6E9/#d7263d
+   · Optional #FDF3DD/#e89d1f · readonly URL #F8FAFB · section divider #D9C7EE. */
+.fp-ws3.fp-con2 { grid-template-columns: minmax(0, 1fr) 36.8%; min-height: calc(693 * var(--u)); }   /* 433 of 1177 */ /* + 2px card border = the export's 695 */
+.fp-ws3-box {
+    box-sizing: border-box;
+    border: 1px solid #D1CBD7;
+    border-radius: 10px;
+    padding: 20px 23px 16px;
+    margin-bottom: 20px;
+}
+.fp-ws3-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+.fp-ws3-head b { font-size: calc(14 * var(--u)); font-weight: 700; color: #212121; }
+.fp-chip {
+    display: inline-flex; align-items: center; height: calc(20 * var(--u)); padding: 0 calc(9 * var(--u));
+    border-radius: 10px; font-size: calc(11.5 * var(--u)); font-weight: 700;
+}
+.fp-chip.req { background: #FCE6E9; color: #cd243a; }   /* 4.5:1 on #FCE6E9 */
+.fp-chip.opt { background: #FDF3DD; color: #976614; }   /* 4.5:1 on #FDF3DD */
+.fp-ws3-why { margin: -4px 0 14px; font-size: calc(12.5 * var(--u)); line-height: calc(15 * var(--u)); color: #6e6878; }
+.fp-ws3-why .fp-tip { position: relative; display: inline-block; vertical-align: middle; margin: -6px 0 -6px 4px; cursor: pointer; border-radius: 50%; background: none; border: 0; padding: 0; font: inherit; color: inherit; text-align: left; }   /* the frame lets the 20px icon overhang the 15px line */
+.fp-ws3-why .fp-tip img { display: block; width: calc(20 * var(--u)); height: calc(20 * var(--u)); }
+.fp-ws3-why .fp-tip:focus-visible { outline: 2px solid var(--fp); outline-offset: 2px; }
+/* Hover / focus tooltip: explains webhooks to a first-time user. Lives below the icon, inside the card. */
+.fp-ws3-why .fp-tip-box {
+    display: none; position: absolute; left: calc(-10 * var(--u)); top: calc(100% + 10px); z-index: 20;
+    width: calc(320 * var(--u)); padding: calc(12 * var(--u)) calc(14 * var(--u)) calc(13 * var(--u));
+    background: #fff; border: 1px solid #D1CBD7; border-radius: 10px; box-shadow: 0 10px 28px rgba(3, 0, 20, .12);
+    font-size: calc(12.5 * var(--u)); line-height: 1.45; color: #4a4452; text-align: left; white-space: normal;
+}
+.fp-ws3-why .fp-tip-box::before { content: ""; position: absolute; left: calc(15 * var(--u)); top: -6px; width: 10px; height: 10px; background: #fff; border-left: 1px solid #D1CBD7; border-top: 1px solid #D1CBD7; transform: rotate(45deg); }
+.fp-ws3-why .fp-tip-box b { display: block; margin-bottom: 4px; font-size: calc(13 * var(--u)); color: #212121; }
+.fp-ws3-why .fp-tip:hover .fp-tip-box, .fp-ws3-why .fp-tip:focus-within .fp-tip-box { display: block; }
+.fp-ws3-box .fld { margin-bottom: 14px; }
+.fp-ws3-box .fld:last-of-type { margin-bottom: 8px; }
+.fp-ws3-urlrow { display: flex; gap: 10px; align-items: stretch; }
+.fastpix-wrap .fp-ws3-urlrow input[type=text] { background: #F8FAFB; color: #4a4452; font-size: calc(12 * var(--u)); }
+.fp-ws3-copy {
+    box-sizing: border-box;
+    flex: 0 0 auto; height: calc(38 * var(--u)); width: calc(62 * var(--u)); padding: 0;
+    background: #fff; border: 1px solid #D1CBD7; border-radius: 8px;
+    font-size: calc(12.5 * var(--u)); font-weight: 700; color: #6d22cd; cursor: pointer;
+    font-family: "Inter", var(--f);
+}
+.fp-ws3-copy:hover { border-color: var(--fp); }
+.fp-ws3-status { display: block; font-size: 12px; color: #6e6878; }
+.fp-ws3-status:empty, .fp-ws3-status[hidden] { display: none; }
+.fp-ws3-status.ok, .fp-ws3-status.okv { color: var(--ok); }
+.fp-ws3-status.err { color: var(--err); }
+.fp-ws3-status.wait { color: #6e6878; }
+.fp-ws3-status .dot { display: none; }
+.fp-ws3-spacer { flex: 1 1 auto; }
+.fp-ws3-skip {
+    box-sizing: border-box;
+    height: calc(36 * var(--u)); padding: 0 12px;
+    background: #fff; border: 1px solid #d1cbd7; border-radius: 8px;
+    font-size: calc(13.5 * var(--u)); font-weight: 700; color: #4a4452; cursor: pointer;
+    font-family: "Inter", var(--f);
+}
+.fp-ws3-skip:hover { border-color: var(--wp-faint); }
+.fp-ws3 .fp-con2-act { max-width: none; }
+.fp-ws3-divider { border: 0; border-top: 1px solid #D9C7EE; margin: calc(18 * var(--u)) 0; }
+.fp-ws3-mock .ttl b { font-size: 11px; }
+.fp-ws3-prod {
+    display: inline-flex; align-items: center; height: calc(14 * var(--u)); padding: 0 calc(7 * var(--u));
+    border-radius: 7px; background: #E4FBF0; color: #0b8153;   /* 4.5:1 on #E4FBF0 */
+    font-size: calc(8.5 * var(--u)); font-weight: 700;
+}
+@media (max-width: 1000px) {
+    .fp-ws3.fp-con2 { grid-template-columns: 1fr; }
+}
+
+/* ---- Step 3 rhythm, measured against the Figma export (9342:95054):
+   card 695 tall, side panel 433 full-bleed, boxes 671×156 / 671×276. ---- */
+[data-fp-view="wsweb"] .fp-con2-main { padding: calc(31 * var(--u)) 40px calc(24 * var(--u)) 36px; }   /* boxes 671 wide at 1440, 36 from the side panel */
+[data-fp-view="wsweb"] .fp-eyebrow { line-height: 1.2; margin-bottom: 3px; letter-spacing: 0; }
+[data-fp-view="wsweb"] .fp-con2-side .fp-eyebrow { margin-bottom: calc(13 * var(--u)); }
+[data-fp-view="wsweb"] .fp-con2-h { font-family: "Inter", var(--f); line-height: 1.2; margin-bottom: calc(10 * var(--u)); }   /* this frame sets the title in Inter Bold */
+[data-fp-view="wsweb"] .fp-con2-lede { line-height: 1.5; margin-bottom: calc(23 * var(--u)); max-width: 640px; }   /* wraps before "instantly." like the frame */
+[data-fp-view="wsweb"] .fp-ws3-box { padding: calc(19 * var(--u)) 23px calc(23 * var(--u)); margin-bottom: calc(19 * var(--u)); border: 0; }   /* the frame draws no box around the two sections (their vectors are empty) — the inset stays */
+[data-fp-view="wsweb"] .fp-ws3-box .fld input { height: calc(39 * var(--u)); min-height: 0; }
+[data-fp-view="wsweb"] .fp-ws3-box .fp-ws3-urlrow input { height: calc(38 * var(--u)); }
+[data-fp-view="wsweb"] .fp-con2-cta { height: calc(37 * var(--u)); }
+[data-fp-view="wsweb"] #fp-back3 { align-self: flex-start; margin-left: 6px; }   /* the frame tops "← Back" with the buttons */
+[data-fp-view="wsweb"] .fp-ws3 .fp-con2-act { padding-top: 0; }   /* the box's 19px margin is the gap; auto margin does the rest */
+[data-fp-view="wsweb"] .fp-ws3-why { margin-bottom: calc(21 * var(--u)); }   /* why 570–600 → label 620.3 */
+[data-fp-view="wsweb"] .fp-ws3-head { align-items: flex-start; margin-bottom: calc(10 * var(--u)); }   /* chip makes the row 21px tall */
+[data-fp-view="wsweb"] .fp-ws3-head b { line-height: 1.2; }
+[data-fp-view="wsweb"] .fp-chip { margin-top: 1px; }
+[data-fp-view="wsweb"] .fp-ws3-box .fld { margin-bottom: calc(10 * var(--u)); }
+[data-fp-view="wsweb"] .fp-ws3-box .fld:last-of-type { margin-bottom: 0; }
+[data-fp-view="wsweb"] .fp-ws3-box .fld label { line-height: 1.2; margin-bottom: calc(9 * var(--u)); }
+[data-fp-view="wsweb"] .fp-fld-help { line-height: 1.2; margin-top: calc(8 * var(--u)); }   /* owner 2026-09-08: the frame's 3px felt cramped */
+[data-fp-view="wsweb"] .fp-ws3-urlrow { gap: 8px; }
+[data-fp-view="wsweb"] .fp-ws3-copy { padding: 0 15px; border: 1.5px solid #6D22CD; }
+[data-fp-view="wsweb"] .fp-con2-act { gap: 15px; }
+[data-fp-view="wsweb"] .fp-con2-side { padding: calc(26 * var(--u)) 26px calc(26 * var(--u)) 27px; }
+[data-fp-view="wsweb"] .fp-con2-steps { margin-bottom: calc(11 * var(--u)); }
+[data-fp-view="wsweb"] .fp-con2-steps li { align-items: flex-start; gap: calc(9 * var(--u)); margin-bottom: calc(11 * var(--u)); line-height: calc(19 * var(--u)); }
+[data-fp-view="wsweb"] .fp-con2-steps li:last-child { margin-bottom: 0; }
+[data-fp-view="wsweb"] .fp-con2-steps li > span:last-child { max-width: calc(340 * var(--u)); }
+[data-fp-view="wsweb"] .fp-con2-steps .n { box-sizing: border-box; flex-basis: calc(23 * var(--u)); width: calc(23 * var(--u)); height: calc(23 * var(--u)); font-size: calc(11 * var(--u)); }
+[data-fp-view="wsweb"] .fp-con2-cap { line-height: 1.2; margin-bottom: 9px; }
+[data-fp-view="wsweb"] .fp-con2-popup { margin-bottom: calc(6 * var(--u)); }
+[data-fp-view="wsweb"] .fp-ws3-mock { padding-bottom: 6px; }
+[data-fp-view="wsweb"] .fp-ws3-mock .ttl { align-items: center; }
+[data-fp-view="wsweb"] .fp-con2-popup .ttl .fp-ws3-prod { font-size: calc(8.5 * var(--u)); color: #0ea66a; }
+[data-fp-view="wsweb"] .fp-con2-popup .key + .foot { margin-top: 9px; }   /* collapses with the key's 5px */
+[data-fp-view="wsweb"] .fp-ws3-divider { margin: 17px 0 16px; }   /* collapses with the mock card's 6px */
+
+.fastpix-wrap.fp-landing-active .cwhead { display: none; }
+
+/* popup copy glyphs ride the frame unit too */
+.fp-con2-popup .key img { width: calc(9 * var(--u)); height: calc(9 * var(--u)); }

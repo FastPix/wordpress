@@ -1,0 +1,4 @@
+hls.js 1.7.3 — https://www.npmjs.com/package/hls.js
+Vendored dist/hls.min.js (sets window.Hls). Apache-2.0.
+Source: https://github.com/video-dev/hls.js/tree/v1.7.3
+Bundled so the FastPix player never fetches hls.js from cdn.jsdelivr.net (it only does when window.Hls is missing).

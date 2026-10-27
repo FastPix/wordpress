@@ -1,0 +1,10 @@
+<svg width="72" height="24" viewBox="0 0 72 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g id="Frame">
+<path id="Vector" d="M2 12H10M18 12H26M34 12H42" stroke="#7562E0" stroke-width="2.4" stroke-linecap="round"/>
+<path id="Vector_2" d="M2 12H52" stroke="#7562E0" stroke-width="2.4" stroke-linecap="round" stroke-dasharray="6 7"/>
+<g id="Vector_3">
+<path d="M54 5L66 12L54 19" fill="#7562E0"/>
+<path d="M54 5L66 12L54 19" stroke="#7562E0" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+</g>
+</g>
+</svg>
