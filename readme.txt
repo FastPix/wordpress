@@ -4,7 +4,7 @@ Tags: video, video hosting, video player, learndash, video analytics
 Requires at least: 6.8
 Tested up to: 7.1
 Requires PHP: 8.3
-Stable tag: 2.0.0
+Stable tag: 2.0.1
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -15,6 +15,12 @@ Video hosting, player and analytics for WordPress. Host, protect and measure vid
 Host and manage video content directly in WordPress with FastPix. Upload and play videos, add AI-powered captions and chapters, protect content with DRM, and track video and course performance through analytics in wp-admin.
 
 Your videos are stored, encoded to adaptive-bitrate quality and streamed from the FastPix network, so your site stays fast and your content stays free of YouTube ads and outside branding. A FastPix account is required.
+
+[Get started on the FastPix dashboard](https://dashboard.fastpix.com) | [Visit fastpix.com](https://fastpix.com) | [Read the WordPress docs](https://fastpix.com/docs/integrations/wordpress)
+
+Watch how to upload, embed, protect and measure video in WordPress with FastPix:
+
+https://youtu.be/m4RE1N99APg
 
 = Who it's for =
 
@@ -72,7 +78,9 @@ To stop the plugin crediting the lesson automatically and do it yourself, return
 
 **WP-CLI** - manage large libraries and automate maintenance from the terminal or a cron job: `wp fastpix status` (check the connection, schema and queue), `wp fastpix sync` (pull in new videos now), `wp fastpix reindex` (rebuild the transcript search index), `wp fastpix doctor` (re-run the activation checks when something looks wrong), and more.
 
-Full reference for every setting, capability, hook and command: https://fastpix.com/docs/integrations/wordpress-settings-and-reference
+**FastPix PHP SDK** - building your own server-side integration alongside the plugin? Manage uploads, media, playback IDs, live streams and more from your own PHP with the [FastPix PHP SDK](https://github.com/FastPix/fastpix-php).
+
+Full reference for every setting, capability, hook and command is in the [WordPress plugin settings and reference](https://fastpix.com/docs/integrations/wordpress-settings-and-reference).
 
 = Learn more =
 
@@ -90,7 +98,9 @@ Already have a library? Learn about [moving a WordPress Media Library off your s
 * PHP 8.3 or later
 * A site served over HTTPS
 * MySQL 5.7 / MariaDB 10.3 or newer with InnoDB and FULLTEXT support (for transcript search)
-* A FastPix account - create one free at https://dashboard.fastpix.io/signup
+* A FastPix account - [create one on the FastPix dashboard](https://dashboard.fastpix.com)
+
+For the complete walkthrough, see [Integrate FastPix with WordPress](https://fastpix.com/docs/integrations/wordpress).
 
 = 1. Install the plugin =
 
@@ -109,17 +119,17 @@ On activation the plugin runs its environment checks and opens the setup wizard.
 
 = 2. Get your FastPix credentials =
 
-1. Sign in to the FastPix dashboard.
-2. Go to **Manage > Access Tokens** and generate a token. Copy the **Access token ID** and **Secret key**. The token needs **Video: Read + Write**, **Data: Read**, and **System** permissions.
-3. Copy your **Workspace key** from the workspace settings.
+1. Sign in to the [FastPix dashboard](https://dashboard.fastpix.com).
+2. Go to **Manage > Access Tokens** and generate a token. Copy the **Access token ID** and **Secret key**. The token needs **Video: Read + Write**, **Data: Read**, and **System** permissions. See [get your FastPix API credentials](https://fastpix.com/docs/getting-started/activate-your-account#generate-api-credentials).
+3. Copy your **Workspace key** from the workspace settings. See [set up a workspace key](https://fastpix.com/docs/getting-started/set-up-a-workspace)
 
 = 3. Connect the plugin =
 
 1. In the setup wizard (**FastPix > Connection**), paste the **Access token ID** and **Secret key** and click **Connect**.
 2. Paste your **Workspace key** and click **Save workspace**.
-3. Optional but recommended: set up webhooks. Copy the webhook URL from **FastPix > Settings**, add it under **Org Settings > Webhooks** in the FastPix dashboard, paste the signing secret back into WordPress and click **Save & verify**. Without webhooks, the plugin polls FastPix every few minutes.
+3. Optional but recommended: [Set up webhooks](https://fastpix.com/docs/webhooks/set-up-webhooks). Copy the webhook URL from **FastPix > Settings**, add it under **Org Settings > Webhooks** in the FastPix dashboard, paste the signing secret back into WordPress and click **Save & verify**. Without webhooks, the plugin polls FastPix every few minutes.
 
-When the Connection screen shows **Connected**, the full FastPix menu (Videos, Add media, Analytics, Settings) appears. Go to **FastPix > Add media** to upload your first video, then embed it with the block or the `[fastpix id="…"]` shortcode.
+When the Connection screen shows **Connected**, the full FastPix menu (Videos, Add media, Analytics, Settings) appears. Go to **FastPix > Add media** to upload your first video, then [embed it](https://fastpix.com/docs/integrations/wordpress-manage-video) with the block or the `[fastpix id="…"]` shortcode.
 
 == Frequently Asked Questions ==
 
@@ -129,7 +139,7 @@ Hosting large video files on your own web server slows the site and has no adapt
 
 = Do I need a FastPix account? =
 
-Yes. The plugin is free and open source (GPLv2 or later), and it connects WordPress to your FastPix account, which hosts, encodes and delivers your video. Create one at https://dashboard.fastpix.io/signup.
+Yes. The plugin is free and open source (GPLv2 or later), and it connects WordPress to your FastPix account, which hosts, encodes and delivers your video. Create one on the [FastPix dashboard](https://dashboard.fastpix.com).
 
 = How do I embed a video in WordPress? =
 
@@ -169,16 +179,18 @@ Yes, per site. Activate it on each site individually; each site keeps its own co
 
 == Screenshots ==
 
-1. Welcome screen - what FastPix does and exactly what data it receives.
-2. Connect your FastPix account with an access token and secret key.
-3. Link your workspace and turn on instant updates through webhooks.
-4. Upload settings - privacy, quality, subtitles, domain lock and watermark for each video.
-5. The video library - search titles, transcripts and chapters, with shortcodes and privacy at a glance.
-6. The FastPix Video block in the editor - pick a video and set autoplay, resume and player controls per embed.
-7. Live streaming - connect OBS or any RTMPS/SRT encoder; the recording lands in your library automatically.
-8. Video analytics - views, watch time, quality of experience and playback errors.
+1. Video analytics - views, watch time, quality of experience and playback errors, from a local daily rollup.
+2. Live streaming - connect OBS or any RTMPS/SRT encoder; the recording lands in your library automatically.
+3. The video library - search across titles, transcripts and chapters, with filters and bulk actions.
+4. Embedding a video with the FastPix Video block in the Gutenberg editor.
+5. The upload form - resumable uploads, privacy, quality and subtitle options.
 
 == Changelog ==
+
+= 2.0.1 =
+* Fixed: seekbar hover previews did not load on private and DRM videos. The bundled FastPix player now sends the playback token with the preview image request.
+* Fixed: DRM videos failed to play in Safari (FairPlay).
+* Updated the bundled FastPix player to 1.0.23.
 
 = 2.0.0 =
 * Video hosting on WordPress with resumable uploads, URL import, and Media Library migration (originals kept).
@@ -188,9 +200,12 @@ Yes, per site. Activate it on each site individually; each site keeps its own co
 * Video analytics from a local daily rollup: views, watch time, quality of experience and errors, with CSV export.
 * Course features for LearnDash, Tutor LMS, LifterLMS and LearnPress: completion that only counts a genuinely watched video, automatic lesson credit, per-course analytics.
 * Live streaming over RTMPS or SRT, with automatic recording.
-* Signed webhooks, WP-CLI commands, and developer hooks. See https://fastpix.com/docs/integrations/wordpress-settings-and-reference.
+* Signed webhooks, WP-CLI commands, and developer hooks. See the [settings and reference guide](https://fastpix.com/docs/integrations/wordpress-settings-and-reference).
 
 == Upgrade Notice ==
+
+= 2.0.1 =
+Fixes seekbar hover previews on private and DRM videos, and DRM playback in Safari.
 
 = 2.0.0 =
 Video hosting, adaptive-bitrate streaming, private and DRM playback, LMS completion tracking, live streaming and analytics for WordPress. Requires a free FastPix account.

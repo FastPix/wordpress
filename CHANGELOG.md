@@ -2,6 +2,15 @@
 
 All notable changes to the FastPix WordPress plugin. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versions follow the plugin header and `readme.txt`.
 
+## [2.0.1] - 2026-10-26
+
+### Fixed
+- Seekbar hover previews did not load on private and DRM videos: the bundled player requested the preview spritesheet image without the playback token, so FastPix answered `401`. Playback itself was unaffected.
+- DRM playback failed in Safari: the player passed Widevine-only robustness values to FairPlay, so Safari rejected the key system before any license request.
+
+### Changed
+- Bundled FastPix player updated from 1.0.21 to 1.0.23 (`assets/vendor/fastpix-player.js`).
+
 ## [2.0.0] - 2026-09-13
 
 Complete rebuild of the plugin.

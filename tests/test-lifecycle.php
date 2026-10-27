@@ -101,7 +101,7 @@ as_unschedule_all_actions('fastpix_deep_sweep');   // the bootstrap re-seeds the
 /* --------------------------------------------------- compliance [REQ-110] */
 
 $readme = (string) file_get_contents(dirname(__DIR__) . '/readme.txt');
-assert(strpos($readme, 'Stable tag: 2.0.0') !== false);
+assert(strpos($readme, 'Stable tag: 2.0.1') !== false);
 assert(strpos($readme, 'License: GPLv2 or later') !== false);
 assert(strpos($readme, '== External services ==') === false);        // section is a heading INSIDE Description
 assert(strpos($readme, 'External services') !== false);              // the disclosure exists
@@ -113,7 +113,7 @@ assert(strpos($readme, 'privacy-policy') !== false);
 assert(stripos($readme, 'delete-on-uninstall') !== false || stripos($readme, 'Delete plugin data on uninstall') !== false);
 
 $header = (string) file_get_contents(dirname(__DIR__) . '/fastpix-io.php');
-assert(strpos($header, 'Version: 2.0.0') !== false);
+assert(strpos($header, 'Version: 2.0.1') !== false);
 assert(strpos($header, 'Requires at least: 6.8') !== false);
 assert(strpos($header, 'Requires PHP: 8.3') !== false);
 assert(strpos($header, 'License: GPLv2 or later') !== false);   // matches readme.txt's "GPLv2 or later"
