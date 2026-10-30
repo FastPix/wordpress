@@ -191,7 +191,6 @@ class Fastpix_Health {
                 'token_id'     => Fastpix_Credentials::masked_token_id(),
             ),
             'checks'      => self::checks(),
-            'deactivation_feedback' => Fastpix_Deactivate::report_line(),   // the last "why did you turn it off?" answer, if any
             'last_errors' => $errors,
         );
     }

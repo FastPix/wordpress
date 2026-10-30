@@ -146,8 +146,8 @@ assert($settings['chapters'] === true && $settings['summary'] === 'medium', 'REQ
 // The platform states its window (`timeout`, 4 h live) — not an assumed hour. (QA U6)
 assert(abs(strtotime($row['url_expires_at'] . ' UTC') - (time() + 14400)) < 120, 'the signed URL expiry follows the platform timeout');
 // Every settings knob is clamped — the routes take `settings` as a bare object. (QA U17)
-$snap = \Fastpix\Fastpix_Uploads_Settings::settings_snapshot(array('quality_tier' => 'ultra', 'max_resolution' => '4k', 'subtitles' => 'xx', 'summary' => 'huge', 'moderation' => 'yes', 'chapters' => 'no'));
-assert($snap['quality_tier'] === 'standard' && $snap['max_resolution'] === RES_1080P && $snap['subtitles'] === 'off' && $snap['summary'] === 'medium' && $snap['moderation'] === 'on' && $snap['chapters'] === true, 'unknown tier/resolution/language/summary fall back; flags are booleans');
+$snap = \Fastpix\Fastpix_Uploads_Settings::settings_snapshot(array('quality_tier' => 'ultra', 'max_resolution' => '4k', 'subtitles' => 'xx', 'summary' => 'huge', 'chapters' => 'no'));
+assert($snap['quality_tier'] === 'standard' && $snap['max_resolution'] === RES_1080P && $snap['subtitles'] === 'off' && $snap['summary'] === 'medium' && !isset($snap['moderation']) && $snap['chapters'] === true, 'unknown tier/resolution/language/summary fall back; flags are booleans');
 assert(\Fastpix\Fastpix_Uploads_Settings::settings_snapshot(array('subtitles' => 'fr'))['subtitles'] === 'fr', 'a platform language survives');
 // Accepted formats are lowercase throughout — the browsers compare file.type lowercased against the list verbatim. (QA U7)
 $mimes = \Fastpix\Fastpix_Uploads_Settings::mime_config();

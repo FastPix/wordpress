@@ -75,7 +75,7 @@ $fastpix_lms_on    = \Fastpix\Fastpix_Lms::enabled();
                 <p class="fp-st__err" id="fp-webhook-note" hidden></p></div>
             <div class="fp-st__ctl" id="fp-secret-edit">
                 <input type="password" id="fp-webhook-secret" class="mono fp-secret" autocomplete="new-password" spellcheck="false" value="<?php echo esc_attr($webhook_secret_full); ?>" placeholder="<?php esc_attr_e('Paste the signing secret from FastPix', 'fastpix-io'); ?>">
-                <button type="button" class="fp-st__btn primary" id="fp-webhook-save"<?php echo $webhook_configured ? '' : ' disabled'; ?>><?php esc_html_e('Save & verify', 'fastpix-io'); ?></button>
+                <button type="button" class="fp-st__btn primary" id="fp-webhook-save" disabled><?php esc_html_e('Verify', 'fastpix-io'); ?></button>
             </div>
         </div>
 
@@ -169,8 +169,7 @@ $fastpix_lms_on    = \Fastpix\Fastpix_Lms::enabled();
             <div class="fp-st__lab"><label for="fp-secret"><?php esc_html_e('Secret key', 'fastpix-io'); ?></label>
                 <p class="fp-st__err inline" id="fp-creds-err" hidden></p></div>
             <div class="fp-st__ctl"><input type="password" id="fp-secret" class="mono fp-secret" autocomplete="new-password" spellcheck="false" value="<?php echo esc_attr($secret_full); ?>" placeholder="<?php esc_attr_e('e.g. 1c32f452-5fec-4cb9-b795-f7a9f09a1b45', 'fastpix-io'); ?>">
-                <button type="button" class="fp-st__btn primary" id="fp-creds-save"><?php esc_html_e('Verify', 'fastpix-io'); ?></button>
-                <span class="fp-st__saved" id="fp-creds-note" aria-live="polite"></span></div>
+                <button type="button" class="fp-st__btn primary" id="fp-creds-save" aria-live="polite" disabled><?php esc_html_e('Verify', 'fastpix-io'); ?></button></div>
         </div>
         <div class="fp-st__row kv">
             <div class="fp-st__lab"><?php esc_html_e('Connected since', 'fastpix-io'); ?></div>
@@ -191,6 +190,12 @@ $fastpix_lms_on    = \Fastpix\Fastpix_Lms::enabled();
         <div class="fp-st__row danger">
             <div class="fp-st__lab"><p class="fp-st__help"><?php esc_html_e('Disconnecting stops playback until an account is connected again. Nothing is deleted.', 'fastpix-io'); ?></p></div>
             <div class="fp-st__ctl"><button type="button" class="fp-st__btn danger" id="fp-disconnect"<?php echo $state['connected'] ? '' : ' disabled'; ?>><?php esc_html_e('Disconnect', 'fastpix-io'); ?></button></div>
+        </div>
+        <?php /* The page's one Save (the credential pair and the signing secret must pass Verify first). */ ?>
+        <div class="fp-st__row fp-st__savebar">
+            <span class="fp-st__dirty" id="fp-dirty-note" aria-live="polite"></span>
+            <button type="button" class="fp-st__btn sec" id="fp-cancel-all" disabled><?php esc_html_e('Cancel', 'fastpix-io'); ?></button>
+            <button type="button" class="fp-st__btn primary" id="fp-save-all" disabled><?php esc_html_e('Save changes', 'fastpix-io'); ?></button>
         </div>
     </div>
 

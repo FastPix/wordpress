@@ -123,6 +123,7 @@ class Fastpix_Render_Live {
                 'accent-color'           => $settings['accentColour'],
                 'metadata-workspace-key' => (string) get_option(Fastpix_Connection::OPT_WORKSPACE_ID, ''),
                 'metadata-video-title'   => (string) $stream['name'],
+                'poster'                 => self::live_thumbnail($playback['id']),   // signed below for a private stream
             ));
             // RULE-033/REQ-071: a private stream inherits protection — the
             // same signed token as recorded video, minted at render.
@@ -131,7 +132,8 @@ class Fastpix_Render_Live {
                 if (is_wp_error($tokens)) {
                     $player_attrs = array();   // fall through to the warming-up card
                 } else {
-                    $player_attrs['token'] = $tokens['media'];
+                    $player_attrs['token']  = $tokens['media'];
+                    $player_attrs['poster'] = self::live_thumbnail($playback['id'], $tokens['media']);
                     // RULE-014: the markup carries a short-lived signed token,
                     // so it must NEVER be persisted by a page or edge cache.
                     // Mark the page no-store so a fresh token is minted on every
@@ -181,6 +183,34 @@ class Fastpix_Render_Live {
         }
 
         return $result;
+    }
+
+    /**
+     * The live frame FastPix serves while a stream is on air (404 when idle):
+     * images.fastpix.com/live/{playbackId}/thumbnail.jpg — signed for a private stream.
+     */
+    public static function live_thumbnail($playback_id, $token = '') {
+        if ($playback_id === '') {
+            return '';
+        }
+        $url = Fastpix_Attachments::image_base() . '/live/' . rawurlencode($playback_id) . '/thumbnail.jpg';
+
+        return $token !== '' ? $url . '?token=' . rawurlencode($token) : $url;
+    }
+
+    /** The Library's live card: the on-air frame for an active stream, '' when there is none. */
+    public static function stream_thumbnail($stream_id) {
+        $playback = self::live_playback($stream_id);
+        $token    = '';
+        if ($playback['id'] !== '' && $playback['policy'] !== '' && $playback['policy'] !== 'public') {
+            $tokens = Fastpix_Signing::tokens($playback['id']);
+            $token  = is_wp_error($tokens) ? '' : (string) $tokens['media'];
+            if ($token === '') {
+                return '';   // unsigned would only 401
+            }
+        }
+
+        return self::live_thumbnail($playback['id'], $token);
     }
 
     /** ['id' => playback id, 'policy' => accessPolicy] from the platform, cached 5 min. */
@@ -264,6 +294,7 @@ class Fastpix_Render_Live {
         }
         $response = rest_ensure_response($config);
         $response->header('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0');
+        $response->header('CDN-Cache-Control', 'no-store');   // CDNs (Cloudflare and others) read this one even when told to cache everything
         $response->header('Pragma', 'no-cache');
         $response->header('Expires', '0');
 

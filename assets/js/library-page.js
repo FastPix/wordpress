@@ -307,7 +307,7 @@
         tr.innerHTML =
             '<td class="cbcell"><input type="checkbox" class="fp-check" aria-label="' + esc(__('Select', 'fastpix-io')) + '"></td>' +
             '<td class="thcell"><div class="thumb' + (failed ? ' ph' : '') + '">' +
-                (video.poster && !failed ? '<img alt="" loading="lazy" src="' + esc(video.poster) + '">' : '') +
+                (video.poster && !failed ? '<img alt="" loading="lazy" onerror="this.remove()" src="' + esc(video.poster) + '">' : '') +   // a dead image falls back to the plain tile
                 (video.access_policy && video.access_policy !== 'public' ? '<span class="lock">🔒</span>' : '') +
                 (video.duration ? '<span class="dur">' + fmtTime(video.duration) + '</span>' : '') + '</div></td>' +
             '<td class="titlecell"><a class="vtitle" href="#"></a><div class="rowacts">' +
@@ -528,7 +528,7 @@
     // Languages the dashboard marks Beta (docs, 2026-09-20) — label only, never sent to the platform. [QA U5]
     var BETA = { pl: 1, ru: 1, nl: 1, ca: 1, tr: 1, sv: 1, uk: 1, no: 1, fi: 1, sk: 1, el: 1, cs: 1, hr: 1, da: 1, ro: 1, bg: 1 };
     function langLabel(code) { return langName(code) + (BETA[String(code || '').split('-')[0]] ? ' · ' + __('Beta', 'fastpix-io') : ''); }
-    var AI_LABELS = { chapters: __('Chapters', 'fastpix-io'), summary: __('Summary', 'fastpix-io'), entities: __('People & places mentioned', 'fastpix-io'), moderation: __('Moderation', 'fastpix-io'), transcript: __('Transcript', 'fastpix-io'), subtitles: __('Subtitles', 'fastpix-io') };
+    var AI_LABELS = { chapters: __('Chapters', 'fastpix-io'), summary: __('Summary', 'fastpix-io'), entities: __('People & places mentioned', 'fastpix-io'), transcript: __('Transcript', 'fastpix-io'), subtitles: __('Subtitles', 'fastpix-io') };
     function aiLabel(kind) { return AI_LABELS[kind] || kind; }
     // The same three words the ACCESS column, its filter and every policy dropdown use. (owner 2026-09-22)
     var ACCESS_LABEL = { public: __('Public', 'fastpix-io'), private: __('Private', 'fastpix-io'), drm: __('DRM', 'fastpix-io') };
@@ -631,7 +631,9 @@
         /* ================= RIGHT: Poster image ================= */
         var on = { controls: true, click: true, keys: true };   // the rest of the chips start off
         var lesson = { track: false, at: 90 };
-        var mode = 'frame', frameT = 1, posterUrl = '';
+        // The saved poster ("5s" | image URL | '') seeds the card; Save stores the change on the video.
+        var savedPoster = v.default_poster || '', sp = /^(\d+)s$/.exec(savedPoster);
+        var mode = savedPoster && !sp ? 'url' : 'frame', frameT = sp ? parseInt(sp[1], 10) : 1, posterUrl = mode === 'url' ? savedPoster : '';
         var isPublic = !!(v.playback_id && v.access_policy === 'public');
         function thumbUrl(t) { return cfg.imageBase + '/' + encodeURIComponent(v.playback_id) + '/thumbnail.png?time=' + t + '&width=184'; }
         function fmt(s) { s = Number(s) || 0; return Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0'); }
@@ -648,11 +650,11 @@
         var fm = h('div', 'fp-o-reveal'); fm.hidden = true;
         // ponytail: no mini player any more to read the real length from — an unsynced duration falls back to a 60 s slider; the number box stays uncapped.
         var max = Math.floor(v.duration || 0) || 60;
-        var range = h('input'); range.type = 'range'; range.min = 0; range.max = max; range.value = 1; range.setAttribute('aria-label', __('Poster frame', 'fastpix-io')); range.disabled = held; fm.appendChild(range);
-        var fr = h('div', 'fp-o-row'), num = h('input', 'fp-o-in num'); num.type = 'number'; num.min = 0; if (v.duration) { num.max = max; } num.value = 1; num.disabled = held; num.setAttribute('aria-label', __('Poster frame (seconds)', 'fastpix-io'));
+        var range = h('input'); range.type = 'range'; range.min = 0; range.max = max; range.value = frameT; range.setAttribute('aria-label', __('Poster frame', 'fastpix-io')); range.disabled = held; fm.appendChild(range);
+        var fr = h('div', 'fp-o-row'), num = h('input', 'fp-o-in num'); num.type = 'number'; num.min = 0; if (v.duration) { num.max = max; } num.value = frameT; num.disabled = held; num.setAttribute('aria-label', __('Poster frame (seconds)', 'fastpix-io'));
         fr.appendChild(num); fr.appendChild(h('span', 'fp-o-hint', __('seconds in', 'fastpix-io'))); fm.appendChild(fr);
         var um = h('div', 'fp-o-reveal'); um.hidden = true;
-        var urlIn = h('input', 'fp-o-in'); urlIn.type = 'text'; urlIn.placeholder = 'https://example.com/poster.jpg'; urlIn.setAttribute('aria-label', __('Poster image URL', 'fastpix-io')); um.appendChild(urlIn);
+        var urlIn = h('input', 'fp-o-in'); urlIn.type = 'text'; urlIn.placeholder = 'https://example.com/poster.jpg'; urlIn.setAttribute('aria-label', __('Poster image URL', 'fastpix-io')); urlIn.value = posterUrl; um.appendChild(urlIn);
         pc.appendChild(fm); pc.appendChild(um); right.appendChild(pc);
 
         function paintPoster() {
@@ -662,13 +664,19 @@
             thumb.style.backgroundImage = useUrl ? 'url(' + JSON.stringify(posterUrl) + ')' : (isPublic ? 'url(' + thumbUrl(frameT) + ')' : '');
             tt.hidden = !!useUrl;
             pickBtn.setAttribute('aria-expanded', String(!fm.hidden)); urlBtn.setAttribute('aria-expanded', String(!um.hidden));
-            build();
+            pickBtn.classList.toggle('accent', mode === 'frame'); urlBtn.classList.toggle('accent', mode === 'url');
+            if (posterValue() !== savedPoster) { dirty.poster = true; } else { delete dirty.poster; }
+            renderDirty(); build();
         }
+        // What Save stores / the shortcode carries: '' = default frame (1 s), "<n>s" = a frame, else the URL.
+        function posterValue() { return mode === 'url' && posterUrl ? posterUrl : (frameT !== 1 ? frameT + 's' : ''); }
         function sync(val) { frameT = Math.max(0, parseInt(val, 10) || 0); range.value = frameT; num.value = frameT; paintPoster(); }
         range.addEventListener('input', function () { sync(range.value); }); num.addEventListener('input', function () { sync(num.value); });
         urlIn.addEventListener('input', function () { posterUrl = urlIn.value.trim(); paintPoster(); });
-        pickBtn.addEventListener('click', function () { mode = 'frame'; um.hidden = true; fm.hidden = !fm.hidden; paintPoster(); });
-        urlBtn.addEventListener('click', function () { mode = 'url'; fm.hidden = true; um.hidden = !um.hidden; paintPoster(); if (!um.hidden) { urlIn.focus(); } });
+        // Either/or: choosing one drops the other's value.
+        pickBtn.addEventListener('click', function () { mode = 'frame'; posterUrl = urlIn.value = ''; um.hidden = true; fm.hidden = !fm.hidden; paintPoster(); });
+        urlBtn.addEventListener('click', function () { mode = 'url'; frameT = 1; range.value = num.value = 1; fm.hidden = true; um.hidden = !um.hidden; paintPoster(); if (!um.hidden) { urlIn.focus(); } });
+        if (mode === 'url') { um.hidden = false; }
 
         /* ================= RIGHT: Player options ================= */
         var po = h('div', 'fp-o-card fp-o-player'); po.appendChild(titleRow(__('Player options', 'fastpix-io'), __('How this video plays where you embed it. The shortcode updates as you toggle.\n\nPlayer controls: the play button, progress bar, volume and fullscreen. Off gives a bare video.\nChapters: chapter markers on the progress bar so viewers can jump to a section. Needs the Chapters extra.\nTranscript: a written, timestamped text block under the video (not the captions — the player shows those on its own from the subtitle track). It appears only once a transcript has been captured for this video.\nClick to play: shows the poster and waits for a click instead of loading the video at once.\n\nAutoplay, Muted and Loop do what they say. Autoplay only works while muted.', 'fastpix-io')));
@@ -714,7 +722,7 @@
             if (lesson.track) { attrs.trackViewer = true; }
             if (lesson.track) { attrs.completeAt = lesson.at; }
             if (colourIn.value && colourIn.value.toLowerCase() !== '#6d22cd') { attrs.accentColour = colourIn.value; }
-            if (mode === 'frame' && frameT !== 1) { attrs.thumbnailTime = frameT; } if (mode === 'url' && posterUrl) { attrs.poster = posterUrl; }
+            var pv = posterValue(); if (pv !== savedPoster) { if (mode === 'url' && pv) { attrs.poster = pv; } else { attrs.thumbnailTime = frameT; } }
             copyText('<!-- wp:fastpix/video ' + JSON.stringify(attrs) + ' /-->', null); var w = blockBtn.textContent; blockBtn.textContent = __('Block copied — paste in the editor', 'fastpix-io'); setTimeout(function () { blockBtn.textContent = w; }, 1800);
         });
         scr.appendChild(copyBtn); scr.appendChild(blockBtn); scrow.appendChild(scr); left.appendChild(scc);
@@ -782,11 +790,17 @@
         dlSel.addEventListener('change', function () { if (dlSel.value !== dlSaved) { dirty.download = true; } else { delete dirty.download; } renderDirty(); });
         saveBtn.addEventListener('click', function () {
             saveBtn.disabled = true; stateEl.textContent = __('Saving…', 'fastpix-io');
-            var body = {}; if (dirty.title) { body.title = titleIn.value; } if (dirty.download) { body.downloadable = dlSel.value; }
+            var body = {}; if (dirty.title) { body.title = titleIn.value; } if (dirty.download) { body.downloadable = dlSel.value; } if (dirty.poster) { body.poster = posterValue(); }
             api('PATCH', '/videos/' + id, body).then(function (r) {
                 if (!r.ok) { stateEl.textContent = (r.json && r.json.message) || __('Not saved.', 'fastpix-io'); saveBtn.disabled = false; return; }
-                v.title = titleIn.value; v.mp4_support = dlSel.value; dlSaved = dlSel.value; dirty = {}; renderDirty(); stateEl.textContent = __('Saved', 'fastpix-io');
+                v.title = titleIn.value; v.mp4_support = dlSel.value; dlSaved = dlSel.value; v.default_poster = savedPoster = (r.json && r.json.default_poster) || '';
+                dirty = {}; renderDirty(); build(); stateEl.textContent = __('Saved', 'fastpix-io');
                 var t = tr.querySelector('.vtitle'); if (t) { t.textContent = v.title || __('(untitled)', 'fastpix-io'); }
+                var th = tr.querySelector('.thcell .thumb'), im = th && th.querySelector('img');
+                if (th && r.json && r.json.poster) {
+                    if (!im) { im = document.createElement('img'); im.alt = ''; im.onerror = function () { this.remove(); }; th.insertBefore(im, th.firstChild); }   // a private video had no image until now
+                    im.src = r.json.poster;
+                }
             });
         });
         function build() {
@@ -798,7 +812,7 @@
             if (lesson.track) { out += ' track_viewer'; }
             if (lesson.track) { out += ' complete_at="' + lesson.at + '"'; }
             if (colourIn.value && colourIn.value.toLowerCase() !== '#6d22cd') { out += ' accentcolor="' + colourIn.value + '"'; }
-            if (mode === 'frame') { if (frameT !== 1) { out += ' poster="' + frameT + 's"'; } } else if (posterUrl) { out += ' poster="' + posterUrl.replace(/"/g, '') + '"'; }
+            var pv = posterValue(); if (pv !== savedPoster) { out += ' poster="' + (pv || '1s').replace(/"/g, '') + '"'; }
             code.textContent = out + ']';
             if (state.open && state.open.id === id) { state.open.shortcode = code.textContent; }   // the row's Shortcode button copies this
         }
@@ -947,7 +961,7 @@
                 li.appendChild(done); li.appendChild(out);
             } else {
                 var g = bt(r && r.state === 'failed' ? __('Retry', 'fastpix-io') : __('Generate', 'fastpix-io'), 'fp-o-btn sm accent', function () {
-                    g.disabled = true; aerr.hidden = true;
+                    g.disabled = true; aerr.hidden = true; aiPolls[id] = 0;   // a fresh press gets a fresh 5 minutes of checks
                     api('POST', '/videos/' + id + '/ai', { kind: kind }).then(function (res) {
                         if (res.ok) { refreshPart(tr, id, 'ai'); return; }
                         g.disabled = false; aerr.textContent = (res.json && res.json.message) || __('Could not start.', 'fastpix-io'); aerr.hidden = false;
@@ -960,15 +974,24 @@
             ul.appendChild(li);
         });
         card.appendChild(ul); card.appendChild(aerr);
-        // Outputs land in the background (webhook or the minute-apart read-back): while any is
-        // still "Working…", re-read this card every 15 s so Completed appears on its own.
+        // While any is still "Working…", ask FastPix every 5 s (for up to 5 minutes) and re-read
+        // this card, so Completed appears on its own without waiting for WP-Cron.
         if (AI_OFFER.some(function (k) { return byKind[k] && byKind[k].state !== 'ready' && byKind[k].state !== 'failed'; })) {
-            setTimeout(function () { if (card.isConnected) { refreshPart(tr, id, 'ai'); } }, 15000);
+            aiPolls[id] = (aiPolls[id] || 0) + 1;
+            if (aiPolls[id] <= 60) {
+                setTimeout(function () {
+                    if (!card.isConnected) { return; }
+                    api('POST', '/videos/' + id + '/ai/check').then(function () { refreshPart(tr, id, 'ai'); });
+                }, 5000);
+            }
+        } else {
+            delete aiPolls[id];
         }
         return card;
     }
 
     /* Re-render one card of the opened panel in place (no rebuild, no scroll jump). */
+    var aiPolls = {};   // video id → checks made while its AI card shows "Working…"
     function refreshPart(tr, id, part) {
         var panel = state.open && state.open.id === id ? state.open.panel : null;
         var cur = panel && panel.querySelector('[data-part="' + part + '"]');
@@ -1278,6 +1301,9 @@
             var head = h('div', 'fp-lv-head');
             var thumb = h('div', 'fp-lv-thumb');
             var preparing = s.status === 'preparing';
+            if (s.thumbnail) {   // the on-air frame; a dead image falls back to the plain tile
+                var im = document.createElement('img'); im.alt = ''; im.src = s.thumbnail; im.onerror = function () { this.remove(); }; thumb.appendChild(im);
+            }
             thumb.appendChild(h('span', 'fp-lv-badge' + (preparing ? ' prep' : ''), preparing ? __('PREPARING', 'fastpix-io') : __('LIVE', 'fastpix-io')));
             head.appendChild(thumb);
 

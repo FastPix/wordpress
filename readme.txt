@@ -4,7 +4,7 @@ Tags: video, video hosting, video player, learndash, video analytics
 Requires at least: 6.8
 Tested up to: 7.1
 Requires PHP: 8.3
-Stable tag: 2.0.1
+Stable tag: 2.0.2
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -127,7 +127,7 @@ On activation the plugin runs its environment checks and opens the setup wizard.
 
 1. In the setup wizard (**FastPix > Connection**), paste the **Access token ID** and **Secret key** and click **Connect**.
 2. Paste your **Workspace key** and click **Save workspace**.
-3. Optional but recommended: [Set up webhooks](https://fastpix.com/docs/webhooks/set-up-webhooks). Copy the webhook URL from **FastPix > Settings**, add it under **Org Settings > Webhooks** in the FastPix dashboard, paste the signing secret back into WordPress and click **Save & verify**. Without webhooks, the plugin polls FastPix every few minutes.
+3. Optional but recommended: [Set up webhooks](https://fastpix.com/docs/webhooks/set-up-webhooks). Copy the webhook URL from **FastPix > Settings**, add it under **Org Settings > Webhooks** in the FastPix dashboard, paste the signing secret back into WordPress, click **Verify**, then **Save changes**. Without webhooks, the plugin polls FastPix every few minutes.
 
 When the Connection screen shows **Connected**, the full FastPix menu (Videos, Add media, Analytics, Settings) appears. Go to **FastPix > Add media** to upload your first video, then [embed it](https://fastpix.com/docs/integrations/wordpress-manage-video) with the block or the `[fastpix id="…"]` shortcode.
 
@@ -187,6 +187,18 @@ Yes, per site. Activate it on each site individually; each site keeps its own co
 
 == Changelog ==
 
+= 2.0.2 =
+* Changed: Chapters, Summary and People & places use FastPix's new In-Video AI API (the previous endpoints are retired by FastPix). Summary length is now chosen by FastPix.
+* Fixed: AI extras stayed on "Working…" until another click. Generate now asks FastPix at once and the panel updates by itself.
+* Fixed: a re-used live stream kept showing the previous broadcast's recording after a new broadcast ended.
+* Added: live streams show the on-air frame as their thumbnail, in the library and as the embed's poster.
+* Added: a poster frame or image chosen in the library is saved per video and used by its embeds.
+* Changed: the Settings page saves with one Save button; the credentials and the webhook signing secret must be verified first.
+* Changed: deactivating shows a short confirmation instead of the feedback survey.
+* Security: requests for a fresh private/DRM playback token can no longer be served from an edge cache.
+* Removed: unused content moderation request.
+* Updated the bundled FastPix player to 1.0.24.
+
 = 2.0.1 =
 * Fixed: seekbar hover previews did not load on private and DRM videos. The bundled FastPix player now sends the playback token with the preview image request.
 * Fixed: DRM videos failed to play in Safari (FairPlay).
@@ -203,6 +215,9 @@ Yes, per site. Activate it on each site individually; each site keeps its own co
 * Signed webhooks, WP-CLI commands, and developer hooks. See the [settings and reference guide](https://fastpix.com/docs/integrations/wordpress-settings-and-reference).
 
 == Upgrade Notice ==
+
+= 2.0.2 =
+Moves AI chapters, summaries and named entities to FastPix's new API before the old one is retired. Also fixes live stream recordings on re-used streams.
 
 = 2.0.1 =
 Fixes seekbar hover previews on private and DRM videos, and DRM playback in Safari.

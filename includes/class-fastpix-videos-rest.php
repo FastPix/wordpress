@@ -66,6 +66,8 @@ class Fastpix_Videos_Rest {
                     'title'        => Fastpix_Rest::arg('string'),
                     'description'  => Fastpix_Rest::arg('string', array('sanitize_callback' => 'sanitize_textarea_field')),
                     'downloadable' => Fastpix_Rest::arg('string', array('enum' => array('off', 'video', 'audio', 'both'))),
+                    // Saved poster: "5s" (a frame), an http(s) image URL, or '' (back to the default frame).
+                    'poster'       => Fastpix_Rest::arg('string', array('validate_callback' => array(__CLASS__, 'valid_poster'), 'sanitize_callback' => array(__CLASS__, 'clean_poster'))),
                     'tracks'       => array('type' => 'array', 'required' => false),
                     // accept copies the suggestion into the local field; dismiss
                     // discards it. [RULE-022]
@@ -104,6 +106,11 @@ class Fastpix_Videos_Rest {
             'callback'   => array(__CLASS__, 'rerun_ai'),
             'capability' => Fastpix_Capabilities::EDIT_VIDEO_OWN,   // own_row() scopes edit-own users to their rows [QA L15]
             'args'       => array('kind' => Fastpix_Rest::arg('string')),
+        ));
+        Fastpix_Rest::register('/videos/(?P<id>\d+)/ai/check', array(
+            'methods'    => 'POST',
+            'callback'   => array(__CLASS__, 'check_ai'),
+            'capability' => Fastpix_Capabilities::EDIT_VIDEO_OWN,
         ));
 
         // The block editor resolves its saved identifier (a media id) here — the list's
@@ -450,6 +457,10 @@ class Fastpix_Videos_Rest {
             }
         }
 
+        if ($request->get_param('poster') !== null) {
+            $update['default_poster'] = (string) $request->get_param('poster');
+        }
+
         // A suggestion is acted on once: accept copies it in, dismiss drops it,
         // both clear the stored suggestion. [RULE-022]
         $suggestion = $request->get_param('suggestion');
@@ -465,6 +476,21 @@ class Fastpix_Videos_Rest {
         }
 
         return $update;
+    }
+
+    /** A poster value the player can use: '' | "<seconds>s" | an http(s) URL. */
+    public static function valid_poster($value) {
+        $value = trim((string) $value);
+
+        return $value === '' || preg_match('/^\d+s$/', $value) || esc_url_raw($value, array('http', 'https')) !== ''
+            ? true
+            : new \WP_Error('fastpix_bad_poster', __('The poster must be an http(s) image URL.', 'fastpix-io'), array('status' => 400));
+    }
+
+    public static function clean_poster($value) {
+        $value = trim((string) $value);
+
+        return $value === '' || preg_match('/^\d+s$/', $value) ? $value : esc_url_raw($value, array('http', 'https'));
     }
 
     /**
@@ -980,9 +1006,25 @@ class Fastpix_Videos_Rest {
         if ($kind !== '' && !isset(Fastpix_Ai::KINDS[$kind]) && $kind !== 'subtitles') {
             return new \WP_Error('fastpix_bad_kind', __('Unknown AI output.', 'fastpix-io'), array('status' => 400));
         }
-        Fastpix_Ai::request($row['media_id'], $kind !== '' ? array($kind) : null);
+        if (isset(Fastpix_Ai::KINDS[$kind])) {
+            // One button press → ask FastPix now, not whenever WP-Cron next runs.
+            Fastpix_Ai::request_job(array('media_id' => $row['media_id'], 'kinds' => array($kind), 'attempt' => 1));
+        } else {
+            Fastpix_Ai::request($row['media_id'], $kind !== '' ? array($kind) : null);
+        }
 
         return rest_ensure_response(array('queued' => true, 'kind' => $kind !== '' ? $kind : null));
+    }
+
+    /** Read back any output still "Working…" for this video, now (the Library polls this while open). */
+    public static function check_ai($request) {
+        $row = self::own_row($request, Fastpix_Capabilities::EDIT_VIDEO);
+        if (is_wp_error($row)) {
+            return $row;
+        }
+        Fastpix_Ai::check_now((int) $row['id']);
+
+        return rest_ensure_response(array('checked' => true));
     }
 
     /** [API-P06] Embed code + shortcode for the row's chips. */
@@ -1067,6 +1109,19 @@ class Fastpix_Videos_Rest {
     }
 
     /** True for a row stamped with a workspace other than the connected one (or the sentinel). */
+    /** The row's thumbnail: the saved poster (image URL or frame), else the default frame. */
+    private static function list_poster($row, $playback) {
+        $saved = isset($row['default_poster']) ? (string) $row['default_poster'] : '';
+        if ($saved !== '' && !preg_match('/^(\d+)s$/', $saved, $m)) {
+            return $saved;   // the site's own image — nothing to sign
+        }
+        if ($row['access_policy'] !== 'public' || $playback === '') {
+            return null;   // a private poster is signed too [REQ-101]
+        }
+
+        return Fastpix_Attachments::image_base() . '/' . rawurlencode($playback) . '/thumbnail.png?width=160' . (isset($m[1]) ? '&time=' . $m[1] : '');
+    }
+
     public static function is_other_workspace($row) {
         return $row['workspace_id'] !== '' && $row['workspace_id'] !== self::connected_workspace();
     }
@@ -1091,9 +1146,7 @@ class Fastpix_Videos_Rest {
             'ai_state'      => $row['ai_state'],
             'error_code'    => $row['error_code'],
             'author_id'     => (int) $row['author_id'],
-            'poster'        => ($row['access_policy'] === 'public' && $playback !== '')
-                ? Fastpix_Attachments::image_base() . '/' . rawurlencode($playback) . '/thumbnail.png?width=160'
-                : null,   // a private poster is signed too [REQ-101]
+            'poster'        => self::list_poster($row, $playback),
         );
         // Belongs to a previously connected workspace: the current credentials cannot manage it.
         $shaped['other_workspace'] = self::is_other_workspace($row);
@@ -1103,6 +1156,7 @@ class Fastpix_Videos_Rest {
             $shaped['aspect_ratio']   = $row['aspect_ratio'];
             $shaped['max_resolution'] = $row['max_resolution'];
             $shaped['mp4_support']    = $row['mp4_support'];
+            $shaped['default_poster'] = isset($row['default_poster']) ? $row['default_poster'] : '';
             $shaped['quality_tier']   = $row['quality_tier'];
             $shaped['deleted_at']     = $row['deleted_at'];
             $shaped['can_edit']       = !$shaped['other_workspace'] && (current_user_can(Fastpix_Capabilities::EDIT_VIDEO)

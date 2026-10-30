@@ -1,6 +1,6 @@
 /**
- * UI-006 behaviour (redesign): fields autosave on change with an inline
- * "Saved" note; the signing secret and the credential pair are write-only —
+ * UI-006 behaviour (redesign): edits collect until the page's one "Save changes"; the
+ * credential pair and the signing secret must pass Verify before Save takes them. They are write-only —
  * the page carries masks, never the values (ASSUME-107), and the server reads a
  * mask coming back as "the stored value" — and verified before they replace anything; Send test event proves the receiver
  * end to end; Disconnect asks first.
@@ -10,7 +10,7 @@
 
     if (typeof fastpixSettings === 'undefined') { return; }
     var cfg = fastpixSettings;
-    var __ = wp.i18n.__, sprintf = wp.i18n.sprintf;   // [QA L25]
+    var __ = wp.i18n.__, _n = wp.i18n._n, sprintf = wp.i18n.sprintf;   // [QA L25]
     var $ = function (id) { return document.getElementById(id); };
 
     function api(method, path, body) {
@@ -27,7 +27,7 @@
     }
     function showErr(el, text) { if (el) { el.textContent = text || ''; el.hidden = !text; } }
     function copy(text, button) {
-        var done = function () { if (button) { var was = button.textContent; button.textContent = __('Copied', 'fastpix-io'); setTimeout(function () { button.textContent = was; }, 1500); } };
+        var done = function () { if (button) { var was = button.textContent; button.textContent = '✓'; setTimeout(function () { button.textContent = was; }, 1500); } };
         if (navigator.clipboard && navigator.clipboard.writeText) { navigator.clipboard.writeText(text).then(done, done); } else { done(); }
     }
 
@@ -46,80 +46,124 @@
         f.parentNode.insertBefore(btn, f.nextSibling);
     });
 
-    /* ---------------------------------------------- Video setup: autosave */
+    /* ------------------------------------------------- one Save for the page */
 
-    var ws = $('fp-workspace-input');
-    if (ws) {
-        var wsSaved = ws.value.trim();
-        function saveWorkspace() {
-            var v = ws.value.trim();
-            if (v === wsSaved) { return; }
-            showErr($('fp-workspace-err'), '');
-            api('POST', '/connection/workspace', { workspace_id: v }).then(function (res) {
-                if (!res.ok) { showErr($('fp-workspace-err'), res.json.message || __('That workspace key was not accepted.', 'fastpix-io')); return; }
-                wsSaved = v; note($('fp-workspace-note'), __('Saved', 'fastpix-io'));
-                var acc = $('fp-account-workspace'); if (acc) { acc.textContent = v || '—'; }
-            });
+    var fields = {
+        workspace: $('fp-workspace-input'), drm: $('fp-drm-config'), ttl: $('fp-token-ttl'), retention: $('fp-lesson-retention'),
+        lms: $('fp-lms-enabled'), seo: $('fp-structured-data'), uninstall: $('fp-delete-on-uninstall'),
+        whSecret: $('fp-webhook-secret'), tokenId: $('fp-token-id'), secret: $('fp-secret')
+    };
+    Object.keys(fields).forEach(function (k) { if (!fields[k]) { delete fields[k]; } });
+    function val(k) { var el = fields[k]; if (!el) { return ''; } return el.type === 'checkbox' ? el.checked : el.value.trim(); }
+    var saved = {};
+    Object.keys(fields).forEach(function (k) { saved[k] = val(k); });
+    function changed() { return Object.keys(fields).filter(function (k) { return val(k) !== saved[k]; }); }
+    function has(list, k) { return list.indexOf(k) !== -1; }
+
+    // What Verify last approved — Save takes the pair / secret only while the fields still hold exactly that.
+    var credsOk = '', credsBusy = false, wh = { value: null, result: '' };
+    function pairNow() { return val('tokenId') + '\n' + val('secret'); }
+
+    var saveAll = $('fp-save-all'), cancelAll = $('fp-cancel-all'), dirtyNote = $('fp-dirty-note'), busy = false;
+    function refresh() {
+        if (!saveAll) { return; }
+        var c = changed(), block = '';
+        if ((has(c, 'tokenId') || has(c, 'secret')) && credsOk !== pairNow()) {
+            block = __('Verify the access token and secret key before saving.', 'fastpix-io');
+        } else if (has(c, 'whSecret') && (wh.value !== val('whSecret') || wh.result === 'mismatch')) {
+            block = __('Verify the signing secret before saving.', 'fastpix-io');
         }
-        ws.addEventListener('change', saveWorkspace);
-        ws.addEventListener('keydown', function (e) { if (e.key === 'Enter') { e.preventDefault(); saveWorkspace(); } });
-    }
-
-    var drm = $('fp-drm-config');
-    if (drm) {
-        var drmSaved = drm.value.trim();
-        function saveDrm() {
-            var v = drm.value.trim();
-            if (v === drmSaved) { return; }
-            showErr($('fp-drm-err'), '');
-            api('PATCH', '/settings', { drm_configuration_id: v }).then(function (res) {
-                if (!res.ok) { showErr($('fp-drm-err'), res.json.message || __('That does not look like a DRM configuration ID (UUID).', 'fastpix-io')); return; }
-                drmSaved = res.json.drm_configuration_id || ''; drm.value = drmSaved; note($('fp-drm-note'), drmSaved ? __('Saved', 'fastpix-io') : __('Cleared', 'fastpix-io'));
-            });
+        saveAll.disabled = busy || !c.length || !!block;
+        cancelAll.disabled = busy || !c.length;
+        if (!busy) {
+            dirtyNote.textContent = block || (c.length ? sprintf(_n('%d unsaved change', '%d unsaved changes', c.length, 'fastpix-io'), c.length) : '');
+            dirtyNote.classList.toggle('warn', !!block);
         }
-        drm.addEventListener('change', saveDrm);
-        drm.addEventListener('keydown', function (e) { if (e.key === 'Enter') { e.preventDefault(); saveDrm(); } });
+        if ($('fp-creds-save') && !credsBusy) {
+            var credsDone = credsOk === pairNow();
+            $('fp-creds-save').disabled = busy || !val('tokenId') || !val('secret') || credsDone;
+            $('fp-creds-save').textContent = credsDone ? __('Verified', 'fastpix-io') : __('Verify', 'fastpix-io');
+        }
+        if ($('fp-webhook-save')) {
+            var whDone = wh.value === val('whSecret');
+            $('fp-webhook-save').disabled = busy || !val('whSecret') || whDone;
+            $('fp-webhook-save').textContent = whDone && wh.result === 'verified' ? __('Verified', 'fastpix-io') : __('Verify', 'fastpix-io');
+        }
     }
+    Object.keys(fields).forEach(function (k) {
+        fields[k].addEventListener('input', refresh); fields[k].addEventListener('change', refresh);
+        if (fields[k].tagName === 'INPUT' && fields[k].type !== 'checkbox') {
+            fields[k].addEventListener('keydown', function (e) { if (e.key === 'Enter') { e.preventDefault(); } });   // Enter no longer saves a single field
+        }
+    });
+    if (fields.lms) { fields.lms.addEventListener('change', function () { var f = $('fp-lesson-retention-field'); if (f) { f.hidden = !fields.lms.checked; } }); }
+    window.addEventListener('beforeunload', function (e) { if (!busy && changed().length) { e.preventDefault(); e.returnValue = ''; } });
 
-    var ttl = $('fp-token-ttl');
-    if (ttl) {
-        ttl.addEventListener('change', function () {
-            var minutes = Math.max(2, Math.min(1440, parseInt(ttl.value, 10) || 15));
-            api('PATCH', '/settings', { playback_token_ttl: minutes * 60 }).then(function (res) {
-                if (!res.ok) { note($('fp-ttl-note'), res.json.message || __('Not saved', 'fastpix-io'), true); return; }
-                ttl.value = Math.round(res.json.playback_token_ttl / 60); note($('fp-ttl-note'), __('Saved', 'fastpix-io'));
-            });
-        });
-    }
-    // Course features master switch — reveals the retention field.
-    var lms = $('fp-lms-enabled');
-    if (lms) {
-        lms.addEventListener('change', function () {
-            api('PATCH', '/settings', { lms_enabled: lms.checked }).then(function (res) {
-                if (!res.ok) { return; }
-                note($('fp-lms-note'), __('Saved', 'fastpix-io'));
-                var field = $('fp-lesson-retention-field');
-                if (field) { field.hidden = !lms.checked; }
-            });
-        });
-    }
-
-    // Per-learner retention days — same autosave pattern as the TTL.
-    var retention = $('fp-lesson-retention');
-    if (retention) {
-        retention.addEventListener('change', function () {
-            var days = Math.max(1, Math.min(3650, parseInt(retention.value, 10) || 90));
-            api('PATCH', '/settings', { lesson_retention_days: days }).then(function (res) {
-                if (!res.ok) { return; }
-                retention.value = res.json.lesson_retention_days; note($('fp-lesson-retention-note'), __('Saved', 'fastpix-io'));
-            });
+    if (cancelAll) {
+        cancelAll.addEventListener('click', function () {
+            Object.keys(fields).forEach(function (k) { if (fields[k].type === 'checkbox') { fields[k].checked = saved[k]; } else { fields[k].value = saved[k]; } });
+            if (fields.lms && $('fp-lesson-retention-field')) { $('fp-lesson-retention-field').hidden = !saved.lms; }
+            credsOk = ''; wh = { value: null, result: '' };
+            ['fp-workspace-err', 'fp-drm-err', 'fp-creds-err', 'fp-webhook-note'].forEach(function (id) { showErr($(id), ''); });
+            refresh();
         });
     }
 
-    var seo = $('fp-structured-data');
-    if (seo) {
-        seo.addEventListener('change', function () {
-            api('PATCH', '/settings', { structured_data: seo.checked }).then(function (res) { note($('fp-seo-note'), res.ok ? __('Saved', 'fastpix-io') : __('Not saved', 'fastpix-io'), !res.ok); });
+    if (saveAll) {
+        saveAll.addEventListener('click', function () {
+            var c = changed(), creds = has(c, 'tokenId') || has(c, 'secret');
+            busy = true; refresh(); dirtyNote.classList.remove('warn'); dirtyNote.textContent = __('Saving…', 'fastpix-io');
+            ['fp-workspace-err', 'fp-drm-err', 'fp-creds-err'].forEach(function (id) { showErr($(id), ''); });
+            var step = Promise.resolve(true);
+            function then(fn) { step = step.then(function (ok) { return ok ? fn() : false; }); }
+            function failed(res, errId, fallback) { showErr($(errId), (res.json && res.json.message) || fallback); return false; }
+
+            if (has(c, 'workspace')) {
+                then(function () {
+                    return api('POST', '/connection/workspace', { workspace_id: val('workspace') }).then(function (res) {
+                        if (!res.ok) { return failed(res, 'fp-workspace-err', __('That workspace key was not accepted.', 'fastpix-io')); }
+                        saved.workspace = val('workspace'); var acc = $('fp-account-workspace'); if (acc) { acc.textContent = saved.workspace || '—'; }
+                        return true;
+                    });
+                });
+            }
+            if (creds) {   // verified a moment ago; connect checks it once more and stores it
+                then(function () {
+                    return api('POST', '/connection', { token_id: val('tokenId'), secret: val('secret') }).then(function (res) {
+                        if (!res.ok) { credsOk = ''; return failed(res, 'fp-creds-err', __('The pair was not accepted. Nothing was saved.', 'fastpix-io')); }
+                        saved.tokenId = val('tokenId'); saved.secret = val('secret');
+                        return true;
+                    });
+                });
+            }
+            var body = {};
+            if (has(c, 'drm')) { body.drm_configuration_id = val('drm'); }
+            if (has(c, 'ttl')) { body.playback_token_ttl = Math.max(2, Math.min(1440, parseInt(val('ttl'), 10) || 15)) * 60; }
+            if (has(c, 'retention')) { body.lesson_retention_days = Math.max(1, Math.min(3650, parseInt(val('retention'), 10) || 90)); }
+            if (has(c, 'lms')) { body.lms_enabled = val('lms'); }
+            if (has(c, 'seo')) { body.structured_data = val('seo'); }
+            if (has(c, 'uninstall')) { body.delete_on_uninstall = val('uninstall'); }
+            if (has(c, 'whSecret')) { body.webhook_secret = val('whSecret'); }
+            if (Object.keys(body).length) {
+                then(function () {
+                    return api('PATCH', '/settings', body).then(function (res) {
+                        if (!res.ok) { return failed(res, has(c, 'drm') ? 'fp-drm-err' : 'fp-webhook-note', __('Not saved.', 'fastpix-io')); }
+                        var j = res.json;
+                        if (fields.drm) { fields.drm.value = j.drm_configuration_id || ''; }
+                        if (fields.ttl && j.playback_token_ttl) { fields.ttl.value = Math.round(j.playback_token_ttl / 60); }
+                        if (fields.retention && j.lesson_retention_days) { fields.retention.value = j.lesson_retention_days; }
+                        Object.keys(fields).forEach(function (k) { if (k !== 'workspace' && k !== 'tokenId' && k !== 'secret') { saved[k] = val(k); } });
+                        return true;
+                    });
+                });
+            }
+            step.then(function (ok) {
+                busy = false; refresh();
+                if (!ok) { dirtyNote.classList.add('warn'); dirtyNote.textContent = __('Some changes were not saved — see the message above.', 'fastpix-io'); return; }
+                dirtyNote.textContent = __('Saved', 'fastpix-io');
+                if (creds) { setTimeout(function () { window.location.reload(); }, 900); return; }   // the Account rows and the header pill come from the server
+                if (has(c, 'whSecret')) { testBtn.disabled = false; testBtn.removeAttribute('title'); sendTest(true); }   // ask FastPix for a delivery that confirms it
+            });
         });
     }
 
@@ -128,23 +172,24 @@
     var whCopy = $('fp-webhook-copy');
     if (whCopy) { whCopy.addEventListener('click', function () { copy($('fp-webhook-url').value, whCopy); }); }
 
-    var secret = $('fp-webhook-secret'), whSave = $('fp-webhook-save'), whNote = $('fp-webhook-note');
-    if (secret) {
-        var whSaved = secret.value.trim(), whBusy = false;
-        secret.addEventListener('input', function () { whSave.disabled = whBusy || secret.value.trim() === ''; showErr(whNote, ''); });   // a keystroke must not re-arm a save in flight
+    // Verify checks the secret against FastPix's last delivery without saving it. No delivery yet
+    // ('unknown') cannot be checked here — Save is allowed and FastPix's next event confirms it.
+    var whSave = $('fp-webhook-save'), whNote = $('fp-webhook-note');
+    if (whSave) {
         whSave.addEventListener('click', function () {
-            if (whBusy) { return; }
-            whSave.disabled = true;
-            if (secret.value.trim() === whSaved) { whSave.disabled = false; sendTest(true); return; }   // unchanged: just verify it again
-            whBusy = true;
-            api('PATCH', '/settings', { webhook_secret: secret.value.trim() }).then(function (res) {
-                whBusy = false;
-                whSave.disabled = false;
-                if (!res.ok || !res.json.webhook_configured) { showErr(whNote, (res.json && res.json.message) || __('Could not save.', 'fastpix-io')); return; }
-                whSaved = secret.value.trim();
-                $('fp-webhook-test').disabled = false; $('fp-webhook-test').removeAttribute('title');
-                showErr(whNote, '');
-                sendTest(true);   // "Save & verify": verify right away
+            var v = val('whSecret');
+            whSave.disabled = true; showErr(whNote, '');
+            api('POST', '/settings/webhook-verify', { secret: v }).then(function (res) {
+                if (!res.ok) { wh = { value: null, result: '' }; showErr(whNote, (res.json && res.json.message) || __('Could not verify.', 'fastpix-io')); refresh(); return; }
+                wh = { value: v, result: res.json.result };
+                if (wh.result === 'mismatch') {
+                    showErr(whNote, __('Not verified — this secret does not match the one on the endpoint in the FastPix dashboard.', 'fastpix-io'));
+                } else if (wh.result === 'unknown') {
+                    showErr(whNote, __('Cannot check yet — FastPix has not sent an event to this site. You can save it; FastPix\u2019s next event confirms it.', 'fastpix-io'));
+                } else {
+                    showErr(whNote, '');
+                }
+                refresh();
             });
         });
     }
@@ -214,26 +259,22 @@
 
     document.querySelectorAll('.fp-copy').forEach(function (b) { b.addEventListener('click', function () { copy(b.getAttribute('data-copy'), b); }); });
 
-    // The pair edits in place; Verify checks it against FastPix before anything is stored.
-    if ($('fp-creds-save')) {
-        var credsBtn = $('fp-creds-save');
-        function credsDirty() { showErr($('fp-creds-err'), ''); }
-        $('fp-token-id').addEventListener('input', credsDirty); $('fp-secret').addEventListener('input', credsDirty);
+    // The pair edits in place; Verify checks it against FastPix and stores nothing — Save stores it.
+    var credsBtn = $('fp-creds-save');
+    if (credsBtn) {
         credsBtn.addEventListener('click', function () {
-            var t = $('fp-token-id').value.trim(), s = $('fp-secret').value.trim();
-            if (!t || !s) { showErr($('fp-creds-err'), __('Paste both the token ID and its secret key.', 'fastpix-io')); return; }
-            credsBtn.disabled = true; showErr($('fp-creds-err'), ''); note($('fp-creds-note'), __('Verifying…', 'fastpix-io'));
-            api('POST', '/connection', { token_id: t, secret: s }).then(function (res) {
-                credsBtn.disabled = false;
-                if (!res.ok) { note($('fp-creds-note'), ''); showErr($('fp-creds-err'), res.json.message || __('The pair was not accepted. Nothing was saved.', 'fastpix-io')); return; }
-                note($('fp-creds-note'), __('Verified and saved', 'fastpix-io'));
-                setTimeout(function () { window.location.reload(); }, 900);   // the Account rows and the header pill come from the server
+            var pair = pairNow();
+            credsBusy = true; credsBtn.disabled = true; credsBtn.textContent = __('Verifying…', 'fastpix-io'); showErr($('fp-creds-err'), '');
+            api('POST', '/connection/verify', { token_id: val('tokenId'), secret: val('secret') }).then(function (res) {
+                credsBusy = false;
+                if (!res.ok) { credsOk = ''; showErr($('fp-creds-err'), res.json.message || __('The pair was not accepted.', 'fastpix-io')); refresh(); return; }
+                credsOk = pair;   // the button reads "Verified" until either field changes
+                refresh();
             });
         });
     }
 
-    var uninstall = $('fp-delete-on-uninstall');
-    if (uninstall) { uninstall.addEventListener('change', function () { api('PATCH', '/settings', { delete_on_uninstall: uninstall.checked }).then(function (res) { note($('fp-uninstall-note'), res.ok ? __('Saved', 'fastpix-io') : __('Not saved', 'fastpix-io'), !res.ok); }); }); }
+    refresh();
 
     var disconnect = $('fp-disconnect');
     if (disconnect) {

@@ -40,6 +40,13 @@ class Fastpix_Settings_Page {
         Fastpix_Rest::register('/settings/webhook-test', array(
             'methods' => 'POST', 'callback' => array(__CLASS__, 'webhook_test'), 'capability' => Fastpix_Capabilities::MANAGE_SETTINGS,
         ));
+        // Check a signing secret against FastPix's last delivery — nothing is saved.
+        Fastpix_Rest::register('/settings/webhook-verify', array(
+            'methods'    => 'POST',
+            'callback'   => array(__CLASS__, 'webhook_verify'),
+            'capability' => Fastpix_Capabilities::MANAGE_SETTINGS,
+            'args'       => array('secret' => Fastpix_Rest::arg('string', array('sanitize_callback' => function ($value) { return trim((string) $value); }))),
+        ));
         Fastpix_Rest::register('/settings/webhook-status', array(
             'methods' => 'GET', 'callback' => array(__CLASS__, 'webhook_status'), 'capability' => Fastpix_Capabilities::MANAGE_SETTINGS,
         ));
@@ -85,6 +92,18 @@ class Fastpix_Settings_Page {
         $result['nudge_reason']    = $nudge['reason'];   // why FastPix could not be asked for a delivery (invalid pair, no media, API down)
 
         return rest_ensure_response($result);
+    }
+
+    public static function webhook_verify($request) {
+        $secret = (string) $request->get_param('secret');
+        if ($secret === Fastpix_Credentials::SECRET_MASK && Fastpix_Webhooks::configured()) {
+            $secret = Fastpix_Webhooks::secret();   // the mask means "the secret I already have"
+        }
+        if ($secret === '') {
+            return new \WP_Error('fastpix_webhook_empty', __('Paste the signing secret from FastPix.', 'fastpix-io'), array('status' => 400));
+        }
+
+        return rest_ensure_response(array('result' => Fastpix_Webhooks::check_secret($secret)));
     }
 
     public static function webhook_status() {

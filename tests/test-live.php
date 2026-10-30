@@ -516,6 +516,24 @@ assert(Live::stream_state($sreq)->get_data() === array('status' => 'ended', 'rec
 $mock['media_ids'] = array('lv-rec-1'); $unlink(); Live::refresh_from_platform();   // leave it linked for the sections below   // NOSONAR php:S4143 — read through the by-ref pre_http_request closure
 assert($linked() === $rec_id);
 
+// A RE-USED stream: going live again must drop the last broadcast's recording, never re-link it while
+// FastPix is still adding the new one to mediaIds, and link the new one once it is there.
+$wpdb->insert(Schema::table('videos'), array(
+    'media_id' => 'lv-rec-3', 'workspace_id' => 'ws-lv', 'title' => 'Town hall, take 2', 'status' => 'Ready',
+    'source' => 'Dashboard', 'access_policy' => 'public', 'author_id' => 1, 'created_at' => $now, 'updated_at' => $now,
+));
+$rec3_id = (int) $wpdb->insert_id;
+$wpdb->update(Schema::table('live_streams'), array('status' => 'ended'), array('stream_id' => 'lv-t1'));
+Webhooks::dispatch('video.live_stream.active', array('data' => array('id' => 'lv-t1')));
+assert($linked() === 0, 'going live again unlinks the previous broadcast\'s recording');
+Webhooks::dispatch('video.live_stream.active', array('data' => array('id' => 'lv-t1')));   // a repeat during the same broadcast
+$mock['media_ids'] = array('lv-rec-1'); Live::refresh_from_platform();   // NOSONAR php:S4143 — read through the by-ref pre_http_request closure
+assert($linked() === 0, 'the old recording is never re-linked while the new one has not landed');
+$mock['media_ids'] = array('lv-rec-1', 'lv-rec-3'); Live::refresh_from_platform();   // NOSONAR php:S4143 — read through the by-ref pre_http_request closure
+assert($linked() === $rec3_id, 'the new broadcast\'s recording is linked');
+$mock['media_ids'] = array('lv-rec-1'); $unlink(); delete_option(Live::OPT_PREV_RECORDING); Live::refresh_from_platform();   // back to rec-1 for the sections below   // NOSONAR php:S4143 — read through the by-ref pre_http_request closure
+assert($linked() === $rec_id);
+
 // Sweep repair: the 15-minute sweep re-reads stream state. [WF-009]
 Live::boot();
 assert((bool) has_action('fastpix_new_media_sweep', array('Fastpix\\Fastpix_Live', 'refresh_from_platform')));

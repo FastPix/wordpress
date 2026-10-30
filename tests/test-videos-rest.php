@@ -176,6 +176,20 @@ assert(!$response->is_error(), 'the downloadable toggle saves');
 $mp4_call = array_filter($platform['requests'], function ($r) { return strpos($r['url'], 'update-mp4Support') !== false; });
 assert(count($mp4_call) === 1, 'mp4 support goes through the platform [API-F06]');
 
+// The panel's poster is saved on the video and every embed without its own poster uses it.
+$response = vreq('PATCH', REST_VIDEOS_SLASH . $fixture_ids[1], array('poster' => '7s'));
+assert(!$response->is_error() && $response->get_data()['default_poster'] === '7s', 'a poster frame saves');
+$row = $wpdb->get_row($wpdb->prepare('SELECT * FROM ' . Schema::table('videos') . SQL_WHERE_ID, $fixture_ids[1]), ARRAY_A);
+$m   = new ReflectionMethod(\Fastpix\Fastpix_Render::class, 'video_poster'); $m->setAccessible(true);
+assert($m->invoke(null, \Fastpix\Fastpix_Render::settings(array()), $row, array())['thumbnailTime'] === 7, 'an embed with no poster uses the saved frame');
+assert($m->invoke(null, \Fastpix\Fastpix_Render::settings(array('thumbnailTime' => 3)), $row, array('thumbnailTime' => 3))['thumbnailTime'] == 3, 'an embed with its own frame keeps it');
+assert($m->invoke(null, \Fastpix\Fastpix_Render::settings(array('thumbnailTime' => 1)), $row, array('thumbnailTime' => 1))['thumbnailTime'] == 1, 'an embed that picked frame 1 keeps it too');
+assert(strpos((string) $response->get_data()['poster'], 'time=7') !== false || $response->get_data()['poster'] === null, 'the library thumbnail shows the saved frame');
+$response = vreq('PATCH', REST_VIDEOS_SLASH . $fixture_ids[1], array('poster' => 'https://img.example.com/p.jpg'));
+assert($response->get_data()['default_poster'] === 'https://img.example.com/p.jpg', 'an image URL saves');
+assert(vreq('PATCH', REST_VIDEOS_SLASH . $fixture_ids[1], array('poster' => 'javascript:alert(1)'))->is_error(), 'a non-http poster is refused');
+assert(vreq('PATCH', REST_VIDEOS_SLASH . $fixture_ids[1], array('poster' => ''))->get_data()['default_poster'] === '', 'clearing goes back to the default frame');
+
 // Track operations ride on PATCH (ASSUME-029) and map to the tracks API.
 $platform['requests'] = array();
 $response = vreq('PATCH', REST_VIDEOS_SLASH . $fixture_ids[1], array('tracks' => array(

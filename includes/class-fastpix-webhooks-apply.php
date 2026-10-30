@@ -270,6 +270,9 @@ class Fastpix_Webhooks_Apply {
         }
 
         $status = self::stream_status($type);
+        if ($status === 'active' || $status === 'preparing') {
+            Fastpix_Live::new_broadcast($stream_id);   // a re-used stream going live again: the old recording is not this broadcast's
+        }
 
         // Only a broadcast event (preparing/active/ended) stamps last_active_at —
         // created/updated/idle must not make a never-streamed row read "ended";

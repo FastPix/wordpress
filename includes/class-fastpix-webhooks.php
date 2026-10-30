@@ -93,6 +93,20 @@ class Fastpix_Webhooks {
     }
 
     /**
+     * Settings "Verify", before anything is saved: 'verified' when $secret signed FastPix's last real
+     * delivery, 'mismatch' when it did not, 'unknown' when no delivery has arrived yet to check against.
+     */
+    public static function check_secret($secret) {
+        $secret = trim((string) $secret);
+        $sample = get_option(self::OPT_SAMPLE, array());
+        if (!is_array($sample) || empty($sample['raw'])) {
+            return 'unknown';
+        }
+
+        return !self::mistyped($secret) && self::signed_by((string) $sample['raw'], (string) $sample['sig'], $secret) ? 'verified' : 'mismatch';
+    }
+
+    /**
      * Base64 not in canonical form is a mistyped copy: its spare trailing bits are ignored when decoded, so
      * "…KU=" and "…KV=" are the SAME key and FastPix's deliveries still pass. It saves, but it is never the
      * secret the dashboard shows, so it reads "not verified" until the right one is saved. [QA F1]

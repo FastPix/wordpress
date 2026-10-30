@@ -129,7 +129,7 @@ class Fastpix_Onboarding {
                 'wsHint'           => __('Copy the workspace key exactly from the Workspaces page of the FastPix dashboard.', 'fastpix-io'),
                 'wsRejected'       => __('That workspace ID was not accepted.', 'fastpix-io'),
                 'saved'            => __('Saved', 'fastpix-io'),
-                'copied'           => __('Copied', 'fastpix-io'),
+                'copied'           => '✓',
                 'copy'             => __('Copy', 'fastpix-io'),
                 'configured'       => __('Configured', 'fastpix-io'),
                 'whVerified'       => __('Receiver reachable. Not verified — waiting for FastPix’s next event to confirm this secret…', 'fastpix-io'),
@@ -141,9 +141,7 @@ class Fastpix_Onboarding {
                 'couldNotSave'     => __('Could not save.', 'fastpix-io'),
                 'whSavedVerifying' => __('Saved — verifying…', 'fastpix-io'),
                 /* translators: %s: the delivered event type */
-                'whVerifiedDelivered' => __('Verified — FastPix delivered %s', 'fastpix-io'),
                 /* translators: %s: workspace name */
-                'whForWorkspace'   => __(' for workspace “%s”', 'fastpix-io'),
                 'whSkipped'        => __('Skipped — save the workspace ID to finish', 'fastpix-io'),
             ),
         ));

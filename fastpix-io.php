@@ -2,7 +2,7 @@
 /*
 Plugin Name: FastPix Video
 Description: Upload, manage, embed and measure video with the FastPix platform — library, protected playback, analytics, migration and live streaming, from your WordPress dashboard.
-Version: 2.0.1
+Version: 2.0.2
 Requires at least: 6.8
 Requires PHP: 8.3
 Author: FastPix
@@ -46,7 +46,7 @@ if (!file_exists($fastpix_composer_autoload)) {
 
 require_once $fastpix_composer_autoload;
 
-define('FASTPIX_VERSION', '2.0.1');
+define('FASTPIX_VERSION', '2.0.2');
 
 /**
  * Cache-busting asset version: the file's mtime, so every edit reaches the

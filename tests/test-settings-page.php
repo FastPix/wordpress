@@ -51,8 +51,20 @@ assert(strpos($settings['webhook_url'], 'fastpix/v1/webhook') !== false, 'the re
 assert($settings['delete_on_uninstall'] === false, 'delete-on-uninstall defaults OFF [REQ-102]');
 assert(!array_key_exists('webhook_secret', $settings), 'the secret is write-only — never read back');
 
-// Save the secret through the route: "Instant updates".
+// Verify checks a secret against FastPix's last delivery and saves nothing.
 $whsec = 'whsec_settings_check_9RtP2xW7';
+$kept_sample = get_option(Webhooks::OPT_SAMPLE, null);
+delete_option(Webhooks::OPT_SAMPLE);
+assert(sreq('POST', '/settings/webhook-verify', array('secret' => $whsec))->get_data()['result'] === 'unknown', 'no delivery yet: the secret cannot be checked');
+$sample_raw = '{"type":"video.media.ready"}';
+update_option(Webhooks::OPT_SAMPLE, array('raw' => $sample_raw, 'sig' => base64_encode(hash_hmac('sha256', $sample_raw, $whsec, true))), false);
+assert(sreq('POST', '/settings/webhook-verify', array('secret' => $whsec))->get_data()['result'] === 'verified', 'the secret that signed the last delivery verifies');
+assert(sreq('POST', '/settings/webhook-verify', array('secret' => 'whsec_wrong'))->get_data()['result'] === 'mismatch', 'another secret does not');
+assert(sreq('POST', '/settings/webhook-verify', array('secret' => ''))->is_error(), 'an empty secret is refused');
+assert(Webhooks::secret() === '', 'Verify stored nothing');
+$kept_sample === null ? delete_option(Webhooks::OPT_SAMPLE) : update_option(Webhooks::OPT_SAMPLE, $kept_sample, false);
+
+// Save the secret through the route: "Instant updates".
 $response = sreq('PATCH', REST_SETTINGS, array('webhook_secret' => $whsec));
 assert($response->get_data()['webhook_configured'] === true, 'saving the secret turns instant updates on');
 assert(Webhooks::secret() === $whsec, 'stored where the receiver reads it');
@@ -99,7 +111,7 @@ foreach (array('FastPix settings', 'Video setup', 'Account', 'Workspace key', 'D
                'Delete local data on uninstall', 'Disconnecting stops playback', 'Copy support report', 'Plugin version') as $marker) {
     assert(strpos($html, $marker) !== false, "the screen renders: {$marker} [UI-006]");
 }
-assert(strpos($html, 'Save &amp; verify') !== false, 'the signing secret has its Save & verify action');
+assert(strpos($html, 'id="fp-webhook-save"') !== false && strpos($html, 'id="fp-save-all"') !== false, 'the signing secret has its Verify action and the page one Save');
 assert(strpos($html, 'fp-webhook-skip') === false, 'Skip is the wizard\'s button — not on Settings [ASSUME-033]');
 assert(strpos($html, 'https://fastpix.com/contact-us') !== false && strpos($html, 'https://fastpix.com/docs') !== false && strpos($html, 'https://status.fastpix.io') !== false, 'footer links resolve to live pages (checked 2026-08-18)');
 

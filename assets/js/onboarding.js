@@ -433,8 +433,6 @@
                     el.whNote.classList.remove('err');
                     el.whNote.classList.add('ok');
                     el.whNote.innerHTML = '<span class="dot" aria-hidden="true"></span>' + i18n.whSavedVerifying;
-                    el.whSecret.value = '';
-                    el.whSecret.placeholder = '•••••••• (stored encrypted — paste to replace)';
                     // Prove the secret end to end: a signed test event through the public URL.
                     api('POST', '/settings/webhook-test').then(function (t) {
                         var okv = t.ok && t.json && t.json.delivered;
@@ -465,8 +463,10 @@
         if (!el.whNote || !st) { return st && st.verdict; }
         el.whNote.classList.remove('ok', 'err', 'wait');
         if (st.verdict === 'verified' && st.last_delivery) {
-            el.whNote.classList.add('ok');
-            el.whNote.innerHTML = '<span class="dot" aria-hidden="true"></span>' + i18n.whVerifiedDelivered.replace('%s', esc(st.last_delivery.type)) + (st.workspace_name ? i18n.whForWorkspace.replace('%s', esc(st.workspace_name)) : '');
+            // No sentence: the Show button reads ✓ for a second, then goes back to Show.
+            el.whNote.textContent = '';
+            var sh = document.getElementById('fp-wh-showhide');
+            if (sh) { var was = sh.textContent; sh.textContent = '✓'; setTimeout(function () { sh.textContent = was; }, 1000); }
         } else if (st.verdict === 'rejected') {
             el.whNote.classList.add('err');
             el.whNote.innerHTML = '<span class="dot" aria-hidden="true"></span>' + i18n.whRejected;

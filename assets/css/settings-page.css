@@ -124,3 +124,9 @@
 .fastpix-wrap.fp-st .fp-st__show{height:34px;margin-left:8px;padding:0 12px;border:1px solid var(--v-line,#D1CBD7);border-radius:8px;background:#fff;color:#5d09c7;font:inherit;font-size:13px;font-weight:600;cursor:pointer}
 .fastpix-wrap.fp-st .fp-st__show:hover{border-color:#5d09c7}
 .fastpix-wrap.fp-st .fp-st__show:focus-visible{outline:2px solid #5d09c7;outline-offset:2px}
+
+/* The page's one Save: its own line under Disconnect, right-aligned. */
+.fastpix-wrap.fp-st .fp-st__row.fp-st__savebar { display: flex; justify-content: flex-end; align-items: center; gap: 12px; flex-wrap: wrap; padding: 13px 24px; border-top: 1px solid var(--v-rule); }
+.fastpix-wrap.fp-st .fp-st__dirty { font-size: 13px; color: #50575e; }
+.fastpix-wrap.fp-st .fp-st__dirty:empty { display: none; }
+.fastpix-wrap.fp-st .fp-st__dirty.warn { color: #b32d2e; }

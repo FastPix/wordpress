@@ -52,6 +52,7 @@ class Fastpix_Schema {
             10 => 'migrate_010_upload_session_uri',
             11 => 'migrate_011_drop_ready_count',
             12 => 'migrate_012_platform_created_at',
+            13 => 'migrate_013_default_poster',
         );
     }
 
@@ -906,6 +907,26 @@ class Fastpix_Schema {
         return in_array('platform_created_at', (array) $wpdb->get_col("DESC {$table}", 0), true)
             ? true
             : new \WP_Error('fastpix_schema_create_failed', __('The platform_created_at column could not be added.', 'fastpix-io'), array('videos'));
+    }
+
+    /**
+     * videos.default_poster: the poster saved from the library panel — "5s" (a frame) or an
+     * image URL; '' = the site default (frame at 1 s). Embeds that set no poster of their own use it.
+     */
+    private static function migrate_013_default_poster() {
+        global $wpdb;
+
+        if (!self::table_exists('videos')) {
+            return true;
+        }
+        $table = self::table('videos');
+        if (!in_array('default_poster', (array) $wpdb->get_col("DESC {$table}", 0), true)) {
+            $wpdb->query("ALTER TABLE {$table} ADD COLUMN default_poster varchar(2048) NOT NULL DEFAULT '' AFTER poster_updated_at");
+        }
+
+        return in_array('default_poster', (array) $wpdb->get_col("DESC {$table}", 0), true)
+            ? true
+            : new \WP_Error('fastpix_schema_create_failed', __('The default_poster column could not be added.', 'fastpix-io'), array('videos'));
     }
 
     /**

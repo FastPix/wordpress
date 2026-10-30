@@ -60,6 +60,20 @@ class Fastpix_Rest_Connection {
             ),
         ));
 
+        // POST /connection/verify — the same check as connect, nothing stored (Settings: Verify, then Save).
+        Fastpix_Rest::register('/connection/verify', array(
+            'methods'    => 'POST',
+            'callback'   => array(__CLASS__, 'verify'),
+            'capability' => Fastpix_Capabilities::MANAGE_SETTINGS,
+            'args'       => array(
+                'token_id' => Fastpix_Rest::arg('string', array('required' => true)),
+                'secret'   => Fastpix_Rest::arg('string', array(
+                    'required'          => true,
+                    'sanitize_callback' => function ($value) { return trim((string) $value); },
+                )),
+            ),
+        ));
+
         // POST /connection/test — re-runs the validation read. [WF-001]
         Fastpix_Rest::register('/connection/test', array(
             'methods'    => 'POST',
@@ -103,6 +117,21 @@ class Fastpix_Rest_Connection {
      * never persisted anywhere to begin with). [FR-001, FR-002]
      */
     public static function connect($request) {
+        list($token_id, $secret) = self::pair($request);
+        $result = Fastpix_Connection::connect($token_id, $secret);
+
+        return is_wp_error($result) ? self::refusal($result) : rest_ensure_response($result);   // Fastpix_Connection::state() — secret already masked [REQ-003]
+    }
+
+    public static function verify($request) {
+        list($token_id, $secret) = self::pair($request);
+        $result = Fastpix_Connection::validate($token_id, $secret);
+
+        return is_wp_error($result) ? self::refusal($result) : rest_ensure_response(array('verified' => true));
+    }
+
+    /** The posted pair, with the masks the screens render swapped back for the stored values. */
+    private static function pair($request) {
         $token_id = (string) $request->get_param('token_id');
         // The wizard pre-fills the TRUNCATED id (FR-005) and lets the owner paste a
         // new secret under it: the masked form means "the token I already have".
@@ -115,18 +144,18 @@ class Fastpix_Rest_Connection {
         if (Fastpix_Credentials::has_pair() && $secret === Fastpix_Credentials::SECRET_MASK) {
             $secret = Fastpix_Credentials::secret();
         }
-        $result = Fastpix_Connection::connect($token_id, $secret);
 
-        if (is_wp_error($result)) {
-            $data = (array) $result->get_error_data();
+        return array($token_id, $secret);
+    }
 
-            return new \WP_Error($result->get_error_code(), $result->get_error_message(), array_merge(
-                $data,
-                array('status' => isset($data['status']) && $data['status'] >= 400 ? $data['status'] : 400)
-            ));
-        }
+    /** A refused pair as a 4xx REST error. */
+    private static function refusal($result) {
+        $data = (array) $result->get_error_data();
 
-        return rest_ensure_response($result);   // Fastpix_Connection::state() — secret already masked [REQ-003]
+        return new \WP_Error($result->get_error_code(), $result->get_error_message(), array_merge(
+            $data,
+            array('status' => isset($data['status']) && $data['status'] >= 400 ? $data['status'] : 400)
+        ));
     }
 
     public static function disconnect() {

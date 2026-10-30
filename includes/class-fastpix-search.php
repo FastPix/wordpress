@@ -117,11 +117,11 @@ class Fastpix_Search {
             $data = json_decode((string) $output['generated_json'], true);
 
             if ($output['kind'] === 'chapters' && is_array($data)) {
-                self::index_chapters($add, $data);
+                self::index_chapters($add, isset($data['chapters']) ? $data['chapters'] : $data);
             } elseif ($output['kind'] === 'summary') {
                 $add('summary', 0, is_string($data) ? $data : wp_json_encode($data));
             } elseif ($output['kind'] === 'entities' && is_array($data)) {
-                self::index_entities($add, $data);
+                self::index_entities($add, isset($data['namedEntities']) ? $data['namedEntities'] : $data);
             } elseif ($output['kind'] === 'transcript') {
                 self::index_transcript($add, $data);
             }

@@ -45,7 +45,7 @@ add_filter('fastpix_api_backoff_seconds', '__return_zero');
 
 // ------------------------------------------------------------- transport mock
 
-$mock = array('requests' => array(), 'media' => array(), 'fail_paths' => array());
+$mock = array('requests' => array(), 'media' => array(), 'ai' => array(), 'fail_paths' => array());
 add_filter('pre_http_request', function ($_pre, $args, $url) use (&$mock) {
     $mock['requests'][] = array('method' => $args['method'], 'url' => $url, 'body' => isset($args['body']) ? json_decode($args['body'], true) : null);
     if (substr($url, -4) === '.vtt') {   // the subtitle file on the stream host [ASSUME-086]
@@ -57,7 +57,11 @@ add_filter('pre_http_request', function ($_pre, $args, $url) use (&$mock) {
                          'response' => array('code' => 422, 'message' => ''));
         }
     }
-    $data = $args['method'] === 'GET' ? $mock['media'] : array('mediaId' => 'ai-media-1', 'ok' => true);
+    if ($args['method'] === 'GET' && preg_match('#/ai/[^/]+/([a-z-]+)$#', $url, $m)) {   // In-Video AI read-back
+        $data = isset($mock['ai'][$m[1]]) ? $mock['ai'][$m[1]] : array('status' => 'IN_PROGRESS');
+    } else {
+        $data = $args['method'] === 'GET' ? $mock['media'] : array('id' => 'ai-media-1');
+    }
     return array('headers' => array(), 'body' => wp_json_encode(array('success' => true, 'data' => $data)), 'response' => array('code' => 200, 'message' => ''));
 }, 10, 3);
 
@@ -83,10 +87,10 @@ $video_id = (int) $wpdb->insert_id;
 $wpdb->query($wpdb->prepare(SQL_DELETE_FROM . Schema::table('ai') . SQL_WHERE_VIDEO_ID, $video_id));
 $wpdb->query($wpdb->prepare(SQL_DELETE_FROM . Schema::table('tracks') . SQL_WHERE_VIDEO_ID, $video_id));
 $wpdb->query(SQL_DELETE_FROM . Schema::table('uploads') . " WHERE filename = 'ai-check.mp4'");
-// The batch snapshot the upload was created with [REQ-017]: chapters on, summary medium, moderation off, subtitles en.
+// The batch snapshot the upload was created with [REQ-017]: chapters on, summary medium, subtitles en.
 $wpdb->insert(Schema::table('uploads'), array(
     'upload_id' => 'up-ai-1', 'filename' => 'ai-check.mp4', 'filesize' => 100, 'chunk_size' => 1, 'state' => 'completed',
-    'settings_json' => wp_json_encode(\Fastpix\Fastpix_Uploads_Settings::settings_snapshot(array('chapters' => true, 'summary' => 'medium', 'moderation' => 'off', 'subtitles' => 'en'))),
+    'settings_json' => wp_json_encode(\Fastpix\Fastpix_Uploads_Settings::settings_snapshot(array('chapters' => true, 'summary' => 'medium', 'subtitles' => 'en'))),
     'video_id' => $video_id, 'user_id' => 1, 'created_at' => $now, 'updated_at' => $now,
 ));
 $mock['media'] = array('id' => 'ai-media-1', 'status' => 'Ready',
@@ -102,12 +106,11 @@ as_unschedule_all_actions(Ai::HOOK_REQUEST);
 $mock['requests'] = array();
 Ai::request_job(array('media_id' => 'ai-media-1', 'attempt' => 1));
 
-assert(count(ai_calls($mock, 'PATCH', '/on-demand/ai-media-1/chapters')) === 1, 'chapters requested [API-F05]');
-assert(ai_calls($mock, 'PATCH', '/on-demand/ai-media-1/chapters')[0]['body'] === array('chapters' => true), 'chapters body {chapters:true}');
-$sum = ai_calls($mock, 'PATCH', '/on-demand/ai-media-1/summary');
-assert(count($sum) === 1 && $sum[0]['body']['generate'] === true && $sum[0]['body']['summaryLength'] === 100, 'summary requested with generate + summaryLength');
-assert(count(ai_calls($mock, 'PATCH', '/on-demand/ai-media-1/named-entities')) === 1, 'named entities requested');
-assert(count(ai_calls($mock, 'PATCH', '/on-demand/ai-media-1/moderation')) === 0, 'moderation off in the batch ⇒ not requested (per stored settings)');
+assert(count(ai_calls($mock, 'POST', '/ai/ai-media-1/chapters')) === 1, 'chapters requested on the In-Video AI endpoint');
+assert(count(ai_calls($mock, 'POST', '/ai/ai-media-1/summary')) === 1, 'summary requested');
+assert(count(ai_calls($mock, 'POST', '/ai/ai-media-1/named-entities')) === 1, 'named entities requested');
+assert(count(ai_calls($mock, 'POST', '/moderation')) === 0, 'moderation is never requested');
+assert(count(ai_calls($mock, 'PATCH', '/on-demand/')) === 0, 'the deprecated PATCH /on-demand/{id}/<kind> endpoints are not used');
 $gen = ai_calls($mock, 'POST', EP_GENERATE_SUBTITLES);
 assert(count($gen) === 1 && $gen[0]['body']['languageCode'] === 'en', 'subtitles generated into the audio track for the chosen language');
 
@@ -128,9 +131,9 @@ as_unschedule_all_actions(Ai::HOOK_FETCH);
 
 // -------------------------------------------- 3. fetch: ready / preparing / failed
 
-$mock['media']['chapters']      = array('status' => 'available', 'data' => array('chapters' => array(array('chapter' => '1', 'startTime' => '00:00:00', 'endTime' => '00:00:30', 'title' => 'Intro'))));
-$mock['media']['namedEntities'] = array('status' => 'preparing');
-$mock['media']['summary']       = array('status' => 'failed', 'failedReason' => 'audio too quiet in first 30s');
+$mock['ai']['chapters']       = array('status' => 'COMPLETED', 'result' => array('chapters' => array(array('chapter' => '1', 'startTime' => '0.0', 'endTime' => '30.0', 'title' => 'Intro'))));
+$mock['ai']['named-entities'] = array('status' => 'IN_PROGRESS');
+$mock['ai']['summary']        = array('status' => 'FAILED', 'failedReason' => 'audio too quiet in first 30s');
 
 Ai::fetch_job(array('media_id' => 'ai-media-1', 'kind' => 'chapters', 'attempt' => 1));
 $ch = array_values(array_filter(Ai::rows($video_id, true), function ($r) { return $r['kind'] === 'chapters'; }))[0];
@@ -162,7 +165,7 @@ assert($logged >= 1, 'logged as ai_summary_failed [ERR-021]');
 
 $mock['requests'] = array();
 Ai::request_job(array('media_id' => 'ai-media-1', 'kinds' => array('summary'), 'attempt' => 1));
-$patches = array_filter($mock['requests'], function ($r) { return $r['method'] === 'PATCH'; });
+$patches = array_filter($mock['requests'], function ($r) { return $r['method'] === 'POST' && strpos($r['url'], '/ai/') !== false; });
 assert(count($patches) === 1 && strpos(array_values($patches)[0]['url'], '/summary') !== false, 'a re-run of one kind touches only that endpoint [RULE-011]');
 assert(array_column(Ai::rows($video_id), 'state', 'kind')['summary'] === 'requested', 'and only that row goes back to requested');
 
@@ -183,6 +186,13 @@ $req = new WP_REST_Request('POST', REST_VIDEOS . $video_id . '/ai');
 $req->set_param('kind', 'summary');
 $res = rest_get_server()->dispatch($req);
 assert(!$res->is_error() && $res->get_data()['queued'] === true && $res->get_data()['kind'] === 'summary', 'POST /videos/{id}/ai re-runs one output [API-P03]');
+assert(count(ai_calls($mock, 'POST', '/ai/ai-media-1/summary')) >= 1 && array_column(Ai::rows($video_id), 'state', 'kind')['summary'] === 'requested', 'Generate asks FastPix right away, not on the next WP-Cron run');
+
+// The open panel's check reads a finished output back now.
+$mock['ai']['summary'] = array('status' => 'COMPLETED', 'result' => array('summary' => 'A short abstract.'));
+$res = rest_get_server()->dispatch(new WP_REST_Request('POST', REST_VIDEOS . $video_id . '/ai/check'));
+$sum = array_values(array_filter(Ai::rows($video_id, true), function ($r) { return $r['kind'] === 'summary'; }))[0];
+assert(!$res->is_error() && $sum['state'] === 'ready' && $sum['output'] === 'A short abstract.', 'POST /videos/{id}/ai/check stores a finished output without waiting for cron');
 $req = new WP_REST_Request('POST', REST_VIDEOS . $video_id . '/ai');
 $req->set_param('kind', 'edit');
 assert(rest_get_server()->dispatch($req)->is_error(), 'unknown kinds are refused; there is no save/revert route [RULE-012]');

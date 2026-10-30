@@ -241,7 +241,8 @@ $fastpix_hidden = ' hidden';
                             <label for="fp-webhook-secret"><?php esc_html_e('Signing secret — FastPix displays it after you paste the address', 'fastpix-io'); ?></label>
                             <div class="pwwrap">
                                 <input type="password" id="fp-webhook-secret" class="mono" autocomplete="off" spellcheck="false"
-                                       placeholder="<?php echo esc_attr($fastpix_webhooks_configured ? '•••••••• (stored encrypted — paste to replace)' : __('Paste it back here', 'fastpix-io')); ?>">
+                                       value="<?php echo esc_attr(Fastpix\Fastpix_Webhooks::secret()); ?>"
+                                       placeholder="<?php esc_attr_e('Paste your webhook secret key', 'fastpix-io'); ?>">
                                 <button type="button" class="pwt" id="fp-wh-showhide" aria-pressed="false"><?php esc_html_e('Show', 'fastpix-io'); ?></button>
                             </div>
                             <p class="fp-fld-help"><?php esc_html_e('Proves updates really come from FastPix.', 'fastpix-io'); ?></p>
@@ -253,14 +254,10 @@ $fastpix_hidden = ' hidden';
                         // waiting until one arrives, then verified or not verified. onboarding.js keeps
                         // polling while it reads "waiting".
                         $fastpix_wh_verdict = \Fastpix\Fastpix_Webhooks::verdict();
-                        $fastpix_wh_last    = \Fastpix\Fastpix_Webhooks::last_delivery();
                         $fastpix_wh_class   = array('verified' => 'ok', 'rejected' => 'err', 'pending' => 'wait');
                         ?>
                         <span class="fp-ws3-status <?php echo esc_attr(isset($fastpix_wh_class[$fastpix_wh_verdict]) ? $fastpix_wh_class[$fastpix_wh_verdict] : ''); ?>" id="fp-webhook-note" aria-live="polite" data-verdict="<?php echo esc_attr($fastpix_wh_verdict); ?>"><?php
-                            if ($fastpix_wh_verdict === 'verified') {
-                                /* translators: 1: event type, 2: time */
-                                echo esc_html(sprintf(__('Verified — %1$s received %2$s', 'fastpix-io'), $fastpix_wh_last['type'], date_i18n('j M H:i', strtotime($fastpix_wh_last['at'] . ' UTC'))));
-                            } elseif ($fastpix_wh_verdict === 'rejected') {
+                            if ($fastpix_wh_verdict === 'rejected') {   // verified: no text — the Show button flashes ✓ when it happens
                                 esc_html_e('Not verified — this secret does not match the one on the endpoint in the FastPix dashboard. Paste it again.', 'fastpix-io');
                             } elseif ($fastpix_wh_verdict === 'pending') {
                                 esc_html_e('Not verified — waiting for FastPix’s next event to confirm this secret.', 'fastpix-io');

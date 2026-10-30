@@ -3,18 +3,18 @@
  * AI enrichment — WF-005, FR-040/041, REQ-040…045, RULE-010/011/012.
  *
  * Two jobs, both in the ai group:
- *   fastpix_ai_request  — on media ready (auto) or a re-run: PATCH the four
- *                         API-F05 endpoints per the stored batch settings, and
+ *   fastpix_ai_request  — on media ready (auto) or a re-run: POST /ai/{mediaId}/<kind>
+ *                         for each kind per the stored batch settings, and
  *                         ask for subtitles in the chosen language. One row per
  *                         (video, kind) in fastpix_ai; a failed request marks
  *                         ONLY that kind failed and retries only it (RULE-011).
  *   fastpix_ai_fetch    — on the matching video.mediaAI.<kind>.ready webhook
  *                         (the completion signal — media ready is not): read
- *                         the output back from GET /on-demand/{mediaId} into
+ *                         the output back from GET /ai/{mediaId}/<kind> into
  *                         fastpix_ai as returned (RULE-012), reindex, flush.
  *
- * The four PATCHes answer {mediaId, is<Kind>Enabled:true}; the media record
- * then carries chapters / summary / namedEntities / moderation as {status, data}.
+ * GET /ai/{mediaId}/<kind> answers {status, result}; result is {chapters: […]},
+ * {summary: "…"} or {namedEntities: […]}. Summary length is not settable here.
  */
 
 namespace Fastpix;
@@ -40,12 +40,12 @@ class Fastpix_Ai {
     const MAX_FETCH_ATTEMPTS   = 12;   // "preparing" is re-read a minute apart, then left requested
     const RETRY_SPACING        = 60;
 
-    /** local kind => [platform PATCH path, platform read-back keys] */
+    /** local kind => In-Video AI path: POST /ai/{mediaId}/{path} starts it, GET reads it back.
+     *  (PATCH /on-demand/{mediaId}/{path} is deprecated by FastPix on 2026-10-30.) */
     const KINDS = array(
-        'chapters'   => array('chapters',       array('chapters')),
-        'summary'    => array('summary',        array('summary', 'advancedSummary')),
-        'entities'   => array('named-entities', array('namedEntities', 'named_entities')),
-        'moderation' => array('moderation',     array('moderation')),
+        'chapters'   => 'chapters',
+        'summary'    => 'summary',
+        'entities'   => 'named-entities',
     );
 
     public static function boot() {
@@ -310,13 +310,12 @@ class Fastpix_Ai {
         self::rollup($video['id']);
     }
 
-    /** One PATCH for one output kind, with the already-exists and retry branches. */
+    /** One POST for one output kind, with the already-exists and retry branches. */
     private static function request_one($client, $video, $kind, $settings, $attempt) {
         $media_id = $video['media_id'];
-        $result   = $client->request('PATCH', '/on-demand/' . rawurlencode($media_id) . '/' . self::KINDS[$kind][0], array(
+        $result   = $client->request('POST', '/ai/' . rawurlencode($media_id) . '/' . self::KINDS[$kind], array(
             'context'            => 'background',
             'idempotency_row_id' => 'ai:' . $video['id'] . ':' . $kind . ':' . $attempt,
-            'body'               => self::request_body($kind, $settings),
         ));
 
         if (is_wp_error($result) && preg_match('/already exist/i', $result->get_error_message())) {
@@ -358,37 +357,11 @@ class Fastpix_Ai {
         if (isset($settings['summary']) && $settings['summary'] !== 'off' && $settings['summary'] !== false) {
             $kinds[] = 'summary';
         }
-        if (isset($settings['moderation']) && $settings['moderation'] !== 'off' && $settings['moderation'] !== false) {
-            $kinds[] = 'moderation';
-        }
         if (isset($settings['subtitles']) && $settings['subtitles'] !== 'off' && $settings['subtitles'] !== '') {
             $kinds[] = 'subtitles';
         }
 
         return $kinds;
-    }
-
-    private static function request_body($kind, $settings) {
-        switch ($kind) {
-            case 'chapters':
-                $body = array('chapters' => true);
-                break;
-            case 'summary':
-                $lengths = array('short' => 50, 'medium' => 100, 'long' => 200);
-                $len     = isset($settings['summary']) && isset($lengths[$settings['summary']]) ? $lengths[$settings['summary']] : 100;
-                $body    = array('generate' => true, 'summaryLength' => $len);
-                break;
-            case 'entities':
-                $body = array('namedEntities' => true);
-                break;
-            case 'moderation':
-                $body = array('moderation' => array('type' => 'video'));
-                break;
-            default:
-                $body = array();
-        }
-
-        return $body;
     }
 
     /**
@@ -497,7 +470,7 @@ class Fastpix_Ai {
     public static function kind_from_event($type) {
         $type = strtolower((string) $type);
         foreach (array('chapters' => 'chapters', 'namedentities' => 'entities', 'named_entities' => 'entities',
-                       'advanced_summary' => 'summary', 'summary' => 'summary', 'moderation' => 'moderation',
+                       'advanced_summary' => 'summary', 'summary' => 'summary',
                        'attributed_transcript' => 'transcript', 'transcript' => 'transcript') as $needle => $kind) {
             if (strpos($type, $needle) !== false) {
                 return $kind;
@@ -516,23 +489,62 @@ class Fastpix_Ai {
             return;
         }
 
-        $client = new Fastpix_Api_Client();
-        $result = $client->request('GET', '/on-demand/' . rawurlencode($media_id), array('context' => 'background'));
-        if (is_wp_error($result)) {
-            self::retry_fetch($media_id, $kind, $attempt);
-            return;
-        }
-
-        $data = isset($result['body']['data']) ? $result['body']['data'] : (array) $result['body'];
-        $keys = isset(self::KINDS[$kind]) ? self::KINDS[$kind][1] : array('attributedTranscript', 'attributed_transcript', 'transcript');
-        $out  = Fastpix_Sync::field((array) $data, $keys);
-
-        if (!self::store_fetched($video, $kind, $media_id, $out)) {
-            self::retry_fetch($media_id, $kind, $attempt);   // preparing / not there yet
+        if (!self::fetch_once($video, $kind, 'background')) {
+            self::retry_fetch($media_id, $kind, $attempt);   // unreachable, or preparing / not there yet
             return;
         }
 
         self::rollup($video['id']);
+    }
+
+    /**
+     * Read one output back now. True once it is stored (ready or failed); false while
+     * FastPix is still working on it (a 404 "No … found" included) or unreachable.
+     */
+    private static function fetch_once($video, $kind, $context) {
+        $media_id = (string) $video['media_id'];
+        $client   = new Fastpix_Api_Client();
+        $path     = isset(self::KINDS[$kind]) ? '/ai/' . rawurlencode($media_id) . '/' . self::KINDS[$kind] : '/on-demand/' . rawurlencode($media_id);
+        $result   = $client->request('GET', $path, array('context' => $context));
+        if (is_wp_error($result)) {
+            return false;
+        }
+
+        $data = isset($result['body']['data']) ? $result['body']['data'] : (array) $result['body'];
+        if (isset(self::KINDS[$kind])) {
+            // {status: COMPLETED, result: {chapters: […]} | {summary: "…"} | {namedEntities: […]}}
+            $res = isset($data['result']) && is_array($data['result']) ? $data['result'] : null;
+            $out = array_merge((array) $data, array(
+                'status' => isset($data['status']) ? $data['status'] : 'preparing',
+                'data'   => ($kind === 'summary' && isset($res['summary'])) ? $res['summary'] : $res,
+            ));
+        } else {
+            $out = Fastpix_Sync::field((array) $data, array('attributedTranscript', 'attributed_transcript', 'transcript'));
+        }
+
+        return self::store_fetched($video, $kind, $media_id, $out);
+    }
+
+    /**
+     * The Library asks while its panel is open, so Completed shows up without waiting for
+     * WP-Cron to run the queued read-back (on a quiet site that can be a long wait).
+     */
+    public static function check_now($video_id) {
+        global $wpdb;
+
+        $video = $wpdb->get_row($wpdb->prepare('SELECT id, media_id FROM ' . Fastpix_Schema::table('videos') . ' WHERE id = %d', (int) $video_id), ARRAY_A);
+        if (!$video) {
+            return;
+        }
+        $done = false;
+        foreach (self::rows($video['id']) as $row) {
+            if ($row['state'] === 'requested' && isset(self::KINDS[$row['kind']])) {
+                $done = self::fetch_once($video, $row['kind'], 'interactive') || $done;
+            }
+        }
+        if ($done) {
+            self::rollup($video['id']);
+        }
     }
 
     /** The output's status; shapes without one are treated as available. */

@@ -31,7 +31,10 @@
     function fetchConfig(el) {
         var opts = { credentials: 'same-origin', cache: 'no-store', headers: {} };
         if (cfg.nonce) { opts.headers['X-WP-Nonce'] = cfg.nonce; }
-        return fetch(el.getAttribute('data-fp-config'), opts)
+        // A unique URL each time, so an edge "cache everything" rule can never hand one viewer's token to another.
+        var url = el.getAttribute('data-fp-config');
+        url += (url.indexOf('?') === -1 ? '?' : '&') + '_fp=' + Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+        return fetch(url, opts)
             .then(function (r) { return r.ok ? r.json() : null; })
             .then(function (c) { return c && c.token ? c : null; })
             .catch(function () { return null; });

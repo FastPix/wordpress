@@ -235,7 +235,7 @@ class Fastpix_Uploads_Ingest {
             Fastpix_Attachments::create_proxy($video_id);   // REQ-035
             self::push_title($media_id, $settings);
         }
-        // AI-related settings (subtitles/chapters/summary/moderation)
+        // AI-related settings (subtitles/chapters/summary)
         // from the snapshot are applied on ready by the AI path (API-F05),
         // not here.
     }

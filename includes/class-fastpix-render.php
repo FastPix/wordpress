@@ -244,11 +244,13 @@ class Fastpix_Render {
         return $over;
     }
 
-    public static function render_block($attributes, $content = '') {
+    public static function render_block($attributes, $content = '', $block = null) {
         $attributes = is_array($attributes) ? $attributes : array();
         $id = isset($attributes['videoId']) ? (string) $attributes['videoId'] : '';
+        // $attributes carries block.json defaults; the parsed attrs are what the author actually set.
+        $set = $block instanceof \WP_Block && isset($block->parsed_block['attrs']) ? (array) $block->parsed_block['attrs'] : $attributes;
 
-        return self::render($id, $attributes, array('context' => 'block', 'fallback' => $content));
+        return self::render($id, $attributes, array('context' => 'block', 'fallback' => $content, 'set' => $set));
     }
 
     /* ------------------------------------------------------------- render */
@@ -256,13 +258,17 @@ class Fastpix_Render {
     /**
      * @param string $identifier media id (canonical) or playback id
      * @param array  $overrides  per-embed settings (block attributes / shortcode)
-     * @param array  $opts       context, fallback (saved static markup)
+     * @param array  $opts       context, fallback (saved static markup), set (the attributes the
+     *                           embed itself set; default $overrides)
      */
     public static function render($identifier, $overrides = array(), $opts = array()) {
         $settings = self::settings($overrides);
         $fallback = isset($opts['fallback']) ? (string) $opts['fallback'] : '';
 
         $video  = $identifier === '' ? null : self::resolve($identifier);
+        if ($video) {
+            $settings = self::video_poster($settings, $video, isset($opts['set']) ? (array) $opts['set'] : (array) $overrides);
+        }
         $result = self::render_gate($identifier, $video, $fallback);
         if ($result === null) {
             $result = self::render_playable($video, $settings, $fallback);
@@ -386,6 +392,25 @@ class Fastpix_Render {
         $s['aspectRatio']  = preg_match('/^\d+(\.\d+)?[:\/]\d+(\.\d+)?$/', $s['aspectRatio']) ? str_replace(':', '/', $s['aspectRatio']) : '';
 
         return $s;
+    }
+
+    /**
+     * The poster saved on the video (library "Save changes") fills in when the embed set no
+     * poster of its own — no image URL, no frame. Embed > video > site. [RULE-045]
+     */
+    private static function video_poster($settings, $video, $set) {
+        $saved = isset($video['default_poster']) ? (string) $video['default_poster'] : '';
+        $own   = (isset($set['poster']) && trim((string) $set['poster']) !== '') || array_key_exists('thumbnailTime', $set);
+        if ($saved === '' || $own) {
+            return $settings;
+        }
+        if (preg_match('/^(\d+)s$/', $saved, $m)) {
+            $settings['thumbnailTime'] = (int) $m[1];
+        } else {
+            $settings['poster'] = esc_url_raw($saved);
+        }
+
+        return $settings;
     }
 
     /** media id (canonical) or playback id → video row. */

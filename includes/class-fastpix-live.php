@@ -31,6 +31,8 @@ if (!defined('WPINC')) {
 class Fastpix_Live {
 
     private const PATH       = '/live/streams/';
+    /** stream id => media id of the recording a re-used stream had before its latest broadcast. */
+    const OPT_PREV_RECORDING = 'fastpix_live_prev_recording';
     private const SQL_SELECT = 'SELECT * FROM ';
 
     /** Live ships on in 2.0.0; a site can still switch it off with the filter. */
@@ -207,7 +209,15 @@ class Fastpix_Live {
             (string) get_option(Fastpix_Connection::OPT_WORKSPACE_ID, '')
         ), ARRAY_A);
 
-        return rest_ensure_response(array('streams' => array_map(array(__CLASS__, 'shape'), $rows)));
+        $streams = array_map(function ($row) {
+            $s = self::shape($row);
+            if ($s['status'] === 'active') {   // idle/ended streams have no live frame
+                $s['thumbnail'] = Fastpix_Render_Live::stream_thumbnail($s['stream_id']);
+            }
+            return $s;
+        }, $rows);
+
+        return rest_ensure_response(array('streams' => $streams));
     }
 
     /** GET /streams/{id} — fresh platform detail (keys included) + local row. */
@@ -439,6 +449,9 @@ class Fastpix_Live {
         $name   = $name !== '' ? $name : (string) ($data['metadata']['name'] ?? '');
         $status = strtolower((string) ($data['status'] ?? 'idle'));
         $now    = current_time('mysql', true);
+        if ($status === 'active' || $status === 'preparing') {
+            self::new_broadcast($stream_id);   // before the row write: it reads the status this one replaces
+        }
 
         $wpdb->query($wpdb->prepare(
             'INSERT INTO ' . Fastpix_Schema::table('live_streams') . '
@@ -482,6 +495,10 @@ class Fastpix_Live {
         if ($linked === $media_id) {
             return true;
         }
+        $prev = (array) get_option(self::OPT_PREV_RECORDING, array());
+        if (isset($prev[$stream_id]) && $prev[$stream_id] === $media_id) {
+            return false;   // the last broadcast's recording; this broadcast's has not landed yet
+        }
         $video_id = (int) $wpdb->get_var($wpdb->prepare("SELECT id FROM {$videos} WHERE media_id = %s", $media_id));
         if (!$video_id) {
             Fastpix_Sync::fetch_and_apply($media_id);
@@ -491,12 +508,42 @@ class Fastpix_Live {
             $now = current_time('mysql', true);
             $wpdb->query($wpdb->prepare("UPDATE {$videos} SET source = 'Live' WHERE id = %d AND source = 'Dashboard'", $video_id));
             $wpdb->query($wpdb->prepare("UPDATE {$streams} SET recorded_video_id = %d, updated_at = %s WHERE stream_id = %s", $video_id, $now, $stream_id));
+            if (isset($prev[$stream_id])) {
+                unset($prev[$stream_id]);
+                update_option(self::OPT_PREV_RECORDING, $prev, false);
+            }
             Fastpix_Cache::flush_group('live');
             Fastpix_Cache::flush_group('embed');
             Fastpix_Cache::flush_group('videos');
         }
 
         return (bool) $video_id;
+    }
+
+    /**
+     * A re-used stream went live again: its linked recording belongs to the PREVIOUS broadcast.
+     * Unlink it (so the ended embed looks up this broadcast's recording) and remember it, so the
+     * look-up never re-links it while FastPix is still adding the new one to `mediaIds`.
+     */
+    public static function new_broadcast($stream_id) {
+        global $wpdb;
+
+        $streams = Fastpix_Schema::table('live_streams');
+        $row     = $wpdb->get_row($wpdb->prepare(
+            'SELECT ls.status, v.media_id FROM ' . $streams . ' ls JOIN ' . Fastpix_Schema::table('videos') . ' v ON v.id = ls.recorded_video_id WHERE ls.stream_id = %s',
+            $stream_id
+        ), ARRAY_A);
+        // Only on the way INTO a broadcast: a repeated active/preparing event during the same one
+        // must not unlink a recording that was linked during it.
+        if (!$row || $row['media_id'] === '' || in_array(strtolower((string) $row['status']), array('active', 'preparing'), true)) {
+            return;
+        }
+        $old = (string) $row['media_id'];
+        $prev = (array) get_option(self::OPT_PREV_RECORDING, array());
+        $prev[$stream_id] = $old;
+        update_option(self::OPT_PREV_RECORDING, array_slice($prev, -200, null, true), false);   // ponytail: capped map, a column if it ever matters
+        $wpdb->query($wpdb->prepare('UPDATE ' . $streams . ' SET recorded_video_id = NULL, updated_at = %s WHERE stream_id = %s', current_time('mysql', true), $stream_id));
+        Fastpix_Cache::flush_group('live');
     }
 
     /**

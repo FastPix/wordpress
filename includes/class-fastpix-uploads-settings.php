@@ -109,7 +109,6 @@ class Fastpix_Uploads_Settings {
             'subtitles'      => 'off',         // owner 2026-09-18: off by default; the pop-up offers the site language
             'chapters'       => true,
             'summary'        => 'medium',
-            'moderation'     => 'off',
             'downloadable'   => 'off',
             'normalize_audio'=> false,        // owner 2026-09-18: off by default
             'domain_lock'    => true,    // "Lock to this site"
@@ -129,7 +128,6 @@ class Fastpix_Uploads_Settings {
         $clean['max_resolution'] = in_array($clean['max_resolution'], array('720p', self::DEFAULT_RESOLUTION, '1440p', '2160p'), true) ? $clean['max_resolution'] : self::DEFAULT_RESOLUTION;
         $clean['subtitles']      = isset(Fastpix_Utils::get_language_map()[$clean['subtitles']]) ? $clean['subtitles'] : 'off';
         $clean['summary']        = in_array($clean['summary'], array('off', 'short', 'medium', 'long'), true) ? $clean['summary'] : 'medium';
-        $clean['moderation']     = ($clean['moderation'] === 'off' || $clean['moderation'] === false) ? 'off' : 'on';
         $clean['chapters']       = (bool) $clean['chapters'];
         $clean['normalize_audio']= (bool) $clean['normalize_audio'];
         $clean['domain_lock']    = (bool) $clean['domain_lock'];
